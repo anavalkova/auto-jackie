@@ -8,6 +8,7 @@ import {
   withLovableAiGatewayRunIdHeader,
 } from "@/lib/ai/run-id.server";
 import { getWikidataItem, searchWikidata } from "@/lib/ai/wikidata.server";
+import { lookupFaultCode } from "@/lib/ai/obd.server";
 
 const vehicleSchema = z.object({
   confidential: z.boolean(),
