@@ -125,7 +125,7 @@ export function JackieHome({ chatId }: { chatId?: string }) {
 
     <main className="workspace">
       <aside className="jackie-panel">
-        <div className="portrait-wrap compact"><img src={jackie} alt="Jackie, a mechanic in an orange work jacket" width={1024} height={1024}/><span className="portrait-label"><span className="status-dot"/> Jackie is in</span></div>
+        <div className="portrait-wrap compact"><img src={jackie} alt="Jackie, a mechanic in an orange work jacket" width={1024} height={1024}/><span className="portrait-label"><span className="status-dot"/> Jackie is here — tell her anything</span></div>
 
         <section className="vehicle-card" aria-label="Your car">
           <div className="vehicle-head"><span className="eyebrow">{user ? "YOUR SAVED CAR" : "CAR FOR THIS CHAT"}</span>{vehicle && <Button variant="ghost" size="sm" onClick={() => setGarageOpen(true)}><Pencil/> Change</Button>}</div>
@@ -154,11 +154,11 @@ export function JackieHome({ chatId }: { chatId?: string }) {
       </aside>
 
       <section className="assistant-area" aria-label="Chat with Jackie">
-        <div className="assistant-top"><span><span className="status-dot"/> AI MECHANIC · ANSWERS FROM WIKIDATA</span><span className="preview-badge">{user ? "Chats saved" : "Private chat"}</span></div>
+        <div className="assistant-top"><span><span className="status-dot"/> JACKIE · CAR PROBLEMS, EXPLAINED SIMPLY</span><span className="preview-badge">{user ? "Chats saved" : "Private chat"}</span></div>
         {missing ? <div className="chat-empty"><h1>This chat isn't here.</h1><p>{user ? "It may have been deleted." : "Sign in with the account that saved it to see it."}</p><div className="starter-grid">{!user && <Button onClick={() => setSignInOpen(true)}>Sign in</Button>}<Button variant="outline" asChild><Link to="/">Start a new chat</Link></Button></div></div>
           : initial === null ? <div className="chat-empty"><p>Opening your chat…</p></div>
           : <JackieChat key={chatId ?? `new-${newChatKey}`} chatId={chatId} initialMessages={initial} vehicle={vehicle} pending={null} onPendingSent={() => {}} onTurnFinished={onTurnFinished} onReset={onReset} saving={!!user && !!chatId}/>}
-        <div className="assistant-bottom"><span className="swedish-flag"/><span>Jackie explains — a workshop should confirm before any repair.</span><Button variant="ghost" size="icon" aria-label="About this preview" onClick={() => setInfo("about")}><HelpCircle/></Button></div>
+        <div className="assistant-bottom"><span className="swedish-flag"/><span>Jackie helps you understand the problem. A real workshop confirms the fix before you pay for anything.</span><Button variant="ghost" size="icon" aria-label="About this preview" onClick={() => setInfo("about")}><HelpCircle/></Button></div>
       </section>
     </main>
 
