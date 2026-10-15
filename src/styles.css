@@ -193,6 +193,6 @@
   .assistant-top { padding: 16px; }
 }
 .workspace { grid-template-rows: minmax(0,1fr); }
-.assistant-area { min-height: 0; overflow: hidden; }
-.chat-log { overflow: hidden; }
+.assistant-area { min-height: 0; overflow: clip; }
+.chat-log { overflow: clip; }
 @media (max-width: 760px) { .assistant-area { overflow: visible; } .chat-shell { height: 640px; } }
