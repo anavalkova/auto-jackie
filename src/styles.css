@@ -69,7 +69,7 @@
 .workspace { display: grid; grid-template-columns: 36% 64%; min-height: 715px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--card); box-shadow: var(--frame-shadow); }
 .jackie-panel { display: flex; flex-direction: column; background: var(--secondary); border-right: 1px solid var(--border); }
 .portrait-wrap { height: 355px; position: relative; background: var(--portrait-bg); overflow: hidden; }
-.portrait-wrap > img { width: 100%; height: 100%; object-fit: cover; object-position: center 27%; }
+.portrait-wrap > img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .portrait-label { position: absolute; bottom: 20px; left: 24px; display: flex; gap: 8px; align-items: center; padding: 8px 12px; font-size: 10px; font-weight: 500; background: color-mix(in oklab,var(--card) 88%,transparent); border: 1px solid color-mix(in oklab,var(--card) 60%,transparent); border-radius: 5px; backdrop-filter: blur(12px); }
 .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
 .jackie-intro { padding: 31px 30px 24px; }
