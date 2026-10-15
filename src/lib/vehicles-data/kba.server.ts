@@ -11,7 +11,7 @@ const FUEL: Record<string, string> = {
   "0025": "plug-in hybrid",
 };
 
-const title = (s: string) => s.toLowerCase().replace(/(^|[\s-])\S/g, c => c.toUpperCase());
+const title = (s: string) => s.split(" ").map(w => /\d/.test(w) || w.length <= 3 ? w.toUpperCase() : w[0] + w.slice(1).toLowerCase()).join(" ");
 
 export function lookupKba(hsnRaw: string, tsnRaw: string) {
   const hsn = hsnRaw.trim().padStart(4, "0");

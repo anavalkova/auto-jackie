@@ -10,6 +10,6 @@
 <!-- LOVABLE:END -->
 
 - AI chat streams from the /api/chat server route with Wikidata tools in src/lib/ai; keep model calls and keys server-side so grounding rules can't be bypassed.
-- Vehicle lookups use the local catalog in src/lib/vehicles.ts until a real registry API is chosen; plate-sourced vehicles stay confidential end to end (never sent to the model or shown).
+- German HSN/TSN lookups use the bundled official KBA SV 4.2 register (src/lib/vehicles-data, server-only via /api/vehicles/lookup); Swedish plates still use a local stub until a registry API is chosen.
 - The driver's car is stored only in browser localStorage and chats are not persisted, because drivers have no accounts.
 - Define AutoJackie visual styling in src/styles.css and use shared design-system controls so future screens inherit the same brand.
