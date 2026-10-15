@@ -66,7 +66,7 @@ export const Route = createFileRoute("/api/chat")({
           model: provider.responses("openai/gpt-6-astra"),
           instructions: `${BASE_PROMPT}\n\nVehicle: ${vehicleContext(parsed.data.vehicle)}`,
           messages: await convertToModelMessages(messages),
-          tools: { searchWikidata, getWikidataItem },
+          tools: { searchWikidata, getWikidataItem, lookupFaultCode },
           stopWhen: stepCountIs(8),
           abortSignal: request.signal,
           providerOptions: {
