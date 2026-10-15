@@ -1,6 +1,6 @@
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, isToolUIPart, getToolName } from "ai";
-import { useEffect, useMemo, useState } from "react";
+import { DefaultChatTransport, isToolUIPart, getToolName, type UIMessage } from "ai";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { RotateCcw } from "lucide-react";
 import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/ai-elements/conversation";
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
@@ -12,12 +12,21 @@ import type { Vehicle } from "@/lib/vehicles";
 
 const starters = ["Why do my brakes squeal?", "What does a timing belt do?", "What are spark plugs for?", "My engine light came on — what now?"];
 
-export function JackieChat({ vehicle, pending, onPendingSent }: { vehicle: Vehicle | null; pending: string | null; onPendingSent: () => void }) {
+export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMessages, onTurnFinished, onReset, saving }: {
+  vehicle: Vehicle | null; pending: string | null; onPendingSent: () => void;
+  chatId?: string | undefined; initialMessages?: UIMessage[] | undefined;
+  onTurnFinished?: ((messages: UIMessage[]) => void) | undefined; onReset?: (() => void) | undefined; saving?: boolean | undefined;
+}) {
   const [input, setInput] = useState("");
   const vehiclePayload = vehicle ? { confidential: vehicle.confidential, description: vehicle.confidential ? undefined : vehicle.description, mileageKm: vehicle.mileageKm } : null;
   const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat", body: { vehicle: vehiclePayload } }), [JSON.stringify(vehiclePayload)]);
-  const { messages, sendMessage, status, stop, error, setMessages, clearError } = useChat({ transport });
+  const { messages, sendMessage, status, stop, error, setMessages, clearError } = useChat({ transport, ...(chatId ? { id: chatId } : {}), ...(initialMessages ? { messages: initialMessages } : {}) });
   const busy = status === "submitted" || status === "streaming";
+  const wasBusy = useRef(false);
+  useEffect(() => {
+    if (busy) { wasBusy.current = true; return; }
+    if (wasBusy.current && status === "ready") { wasBusy.current = false; onTurnFinished?.(messages); }
+  }, [busy, status, messages, onTurnFinished]);
 
   const send = (text: string) => { if (!text.trim() || busy) return; clearError(); sendMessage({ text }); setInput(""); };
   useEffect(() => { if (pending) { send(pending); onPendingSent(); } }, [pending]);
@@ -51,9 +60,9 @@ export function JackieChat({ vehicle, pending, onPendingSent }: { vehicle: Vehic
     <PromptInput className="chat-composer" onSubmit={({ text }) => send(text)}>
       <PromptInputTextarea value={input} onChange={e => setInput(e.target.value)} placeholder="Describe the noise, light or part you're wondering about…"/>
       <PromptInputFooter>
-        <span className="composer-hint">{vehicle ? `Using: ${vehicle.label}` : "Tip: add your car for more specific answers."}</span>
+        <span className="composer-hint">{saving ? "Saved to My chats" : vehicle ? `Using: ${vehicle.label}` : "Tip: tell Jackie about your car for more specific answers."}</span>
         <div className="composer-actions">
-          {messages.length > 0 && !busy && <Button variant="ghost" size="sm" type="button" onClick={() => { setMessages([]); clearError(); }}><RotateCcw/> New chat</Button>}
+          {messages.length > 0 && !busy && <Button variant="ghost" size="sm" type="button" onClick={() => { setMessages([]); clearError(); onReset?.(); }}><RotateCcw/> New chat</Button>}
           <PromptInputSubmit status={status} onStop={stop} disabled={!busy && !input.trim()}/>
         </div>
       </PromptInputFooter>

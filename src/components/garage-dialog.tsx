@@ -7,8 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { catalog, isSwedishPlate, plateServiceKm, type Vehicle } from "@/lib/vehicles";
 
-export function GarageDialog({ open, onOpenChange, vehicle, onSave }: {
-  open: boolean; onOpenChange: (o: boolean) => void; vehicle: Vehicle | null; onSave: (v: Vehicle) => void;
+export function GarageDialog({ open, onOpenChange, vehicle, onSave, signedIn }: {
+  open: boolean; onOpenChange: (o: boolean) => void; vehicle: Vehicle | null; onSave: (v: Vehicle) => void; signedIn: boolean;
 }) {
   const [mileage, setMileage] = useState(vehicle?.mileageKm?.toString() ?? "");
   const [plate, setPlate] = useState("");
@@ -56,7 +56,7 @@ export function GarageDialog({ open, onOpenChange, vehicle, onSave }: {
 
   return <Dialog open={open} onOpenChange={o => { onOpenChange(o); setError(""); setPlateDone(false); }}>
     <DialogContent className="garage-dialog">
-      <DialogHeader><DialogTitle>{vehicle ? "Change your car" : "Add your car"}</DialogTitle><DialogDescription>Jackie gives better answers when she knows roughly what you drive.</DialogDescription></DialogHeader>
+      <DialogHeader><DialogTitle>{vehicle ? "Change your car" : "Tell Jackie about your car"}</DialogTitle><DialogDescription>{signedIn ? "Saved to your account so Jackie remembers it next time. Remove it any time." : "Used for this chat only. Nothing is saved — start a new chat or close the tab and it's gone."}</DialogDescription></DialogHeader>
       <div className="garage-field"><Label htmlFor="mileage">Odometer (km), optional</Label><Input id="mileage" inputMode="numeric" placeholder="e.g. 84 000" value={mileage} onChange={e => setMileage(e.target.value)}/></div>
       <Tabs defaultValue="plate" onValueChange={() => setError("")}>
         <TabsList className="garage-tabs"><TabsTrigger value="plate">Swedish plate</TabsTrigger><TabsTrigger value="hsn">German HSN/TSN</TabsTrigger><TabsTrigger value="manual">Pick manually</TabsTrigger></TabsList>
