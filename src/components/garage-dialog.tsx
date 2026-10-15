@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { catalog, hsnTsn, isSwedishPlate, plateServiceKm, type Vehicle } from "@/lib/vehicles";
+import { catalog, isSwedishPlate, plateServiceKm, type Vehicle } from "@/lib/vehicles";
 
 export function GarageDialog({ open, onOpenChange, vehicle, onSave }: {
   open: boolean; onOpenChange: (o: boolean) => void; vehicle: Vehicle | null; onSave: (v: Vehicle) => void;
@@ -16,6 +16,7 @@ export function GarageDialog({ open, onOpenChange, vehicle, onSave }: {
   const [hsn, setHsn] = useState("");
   const [tsn, setTsn] = useState("");
   const [error, setError] = useState("");
+  const [looking, setLooking] = useState(false);
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
   const [year, setYear] = useState("");
@@ -30,12 +31,19 @@ export function GarageDialog({ open, onOpenChange, vehicle, onSave }: {
     setPlateDone(true);
     setTimeout(() => finish({ source: "plate", confidential: true, label: p.replace(/^([A-Z]{3})\s?/, "$1 "), serviceKm: plateServiceKm(p) }), 900);
   };
-  const saveHsn = () => {
-    const hit = hsnTsn[`${hsn.trim()}/${tsn.trim().toUpperCase()}`];
-    if (!hit) return setError("I don't have that code yet. Try 0603 / BKG, or pick your car manually.");
-    const eng = catalog[hit.make]?.[hit.model]?.engines.find(e => e.name === hit.engine);
-    const d = `${hit.year} ${hit.make} ${hit.model} ${hit.engine}`;
-    finish({ source: "hsn", confidential: false, label: `${hit.make} ${hit.model}`, description: d, serviceKm: eng?.serviceKm ?? 30000 });
+  const saveHsn = async () => {
+    setError(""); setLooking(true);
+    try {
+      const res = await fetch("/api/vehicles/lookup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ hsn: hsn.trim(), tsn: tsn.trim() }) });
+      if (res.status === 400) return setError("HSN is 4 digits and TSN is 3 letters or digits.");
+      if (!res.ok) return setError("The German register has no car with that code pair. Check fields 2.1 and 2.2, or pick your car manually.");
+      const hit = await res.json() as { make: string; model: string; typeApprovedYear: number; engine: string; fuel: string };
+      const fromCatalog = Object.entries(catalog[hit.make] ?? {}).find(([m]) => hit.model.toLowerCase().includes(m.toLowerCase()))?.[1].engines[0]?.serviceKm;
+      const serviceKm = fromCatalog ?? (hit.make === "Toyota" ? 15000 : hit.fuel === "electric" ? 30000 : 30000);
+      const label = `${hit.make} ${hit.model}`.trim();
+      finish({ source: "hsn", confidential: false, label, description: `${label}, ${hit.engine}, type approved ${hit.typeApprovedYear} (KBA HSN ${hsn.trim()} / TSN ${tsn.trim().toUpperCase()})`, serviceKm });
+    } catch { setError("Couldn't reach the lookup just now. Try again in a moment."); }
+    finally { setLooking(false); }
   };
   const saveManual = () => {
     const eng = catalog[make]?.[model]?.engines.find(e => e.name === engine);
@@ -61,8 +69,8 @@ export function GarageDialog({ open, onOpenChange, vehicle, onSave }: {
         </TabsContent>
         <TabsContent value="hsn" className="garage-pane">
           <div className="garage-row"><div className="garage-field"><Label htmlFor="hsn">HSN (2.1)</Label><Input id="hsn" placeholder="0603" maxLength={4} value={hsn} onChange={e => setHsn(e.target.value)}/></div><div className="garage-field"><Label htmlFor="tsn">TSN (2.2)</Label><Input id="tsn" placeholder="BKG" maxLength={3} value={tsn} onChange={e => setTsn(e.target.value)}/></div></div>
-          <p className="garage-note">Both codes are on the German registration certificate (Zulassungsbescheinigung Teil I).</p>
-          <Button onClick={saveHsn} disabled={!hsn.trim() || !tsn.trim()}>Find my car</Button>
+          <p className="garage-note">Both codes are on the German registration certificate (Zulassungsbescheinigung Teil I). Checked against the official KBA register.</p>
+          <Button onClick={saveHsn} disabled={looking || !hsn.trim() || !tsn.trim()}>{looking ? "Checking the register…" : "Find my car"}</Button>
         </TabsContent>
         <TabsContent value="manual" className="garage-pane">
           <div className="garage-row">
