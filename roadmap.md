@@ -3,4 +3,4 @@
 - [x] Phase 1: Wikidata-grounded AI chat (/api/chat), garage (plate / HSN-TSN / manual), vehicle dashboard, symptom chips.
 - [x] German HSN/TSN via official KBA register
 - [x] Move saved chat history into the left panel and verify opening, starting and deleting conversations.
-- [ ] Later: real Swedish plate lookup API, prices, workshop bookings.
+- [x] Later: real Swedish plate lookup API, prices, workshop bookings.

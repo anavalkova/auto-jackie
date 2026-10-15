@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { catalog, isSwedishPlate, plateServiceKm, type Vehicle } from "@/lib/vehicles";
+import { catalog, isSwedishPlate, type Vehicle } from "@/lib/vehicles";
 
 export function GarageDialog({ open, onOpenChange, vehicle, onSave, signedIn }: {
   open: boolean; onOpenChange: (o: boolean) => void; vehicle: Vehicle | null; onSave: (v: Vehicle) => void; signedIn: boolean;
@@ -75,7 +75,7 @@ export function GarageDialog({ open, onOpenChange, vehicle, onSave, signedIn }: 
           {plateDone ? <p className="plate-confirm" role="status">I got the information.</p> : <>
             <div className="garage-field"><Label htmlFor="plate">Registration number</Label><Input id="plate" placeholder="ABC 123" value={plate} onChange={e => setPlate(e.target.value)} className="plate-input"/></div>
             <p className="garage-note">Registry details stay private — they're used for service timing, not shown here.</p>
-            <Button onClick={savePlate} disabled={!plate.trim()}>Use this plate</Button>
+            <Button onClick={savePlate} disabled={looking || !plate.trim()}>{looking ? "Checking the register…" : "Use this plate"}</Button>
           </>}
         </TabsContent>
         <TabsContent value="hsn" className="garage-pane">
