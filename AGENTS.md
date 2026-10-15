@@ -13,3 +13,4 @@
 - German HSN/TSN lookups use the bundled official KBA SV 4.2 register (src/lib/vehicles-data, server-only via /api/vehicles/lookup); Swedish plates still use a local stub until a registry API is chosen.
 - Accounts are optional (Google / Lovable sign-in). Guests: car and chat live only in React state, nothing persisted. Signed-in: car in saved_vehicles, chats in chats (UIMessage[] jsonb) via the browser client under owner-only RLS; saved chats open at /c/$chatId.
 - Define AutoJackie visual styling in src/styles.css and use shared design-system controls so future screens inherit the same brand.
+- The shared chat screen loads saved conversations into an always-visible sidebar and refreshes it after completed turns; keep history navigation in sync with saved chats.
