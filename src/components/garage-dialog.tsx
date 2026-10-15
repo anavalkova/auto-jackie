@@ -25,11 +25,22 @@ export function GarageDialog({ open, onOpenChange, vehicle, onSave, signedIn }: 
   const km = mileage.trim() ? Math.max(0, Number(mileage.replace(/\s/g, "")) || 0) : undefined;
   const finish = (v: Vehicle) => { onSave({ ...v, mileageKm: km }); setError(""); setPlateDone(false); onOpenChange(false); };
 
-  const savePlate = () => {
+  const savePlate = async () => {
     const p = plate.trim().toUpperCase();
     if (!isSwedishPlate(p)) return setError("That doesn't look like a Swedish plate. Try something like ABC 123 or ABC 12A.");
-    setPlateDone(true);
-    setTimeout(() => finish({ source: "plate", confidential: true, label: p.replace(/^([A-Z]{3})\s?/, "$1 "), serviceKm: plateServiceKm(p) }), 900);
+    setError(""); setLooking(true);
+    try {
+      const res = await fetch("/api/vehicles/lookup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ plate: p }) });
+      if (res.status === 404) return setError("The Swedish register didn't find that plate. Check it, or pick your car manually.");
+      if (!res.ok) return setError("Couldn't reach the Swedish register just now. Try again, or pick your car manually.");
+      const hit = await res.json() as { make: string; model: string; year: string; engine: string; fuel: string; transmission: string };
+      const fromCatalog = Object.entries(catalog[hit.make] ?? {}).find(([m]) => hit.model.toLowerCase().includes(m.toLowerCase()))?.[1].engines[0]?.serviceKm;
+      const serviceKm = fromCatalog ?? (hit.make === "Toyota" ? 15000 : 30000);
+      const description = [hit.year, hit.make, hit.model, hit.engine, hit.fuel, hit.transmission].filter(Boolean).join(", ");
+      setPlateDone(true);
+      setTimeout(() => finish({ source: "plate", confidential: true, label: p.replace(/^([A-Z]{3})\s?/, "$1 "), description, serviceKm }), 900);
+    } catch { setError("Couldn't reach the Swedish register just now. Try again in a moment."); }
+    finally { setLooking(false); }
   };
   const saveHsn = async () => {
     setError(""); setLooking(true);
