@@ -7,7 +7,7 @@ const SYSTEMS: Record<string, string> = { P: "engine and transmission (powertrai
 
 export const lookupFaultCode = tool({
   description: "Look up the standard (SAE J2012 generic) meaning of an OBD-II fault code such as P0301 that a driver read from their car or a code reader.",
-  inputSchema: z.object({ code: z.string().min(5).max(6).describe("Fault code, e.g. P0301") }),
+  inputSchema: z.object({ code: z.string().min(5).max(6).describe("Fault code, e.g. P0301 (call this tool for ANY code the driver mentions)") }),
   execute: async ({ code }) => {
     const c = code.trim().toUpperCase();
     const meaning = table[c];
