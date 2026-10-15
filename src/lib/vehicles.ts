@@ -26,9 +26,9 @@ export type Vehicle = {
   source: "plate" | "hsn" | "manual";
   confidential: boolean; // plate-sourced registry data is never shown to the driver
   label: string; // what the driver sees
-  description?: string; // only for non-confidential vehicles
+  description?: string | undefined; // only for non-confidential vehicles
   serviceKm: number;
-  mileageKm?: number;
+  mileageKm?: number | undefined;
 };
 
 // German KBA codes (sample set for the demo catalog).

@@ -43,8 +43,8 @@ export function GarageDialog({ open, onOpenChange, vehicle, onSave }: {
     finish({ source: "manual", confidential: false, label: `${make} ${model}`, description: `${year} ${make} ${model} ${engine}`, serviceKm: eng.serviceKm });
   };
 
-  const models = make ? Object.keys(catalog[make]) : [];
-  const entry = make && model ? catalog[make][model] : undefined;
+  const models = make ? Object.keys(catalog[make] ?? {}) : [];
+  const entry = make && model ? catalog[make]?.[model] : undefined;
 
   return <Dialog open={open} onOpenChange={o => { onOpenChange(o); setError(""); setPlateDone(false); }}>
     <DialogContent className="garage-dialog">
