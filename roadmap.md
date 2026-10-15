@@ -5,4 +5,5 @@
 - [x] Move saved chat history into the left panel and verify opening, starting and deleting conversations.
 - [x] Later: real Swedish plate lookup API, prices, workshop bookings.
 - [x] OBD-II fault code lookup (bundled generic SAE code list) with plain-language answers.
+- [x] Tesla Model 3 (2017–2023) official service manual for demos.
 - [ ] Next: official recalls lookup.

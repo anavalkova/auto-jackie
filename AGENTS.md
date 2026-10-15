@@ -14,3 +14,4 @@
 - Accounts are optional (Google / Lovable sign-in). Guests: car and chat live only in React state, nothing persisted. Signed-in: car in saved_vehicles, chats in chats (UIMessage[] jsonb) via the browser client under owner-only RLS; saved chats open at /c/$chatId.
 - Define AutoJackie visual styling in src/styles.css and use shared design-system controls so future screens inherit the same brand.
 - The shared chat screen loads saved conversations into an always-visible sidebar and refreshes it after completed turns; keep history navigation in sync with saved chats.
+- Jackie tools live in src/lib/ai/*.server.ts and are registered in /api/chat; large reference indexes (OBD codes, Tesla manual contents) are bundled JSON in src/lib/vehicles-data, page bodies fetched live — keeps the worker small and data current.
