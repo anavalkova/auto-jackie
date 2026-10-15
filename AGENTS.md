@@ -9,5 +9,7 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Keep phase-one AutoJackie as a browser-only assistant frame with explicitly labeled demo responses; connect live advice, registry lookups, and bookings only in a later requested phase.
+- AI chat streams from the /api/chat server route with Wikidata tools in src/lib/ai; keep model calls and keys server-side so grounding rules can't be bypassed.
+- Vehicle lookups use the local catalog in src/lib/vehicles.ts until a real registry API is chosen; plate-sourced vehicles stay confidential end to end (never sent to the model or shown).
+- The driver's car is stored only in browser localStorage and chats are not persisted, because drivers have no accounts.
 - Define AutoJackie visual styling in src/styles.css and use shared design-system controls so future screens inherit the same brand.

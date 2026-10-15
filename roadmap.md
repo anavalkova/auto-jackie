@@ -1,4 +1,4 @@
-# AutoJackie — initial frame
-- [x] Create the branded driver assistant screen with Jackie imagery.
-- [x] Add basic service selection, demo submission, and start-over controls.
-- [x] Verify the frame on desktop and mobile; leave live AI, quotes, registry, accounts, and booking for later phases.
+# AutoJackie
+- [x] Phase 0: branded driver frame.
+- [x] Phase 1: Wikidata-grounded AI chat (/api/chat), garage (plate / HSN-TSN / manual), vehicle dashboard, symptom chips.
+- [ ] Later: real Swedish plate & German KBA lookup APIs, prices, workshop bookings.
