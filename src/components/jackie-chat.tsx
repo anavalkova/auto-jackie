@@ -10,7 +10,7 @@ import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
 import type { Vehicle } from "@/lib/vehicles";
 
-const starters = ["Why do my brakes squeal?", "What does a timing belt do?", "What are spark plugs for?", "My engine light came on — what now?"];
+const starters = ["Why do my brakes squeal?", "What does a timing belt do?", "What are spark plugs for?", "My engine light came on — what now?", "My code reader shows P0301"];
 
 export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMessages, onTurnFinished, onReset, saving }: {
   vehicle: Vehicle | null; pending: string | null; onPendingSent: () => void;
@@ -44,7 +44,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
             {m.parts.map((part, i) => {
               if (part.type === "text") return m.role === "user" ? <p key={i}>{part.text}</p> : <MessageResponse key={i}>{part.text}</MessageResponse>;
               if (isToolUIPart(part)) {
-                const name = getToolName(part) === "searchWikidata" ? "Searching Wikidata" : "Reading Wikidata record";
+                const name = getToolName(part) === "searchWikidata" ? "Searching Wikidata" : getToolName(part) === "lookupFaultCode" ? "Looking up fault code" : "Reading Wikidata record";
                 return <Tool key={i} defaultOpen={false}><ToolHeader type={part.type as `tool-${string}`} state={part.state} title={name}/><ToolContent><ToolInput input={part.input}/><ToolOutput output={part.output} errorText={part.errorText}/></ToolContent></Tool>;
               }
               return null;
