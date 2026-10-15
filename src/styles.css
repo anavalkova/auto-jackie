@@ -222,3 +222,11 @@
 .history-delete { flex-shrink: 0; width: 28px; height: 28px; color: var(--muted-foreground); }
 .history-delete svg { width: 13px; height: 13px; }
 @media (max-width: 760px) { .chat-history { min-height: 0; } .history-list { max-height: 180px; } }
+
+.offer-card { display: flex; flex-direction: column; gap: .4rem; margin-top: .75rem; padding: 1rem 1.1rem; border: 1px solid color-mix(in oklab, var(--primary) 45%, transparent); border-left: 4px solid var(--primary); border-radius: var(--radius); background: color-mix(in oklab, var(--primary) 7%, var(--card)); }
+.offer-card strong { font-size: 1.05rem; }
+.offer-urgency { font-size: .85rem; color: var(--muted-foreground); }
+.offer-price { font-size: 1.25rem; font-weight: 700; color: var(--primary); }
+.offer-price small { display: block; font-size: .75rem; font-weight: 400; color: var(--muted-foreground); }
+.offer-note { font-size: .85rem; }
+.offer-card button { align-self: flex-start; margin-top: .3rem; }
