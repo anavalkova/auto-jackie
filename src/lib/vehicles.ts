@@ -41,7 +41,7 @@ export const hsnTsn: Record<string, { make: string; model: string; engine: strin
 
 // Swedish plates resolve to a confidential record; only the service interval is used.
 export const isSwedishPlate = (p: string) => /^[A-Z]{3}\s?\d{2}[A-Z0-9]$/i.test(p.trim());
-export const plateServiceKm = (p: string) => ([15000, 30000, 20000][p.charCodeAt(0) % 3]);
+export const plateServiceKm = (p: string): number => [15000, 30000, 20000][p.charCodeAt(0) % 3] ?? 30000;
 
 export function nextService(v: Vehicle) {
   if (v.mileageKm == null) return null;
