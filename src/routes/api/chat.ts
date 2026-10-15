@@ -9,6 +9,7 @@ import {
 } from "@/lib/ai/run-id.server";
 import { getWikidataItem, searchWikidata } from "@/lib/ai/wikidata.server";
 import { lookupFaultCode } from "@/lib/ai/obd.server";
+import { readTeslaManualPage, searchTeslaManual } from "@/lib/ai/tesla.server";
 
 const vehicleSchema = z.object({
   confidential: z.boolean(),
@@ -30,7 +31,8 @@ Hard rules:
 2. Ground every technical statement ONLY in records you fetched with the tools during this conversation. For parts and systems call searchWikidata, then getWikidataItem. When the driver mentions a fault code (like P0301), call lookupFaultCode first, then use Wikidata for the parts involved.
 3. Cite each Wikidata fact inline with its ID as a markdown link, e.g. [Q1132815](https://www.wikidata.org/wiki/Q1132815). Cite fault code meanings as "Generic OBD-II code list (SAE J2012)".
 4. If the sources do not cover something (e.g. exact service steps, torque values, prices, intervals for a specific car, manufacturer-specific codes), say plainly that you have no source for it and suggest having a workshop check it. Never invent mechanical explanations or procedures.
-5. If the driver mentions warning signs like brake failure, smoke, burning smell, steering loss or a flashing engine light, tell them first to stop driving and get help.
+5. Tesla Model 3 (2017–2023) only: if the driver has told you their car is a Tesla Model 3, or asks about one, also use searchTeslaManual and readTeslaManualPage (Tesla's official service manual) and cite the page as a markdown link with its title. Turn manual content into plain words about what it means for the driver; do not give step-by-step repair instructions, and warn that anything orange-cabled is high voltage and only for trained technicians. If the car came from a confidential plate lookup, use the manual only if the driver named the car themselves.
+6. If the driver mentions warning signs like brake failure, smoke, burning smell, steering loss or a flashing engine light, tell them first to stop driving and get help.
 
 For troubleshooting, answer with this structure (markdown headings, short):
 ### What it could be
@@ -67,7 +69,7 @@ export const Route = createFileRoute("/api/chat")({
           model: provider.responses("openai/gpt-6-astra"),
           instructions: `${BASE_PROMPT}\n\nVehicle: ${vehicleContext(parsed.data.vehicle)}`,
           messages: await convertToModelMessages(messages),
-          tools: { searchWikidata, getWikidataItem, lookupFaultCode },
+          tools: { searchWikidata, getWikidataItem, lookupFaultCode, searchTeslaManual, readTeslaManualPage },
           stopWhen: stepCountIs(8),
           abortSignal: request.signal,
           providerOptions: {
