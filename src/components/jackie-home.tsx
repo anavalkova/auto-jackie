@@ -126,6 +126,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
     navigate({ to: "/c/$chatId", params: { chatId: data.id }, replace: true });
   }, [user?.id, chatId, loadChats, workshop?.id]);
 
+  const isFreshChat = !chatId && chatEmpty;
   const onReset = () => {
     if (!user) setVehicle(null);
     shopChatId.current = null;
