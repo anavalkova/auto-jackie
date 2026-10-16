@@ -72,12 +72,19 @@ export function WorkshopDashboard() {
   const [page, setPage] = useState(0);
   const [error, setError] = useState(false);
 
+  const [demo, setDemo] = useState(false);
   const loadShop = useCallback(async () => {
     if (!user) return;
     const { data } = await supabase.from("workshop_members").select("role, workshops(id,name,city,vat_number,slug)").eq("user_id", user.id).limit(1).maybeSingle();
     const w = data?.workshops as { id: string; name: string; city: string; vat_number: string; slug: string | null } | null | undefined;
     setShop(w ? { ...w, role: data!.role } : null);
   }, [user?.id]);
+  const openDemo = useCallback(async () => {
+    const { data: id } = await supabase.rpc("demo_workshop_id");
+    if (!id) return;
+    const { data: w } = await supabase.from("workshops").select("id,name,city,vat_number,slug").eq("id", id).single();
+    if (w) { setDemo(true); setShop({ ...w, role: "demo" }); }
+  }, []);
   useEffect(() => { if (ready && user) void loadShop(); }, [ready, loadShop]);
 
   const loadItems = useCallback(async () => {
@@ -128,8 +135,9 @@ export function WorkshopDashboard() {
   let body;
   if (!ready || (user && shop === undefined)) body = <p className="history-note" role="status">Loading…</p>;
   else if (!user) body = <WorkshopPitch onSignIn={() => setSignIn(true)}/>;
-  else if (!shop) body = <div className="ws-empty"><Wrench/><h1>Your workshop isn't set up yet</h1><p>AutoJackie's team sets up each workshop personally. If we've onboarded you, sign in with the email you gave us{user.email ? ` (you're signed in as ${user.email})` : ""}.</p>{isAdmin && <Button asChild><Link to="/admin">Go to operations</Link></Button>}</div>;
+  else if (!shop) body = <WorkshopPitch onSignIn={() => setSignIn(true)} signedIn onOpenDemo={() => void openDemo()}/>;
   else body = <>
+    {demo && <p className="demo-banner" role="note"><Sparkles aria-hidden/> {t.pitch.demoBanner}</p>}
     <div className="ws-title"><div><span className="eyebrow">WORKSHOP DASHBOARD</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div></div>
     <div className="ws-tabs" role="tablist" aria-label="Dashboard sections">{TABS.map(t => <Button key={t.id} variant={tab === t.id ? "default" : "outline"} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</Button>)}<WhyNote key={tab} overlay {...WHY[tab]}/></div>
     {tab === "booking" ? <BookingTab requests={<>
