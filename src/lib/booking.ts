@@ -1,6 +1,6 @@
 /** Bookable drop-off times offered to drivers: next N weekdays (Mon to Fri), fixed Stockholm times. */
 export const SLOT_HOURS = [8, 10, 13, 15];
-export const MAX_PICKS = 3;
+export const MAX_PICKS = 1;
 
 /** Stockholm wall-clock time to a UTC Date (handles summer/winter time). */
 export function stockholmTime(y: number, m: number, d: number, h: number): Date {

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Check, CircleHelp, X } from "lucide-react";
+import { ArrowLeft, Check, CircleHelp } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,7 +10,7 @@ import { SignInDialog } from "@/components/sign-in-dialog";
 import { useSessionUser } from "@/hooks/use-session-user";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureOther, matchService, OTHER, type ServiceItem } from "@/lib/services";
-import { MAX_PICKS, rulesFromRpc, upcomingDays } from "@/lib/booking";
+import { rulesFromRpc, upcomingDays } from "@/lib/booking";
 import { useT } from "@/lib/i18n";
 
 type Channel = "sms" | "whatsapp" | "email";
@@ -52,7 +53,7 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId }: { card
     if (!shopId) return;
     setPicks([]);
     supabase.rpc("workshop_booking_rules", { _workshop: shopId }).then(({ data }) => {
-      const d = upcomingDays(new Date(), 30, rulesFromRpc(data)); setDays(d); setDay(d[0]?.key ?? "");
+      const d = upcomingDays(new Date(), 400, rulesFromRpc(data)); setDays(d); setDay(d[0]?.key ?? "");
     });
     supabase.rpc("workshop_jackie_profile", { _workshop: shopId }).then(({ data }) => {
       const list = ensureOther(((data as { price_list?: ServiceItem[] } | null)?.price_list ?? []));
@@ -63,8 +64,12 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId }: { card
   }, [shopId]);
 
   const slots = useMemo(() => days.find(d => d.key === day)?.slots ?? [], [days, day]);
-  const toggle = (iso: string) => setPicks(p => p.includes(iso) ? p.filter(x => x !== iso) : p.length >= MAX_PICKS ? p : [...p, iso].sort());
-  const fmtDay = (d: Date) => d.toLocaleDateString(locale, { timeZone: "Europe/Stockholm", weekday: "short", day: "numeric", month: "short" });
+  const keyOf = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const fromKey = (k: string) => { const [y, m, dd] = k.split("-").map(Number); return new Date(y!, m! - 1, dd!); };
+  const dayKeys = useMemo(() => new Set(days.map(d => d.key)), [days]);
+  const selDate = day ? fromKey(day) : undefined;
+  const firstDate = days[0] ? fromKey(days[0].key) : undefined;
+  const lastDate = days.length ? fromKey(days[days.length - 1]!.key) : undefined;
   const fmtTime = (d: Date) => d.toLocaleTimeString(locale, { timeZone: "Europe/Stockholm", hour: "2-digit", minute: "2-digit" });
   const job = (direct ? (service === OTHER ? issue : service) : card.issue).trim();
   const suggested = !direct && services.length ? (card.service && services.some(x => x.task === card.service) ? card.service : matchService(card.issue, services)) : "";
@@ -107,13 +112,13 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId }: { card
 
         {step === 2 && <div className="visit-form">
           {days.length === 0 ? <p className="history-note">{b.noDays}</p> : <>
-            <div><Label>{b.day}</Label>
-              <div className="day-strip" role="listbox" aria-label={b.day}>{days.map(d => { const n = picks.filter(p => d.slots.some(s => s.toISOString() === p)).length; return <button key={d.key} type="button" role="option" aria-selected={d.key === day} className={"day-chip" + (d.key === day ? " is-on" : "")} onClick={() => setDay(d.key)}>{fmtDay(d.slots[0]!)}{n > 0 && <i>{n}</i>}</button>; })}</div></div>
+            <div><Label className="field-tip"><Tip text={b.hTimes}/>{b.day}</Label>
+              <Calendar mode="single" className="booking-cal" weekStartsOn={1} {...(selDate ? { selected: selDate, defaultMonth: selDate } : {})}
+                {...(firstDate ? { startMonth: firstDate } : {})} {...(lastDate ? { endMonth: lastDate } : {})}
+                disabled={d => !dayKeys.has(keyOf(d))}
+                onSelect={d => { if (d) { setDay(keyOf(d)); setPicks([]); } }}/></div>
             <div><Label>{b.time}</Label>
-              <div className="channel-row">{slots.map(sl => { const iso = sl.toISOString(); const on = picks.includes(iso); return <button key={iso} type="button" className={"slot" + (on ? " is-on" : "")} aria-pressed={on} disabled={!on && picks.length >= MAX_PICKS} onClick={() => toggle(iso)}>{fmtTime(sl)}</button>; })}</div></div>
-            <div><Label className="field-tip"><Tip text={b.hTimes.replace("%n", String(MAX_PICKS))}/>{b.picked.replace("%n", String(MAX_PICKS))}</Label>
-              {picks.length === 0 ? <p className="history-note">{b.noPick.replace("%n", String(MAX_PICKS))}</p>
-                : <div className="channel-row">{picks.map(p => <button key={p} type="button" className="pick-chip" aria-label={b.remove} onClick={() => toggle(p)}>{fmtDay(new Date(p))} · {fmtTime(new Date(p))} <X/></button>)}</div>}</div>
+              <div className="channel-row">{slots.map(sl => { const iso = sl.toISOString(); const on = picks.includes(iso); return <button key={iso} type="button" className={"slot" + (on ? " is-on" : "")} aria-pressed={on} onClick={() => setPicks(on ? [] : [iso])}>{fmtTime(sl)}</button>; })}</div></div>
           </>}
         </div>}
 
