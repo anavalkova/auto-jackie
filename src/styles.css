@@ -413,3 +413,7 @@
 .ws-big > div .eyebrow { grid-column: 1; }
 .ws-big strong { font-size: 20px; grid-column: 2; grid-row: 1 / span 2; }
 .ws-big small { grid-column: 1; font-size: 11px; }
+.ws-big { gap: 10px; }
+.ws-big > div { padding: 8px 12px; border-radius: 8px; background: var(--secondary); }
+.ws-big > div .eyebrow { font-size: 10px; }
+.ws-big strong { font-family: var(--font-heading); font-size: 18px; line-height: 1; }
