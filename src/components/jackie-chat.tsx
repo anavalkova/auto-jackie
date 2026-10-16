@@ -2,7 +2,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, isToolUIPart, getToolName, type UIMessage } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CalendarCheck, RotateCcw } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { RequestVisitDialog, type VisitCard } from "@/components/request-visit-dialog";
 import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/ai-elements/conversation";
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { PromptInput, PromptInputFooter, PromptInputSubmit, PromptInputTextarea } from "@/components/ai-elements/prompt-input";
@@ -19,7 +19,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
   onTurnFinished?: ((messages: UIMessage[]) => void) | undefined; onReset?: (() => void) | undefined; saving?: boolean | undefined;
 }) {
   const [input, setInput] = useState("");
-  const [booking, setBooking] = useState<string | null>(null);
+  const [booking, setBooking] = useState<VisitCard | null>(null);
   const vehiclePayload = vehicle ? { confidential: vehicle.confidential, description: vehicle.confidential ? undefined : vehicle.description, mileageKm: vehicle.mileageKm } : null;
   const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat", body: { vehicle: vehiclePayload } }), [JSON.stringify(vehiclePayload)]);
   const { messages, sendMessage, status, stop, error, setMessages, clearError } = useChat({ transport, ...(chatId ? { id: chatId } : {}), ...(initialMessages ? { messages: initialMessages } : {}) });
@@ -54,7 +54,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
                   <span className="offer-urgency">Get it looked at: {o.urgency}</span>
                   {o.priceLowSek != null && o.priceHighSek != null && <p className="offer-price">About {o.priceLowSek.toLocaleString("sv-SE")}–{o.priceHighSek.toLocaleString("sv-SE")} kr <small>incl. VAT · rough estimate, not a quote</small></p>}
                   {o.note && <p className="offer-note">{o.note}</p>}
-                  <Button onClick={() => setBooking(o.issue ?? "")}><CalendarCheck/> Request a workshop visit</Button>
+                  <Button onClick={() => setBooking({ issue: o.issue ?? "", urgency: o.urgency, priceLowSek: o.priceLowSek, priceHighSek: o.priceHighSek, note: o.note })}><CalendarCheck/> Request a workshop visit</Button>
                 </div>;
               }
               if (isToolUIPart(part)) {
@@ -81,6 +81,6 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
         </div>
       </PromptInputFooter>
     </PromptInput>
-    <Dialog open={booking !== null} onOpenChange={o => { if (!o) setBooking(null); }}><DialogContent><DialogHeader><DialogTitle>Booking is almost here</DialogTitle><DialogDescription>Soon you'll pick a partner workshop and a time (Stockholm time) for “{booking}” right here. For now, show this chat to any workshop and ask them to confirm the price.</DialogDescription></DialogHeader><Button onClick={() => setBooking(null)}>Got it</Button></DialogContent></Dialog>
+    <RequestVisitDialog card={booking} vehicleLabel={vehicle && !vehicle.confidential ? vehicle.label : ""} onClose={() => setBooking(null)}/>
   </div>;
 }

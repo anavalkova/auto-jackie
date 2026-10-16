@@ -6,4 +6,7 @@
 - [x] Later: real Swedish plate lookup API, prices, workshop bookings.
 - [x] OBD-II fault code lookup (bundled generic SAE code list) with plain-language answers.
 - [x] Tesla Model 3 (2017–2023) official service manual for demos.
-- [ ] Next: official recalls lookup.
+- [x] Workshop pillar 1: dashboard at /workshop (create workshop, KPIs, requests, status) + drivers send Jackie cards to a workshop.
+- [ ] Workshop pillar 2: quoting engine.
+- [ ] Workshop pillar 3: booking + SMS/WhatsApp.
+- [ ] Later: official recalls lookup.

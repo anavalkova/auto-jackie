@@ -230,3 +230,47 @@
 .offer-price small { display: block; font-size: .75rem; font-weight: 400; color: var(--muted-foreground); }
 .offer-note { font-size: .85rem; }
 .offer-card button { align-self: flex-start; margin-top: .3rem; }
+
+/* Workshop dashboard */
+.brand-sub { font-size: 12px; font-weight: 600; color: var(--muted-foreground); margin-left: 4px; }
+.ws-main { border: 1px solid var(--border); border-radius: 8px; background: var(--card); box-shadow: var(--frame-shadow); padding: 32px; min-height: 600px; }
+.ws-empty { max-width: 520px; margin: 60px auto; text-align: center; display: grid; gap: 14px; justify-items: center; }
+.ws-empty > svg { color: var(--primary); width: 36px; height: 36px; }
+.ws-empty h1 { font-size: 28px; margin: 0; }
+.ws-empty p { color: var(--muted-foreground); margin: 0; line-height: 1.6; }
+.ws-create { width: 100%; text-align: left; }
+.visit-form { display: grid; gap: 14px; }
+.visit-form > div { display: grid; gap: 6px; }
+.native-select { height: 36px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; background: var(--card); color: var(--foreground); font: inherit; font-size: 14px; }
+.ws-title { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+.ws-title h1 { font-size: 28px; margin: 4px 0 0; }
+.ws-kpis { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-bottom: 24px; }
+.ws-kpi { display: grid; gap: 6px; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: var(--secondary); }
+.ws-kpi > svg { color: var(--primary); width: 18px; height: 18px; }
+.ws-kpi strong { font-family: var(--font-heading); font-size: 26px; }
+.ws-kpi small { color: var(--muted-foreground); font-size: 11px; }
+.ws-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.ws-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.ws-list li + li { border-top: 1px solid var(--border); }
+.ws-row { width: 100%; display: grid; grid-template-columns: 96px 1fr 100px 170px 120px; align-items: center; gap: 14px; padding: 14px 16px; background: var(--card); border: 0; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.ws-row:hover { background: var(--accent); }
+.ws-row-main { display: grid; gap: 2px; min-width: 0; }
+.ws-row-main strong, .ws-row-main span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-row-main span, .ws-row time { color: var(--muted-foreground); font-size: 12px; }
+.ws-price { font-size: 13px; }
+.ws-status, .ws-urgency { justify-self: start; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; background: var(--secondary); }
+.ws-status.s-new { background: var(--primary); color: var(--primary-foreground); }
+.ws-status.s-booked { background: color-mix(in oklab, var(--success) 18%, var(--card)); color: var(--success); }
+.ws-urgency.u-today { background: color-mix(in oklab, var(--destructive) 15%, var(--card)); color: var(--destructive); }
+.ws-urgency.u-this-week { background: var(--accent); color: var(--primary); }
+.ws-list-empty { padding: 40px; text-align: center; border: 1px dashed var(--border); border-radius: 8px; }
+.ws-sheet { overflow-y: auto; }
+.ws-detail { display: grid; gap: 22px; padding: 0 16px 24px; }
+.ws-detail p { margin: 6px 0; }
+@media (max-width: 900px) {
+  .ws-main { padding: 18px; }
+  .ws-kpis { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .ws-row { grid-template-columns: 1fr auto; }
+  .ws-row .ws-row-main { grid-column: 1 / -1; grid-row: 1; }
+  .ws-row time, .ws-price { display: none; }
+}
