@@ -9,7 +9,6 @@ import { PromptInput, PromptInputFooter, PromptInputSubmit, PromptInputTextarea 
 import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from "@/components/ai-elements/tool";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
-import { WhyNote } from "@/components/why-note";
 import type { Vehicle } from "@/lib/vehicles";
 
 const starters = ["My brakes squeal and I've been ignoring it for weeks", "An orange light came on and I panicked", "My code reader says P0301 — is it bad?", "Someone told me my timing belt is due. Are they upselling?", "There's a noise I can't describe", "My Tesla Model 3 brakes squeak"];
@@ -36,13 +35,9 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
 
   return <div className="chat-shell">
     {messages.length === 0 ? <div className="chat-empty">
-      <span className="eyebrow">THE CAR CONFESSIONAL · NO JUDGEMENT</span>
       <h1>What's the car<br/>up to today?</h1>
       <p>Tell me everything — the weird noise, the light you've been ignoring, the quote that felt off. I'll explain it in plain words, tell you how urgent it is, give a rough price, and help you book a workshop.</p>
-      <WhyNote id="driver" title="Car talk assumes everyone speaks 'mechanic'. Most drivers don't — and shouldn't have to." stats={[
-        { value: "36%", text: "of privately owned cars in Sweden are registered to women, yet most workshop communication still assumes deep technical knowledge.", source: { label: "Trafikanalys, 2022", url: "https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" } },
-        { value: "P0301?", text: "Warning lights, HSN/TSN codes, service intervals — the industry speaks in codes. Jackie translates them into plain words, with sources." },
-      ]}/>
+      <p className="why-line">Why Jackie exists: 36% of privately owned cars in Sweden are registered to women, yet car talk still assumes everyone speaks “mechanic”. <a href="https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" target="_blank" rel="noreferrer">Trafikanalys, 2022</a></p>
       <div className="starter-grid">{starters.map(s => <Button key={s} variant="outline" className="starter" onClick={() => send(s)}>{s}</Button>)}</div>
     </div> : <Conversation className="chat-log">
       <ConversationContent>
@@ -79,7 +74,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
     <PromptInput className="chat-composer" onSubmit={({ text }) => send(text)}>
       <PromptInputTextarea value={input} onChange={e => setInput(e.target.value)} placeholder="Describe the noise, light or part you're wondering about…"/>
       <PromptInputFooter>
-        <span className="composer-hint">{saving ? "Saved to My chats" : vehicle ? `Using: ${vehicle.label}` : "Tip: tell Jackie about your car for more specific answers."}</span>
+        <span className="composer-hint">{saving ? "Saved to My chats" : ""}</span>
         <div className="composer-actions">
           {messages.length > 0 && !busy && <Button variant="ghost" size="sm" type="button" onClick={() => { setMessages([]); clearError(); onReset?.(); }}><RotateCcw/> New chat</Button>}
           <PromptInputSubmit status={status} onStop={stop} disabled={!busy && !input.trim()}/>
