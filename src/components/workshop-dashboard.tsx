@@ -310,44 +310,63 @@ function closedLabel(k: string) {
   return k.length > 10 ? `${day}, ${k.slice(11)}:00` : `${day}, all day`;
 }
 
+function dayLabel(d: string) {
+  return new Date(`${d}T12:00:00Z`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+}
+const OFF_PAGE = 5;
+
 function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit: boolean }) {
   const { s, setS, save, state } = useSettings(workshopId);
   const [date, setDate] = useState("");
-  const [hour, setHour] = useState("");
+  const [offPage, setOffPage] = useState(0);
   if (!s) return <p className="history-note" role="status">Loading…</p>;
   const flip = (arr: number[], v: number) => arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v].sort((a, b) => a - b);
   const today = new Date().toISOString().slice(0, 10);
   const closed = (s.closed_slots as string[]).filter(k => k.slice(0, 10) >= today);
-  const add = () => {
-    if (!date) return;
-    const k = hour ? `${date}T${hour.padStart(2, "0")}` : date;
-    if (!closed.includes(k)) setS({ ...s, closed_slots: [...closed, k].sort() });
-    setDate(""); setHour("");
+  const setClosed = (next: string[]) => setS({ ...s, closed_slots: [...new Set(next)].sort() });
+  const hourKey = (d: string, h: number) => `${d}T${String(h).padStart(2, "0")}`;
+  const dayClosed = (d: string) => closed.includes(d);
+  const toggleDay = (d: string) => setClosed(dayClosed(d) ? closed.filter(k => k !== d) : [...closed.filter(k => k.slice(0, 10) !== d), d]);
+  const toggleHour = (d: string, h: number) => {
+    const k = hourKey(d, h);
+    setClosed(closed.includes(k) ? closed.filter(x => x !== k) : [...closed.filter(x => x !== d), k]);
   };
+  const byDay = new Map<string, string[]>();
+  for (const k of closed) { const d = k.slice(0, 10); byDay.set(d, [...(byDay.get(d) ?? []), ...(k.length > 10 ? [`${k.slice(11)}:00`] : [])]); }
+  const days = [...byDay.entries()];
+  const pages = Math.max(1, Math.ceil(days.length / OFF_PAGE));
+  const pg = Math.min(offPage, pages - 1);
   const y = new Date().getFullYear();
   const holidays = [...swedishHolidays(y), ...swedishHolidays(y + 1)].filter(([k]) => k >= today).slice(0, 6);
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); void save({ booking_days: s.booking_days, slot_hours: s.slot_hours, min_notice_days: s.min_notice_days, max_ahead_days: s.max_ahead_days, close_holidays: s.close_holidays, closed_slots: closed }); }}>
     <fieldset disabled={!canEdit} className="ws-grid2" style={{ border: 0, padding: 0, margin: 0 }}>
       <section className="ws-card"><h2 className="ws-label-row"><Tip><p>The days and drop-off times drivers can pick. How long each job takes is set in Pricing engine.</p></Tip>Your normal week</h2>
-        <Label>Days</Label><div className="ws-chips">{WEEKDAYS.map(w => <Button key={w.d} type="button" size="sm" variant={s.booking_days.includes(w.d) ? "default" : "outline"} onClick={() => setS({ ...s, booking_days: flip(s.booking_days, w.d) })}>{w.l}</Button>)}</div>
-        <Label>Drop-off times</Label><div className="ws-chips">{HOURS.map(h => <Button key={h} type="button" size="sm" variant={s.slot_hours.includes(h) ? "default" : "outline"} onClick={() => setS({ ...s, slot_hours: flip(s.slot_hours, h) })}>{String(h).padStart(2, "0")}:00</Button>)}</div>
+        <div className="ws-field"><Label>Days</Label><div className="ws-chips">{WEEKDAYS.map(w => <Button key={w.d} type="button" size="sm" variant={s.booking_days.includes(w.d) ? "default" : "outline"} onClick={() => setS({ ...s, booking_days: flip(s.booking_days, w.d) })}>{w.l}</Button>)}</div></div>
+        <div className="ws-field"><Label>Drop-off times</Label><div className="ws-chips">{HOURS.map(h => <Button key={h} type="button" size="sm" variant={s.slot_hours.includes(h) ? "default" : "outline"} onClick={() => setS({ ...s, slot_hours: flip(s.slot_hours, h) })}>{String(h).padStart(2, "0")}:00</Button>)}</div></div>
         <div className="ws-grid2">
-          <div><Label htmlFor="b-notice">Earliest booking</Label>
+          <div className="ws-field"><Label htmlFor="b-notice">Earliest booking</Label>
             <select id="b-notice" className="native-select" value={s.min_notice_days} onChange={e => setS({ ...s, min_notice_days: Number(e.target.value) })}>{[1, 2, 3, 5, 7].map(d => <option key={d} value={d}>{d === 1 ? "Next day" : `${d} days ahead`}</option>)}</select></div>
-          <div><Label htmlFor="b-ahead">Latest booking</Label>
+          <div className="ws-field"><Label htmlFor="b-ahead">Latest booking</Label>
             <select id="b-ahead" className="native-select" value={s.max_ahead_days} onChange={e => setS({ ...s, max_ahead_days: Number(e.target.value) })}>{AHEAD.map(a => <option key={a.d} value={a.d}>Up to {a.l} ahead</option>)}</select></div>
         </div>
       </section>
-      <section className="ws-card"><h2 className="ws-label-row"><Tip><p>Close a whole day (vacation, inventory) or a single drop-off time. Drivers simply won't see it.</p></Tip>Days off</h2>
+      <section className="ws-card"><h2 className="ws-label-row"><Tip><p>Pick a date, then close the whole day or cross out single drop-off times. Drivers simply won't see them.</p></Tip>Days off</h2>
         <label className="ws-label-row"><input type="checkbox" checked={s.close_holidays} onChange={e => setS({ ...s, close_holidays: e.target.checked })}/><Tip><p>Built into AutoJackie, no calendar needed. Includes Midsummer Eve, Christmas Eve and New Year's Eve. Next up: {holidays.map(([k, n]) => `${n} (${k.slice(5)})`).join(", ")}.</p></Tip><span>Closed on Swedish public holidays</span></label>
-        <div className="ws-chips">
-          <Input aria-label="Date" type="date" min={today} value={date} onChange={e => setDate(e.target.value)} style={{ width: 160 }}/>
-          <select aria-label="Time" className="native-select" style={{ width: "auto" }} value={hour} onChange={e => setHour(e.target.value)}><option value="">All day</option>{s.slot_hours.map(h => <option key={h} value={String(h)}>{String(h).padStart(2, "0")}:00 only</option>)}</select>
-          <Button type="button" size="sm" variant="outline" disabled={!date} onClick={add}>Close</Button>
-        </div>
-        {date && s.close_holidays && holidayName(date) && <p className="history-note">That's {holidayName(date)}, already closed.</p>}
-        {closed.length === 0 ? <p className="history-note">No days off planned.</p>
-          : <div className="ws-chips">{closed.map(k => <span key={k} className="ws-closed">{closedLabel(k)}<button type="button" aria-label={`Reopen ${closedLabel(k)}`} onClick={() => setS({ ...s, closed_slots: closed.filter(x => x !== k) })}>×</button></span>)}</div>}
+        <div className="ws-field"><Label htmlFor="b-off">Date</Label>
+          <Input id="b-off" type="date" min={today} value={date} onChange={e => setDate(e.target.value)} style={{ width: 180 }}/></div>
+        {date && (s.close_holidays && holidayName(date)
+          ? <p className="history-note">That's {holidayName(date)}, already closed.</p>
+          : <div className="ws-chips">
+              <Button type="button" size="sm" variant={dayClosed(date) ? "default" : "outline"} onClick={() => toggleDay(date)}>Whole day</Button>
+              {s.slot_hours.map(h => { const off = dayClosed(date) || closed.includes(hourKey(date, h)); return <Button key={h} type="button" size="sm" variant="outline" aria-pressed={off} className={off ? "ws-crossed" : undefined} disabled={dayClosed(date)} onClick={() => toggleHour(date, h)}>{String(h).padStart(2, "0")}:00</Button>; })}
+            </div>)}
+        {days.length === 0 ? <p className="history-note">No days off planned.</p>
+          : <><ul className="ws-off-list">{days.slice(pg * OFF_PAGE, (pg + 1) * OFF_PAGE).map(([d, hrs]) => <li key={d}>
+              <button type="button" className="ws-off-day" onClick={() => setDate(d)}>{dayLabel(d)}</button>
+              <span className="history-note">{hrs.length ? hrs.join(", ") : "All day"}</span>
+              <button type="button" className="ws-off-x" aria-label={`Reopen ${dayLabel(d)}`} onClick={() => setClosed(closed.filter(k => k.slice(0, 10) !== d))}>×</button>
+            </li>)}</ul>
+            {pages > 1 && <Pager page={pg} pages={pages} onPage={setOffPage}/>}</>}
       </section>
     </fieldset>
     <SaveRow canEdit={canEdit} state={state}/>
