@@ -1,5 +1,5 @@
 import { useNavigate, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { UIMessage } from "ai";
 import { ArrowUpRight, CalendarPlus, Car, ChevronDown, Gauge, Globe2, HelpCircle, LockKeyhole, LogOut, MessageSquare, Pencil, Plus, Trash2, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import jackie from "@/assets/jackie.jpg";
 import { LANGS, setLang, useT } from "@/lib/i18n";
 
 const fmt = (n: number) => n.toLocaleString("sv-SE");
+export type WorkshopBrand = { id: string; name: string; city: string; slug: string; accent: string; logo: string; greeting: string };
 type ChatRow = { id: string; title: string; updated_at: string };
 
 function readGuestChat(): UIMessage[] {
@@ -39,7 +40,7 @@ function titleFrom(messages: UIMessage[]) {
   return t.length > 60 ? `${t.slice(0, 57)}…` : t || "New chat";
 }
 
-export function JackieHome({ chatId }: { chatId?: string }) {
+export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: WorkshopBrand }) {
   const navigate = useNavigate();
   const { user, ready } = useSessionUser();
   const { t, lang } = useT();
@@ -111,17 +112,21 @@ export function JackieHome({ chatId }: { chatId?: string }) {
     if (user) await supabase.from("saved_vehicles").delete().eq("user_id", user.id);
   };
 
+  const shopChatId = useRef<string | null>(null);
   const onTurnFinished = useCallback(async (messages: UIMessage[]) => {
     if (!user || messages.length === 0) return;
     const payload = { messages: messages as unknown as Json, title: titleFrom(messages), updated_at: new Date().toISOString() };
     if (chatId) { await supabase.from("chats").update(payload).eq("id", chatId); await loadChats(); return; }
+    if (workshop && shopChatId.current) { await supabase.from("chats").update(payload).eq("id", shopChatId.current); await loadChats(); return; }
     const { data, error } = await supabase.from("chats").insert({ ...payload, user_id: user.id }).select("id").single();
     if (error || !data) return console.error("Couldn't save chat", error);
+    if (workshop) { shopChatId.current = data.id; await loadChats(); return; }
     navigate({ to: "/c/$chatId", params: { chatId: data.id }, replace: true });
-  }, [user?.id, chatId, loadChats]);
+  }, [user?.id, chatId, loadChats, workshop?.id]);
 
   const onReset = () => {
     if (!user) setVehicle(null);
+    shopChatId.current = null;
     if (chatId) navigate({ to: "/" });
     else setNewChatKey(k => k + 1);
   };
@@ -137,13 +142,13 @@ export function JackieHome({ chatId }: { chatId?: string }) {
   const service = vehicle ? nextService(vehicle) : null;
   const [directBooking, setDirectBooking] = useState<VisitCard | null>(null);
 
-  return <div className="app-frame">
+  return <div className="app-frame" style={workshop?.accent ? { ["--primary" as string]: workshop.accent } : undefined}>
     <header className="site-header">
       <Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span></Link>
       <nav aria-label="Main navigation">
-        <span className="market-label"><span className="swedish-flag"/>{t.madeForSweden}</span>
+        {workshop ? <span className="shop-badge">{workshop.logo && <img src={workshop.logo} alt="" className="shop-logo"/>}<span>{workshop.name}</span></span> : <span className="market-label"><span className="swedish-flag"/>{t.madeForSweden}</span>}
         <Button onClick={() => setDirectBooking({ issue: "" })}><CalendarPlus/> {t.bookVisit}</Button>
-        <Button variant="ghost" asChild className="workshop-link"><Link to="/workshop">{t.forWorkshops} <ArrowUpRight/></Link></Button>
+        {!workshop && <Button variant="ghost" asChild className="workshop-link"><Link to="/workshop">{t.forWorkshops} <ArrowUpRight/></Link></Button>}
         {ready && (user ? <>
           <DropdownMenu>
             <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label={t.account}><UserRound/></Button></DropdownMenuTrigger>
@@ -189,17 +194,17 @@ export function JackieHome({ chatId }: { chatId?: string }) {
       </aside>
 
       <section className="assistant-area" aria-label="Chat with Jackie">
-        <div className="assistant-top"><span/><span className="preview-badge">{user ? t.chatsSaved : t.privateChat}</span></div>
+        <div className="assistant-top">{workshop?.greeting ? <span className="shop-greeting">{workshop.greeting}</span> : <span/>}<span className="preview-badge">{user ? t.chatsSaved : t.privateChat}</span></div>
         {missing ? <div className="chat-empty"><h1>{t.missingTitle}</h1><p>{user ? t.missingDeleted : t.missingSignIn}</p><div className="starter-grid">{!user && <Button onClick={() => setSignInOpen(true)}>{t.signIn}</Button>}<Button variant="outline" asChild><Link to="/">{t.startNew}</Link></Button></div></div>
           : initial === null ? <div className="chat-empty"><p>{t.opening}</p></div>
-          : <JackieChat key={chatId ?? `new-${newChatKey}`} chatId={chatId} initialMessages={initial} vehicle={vehicle} pending={null} onPendingSent={() => {}} onTurnFinished={onTurnFinished} onReset={onReset} saving={!!user && !!chatId}/>}
+          : <JackieChat key={chatId ?? `new-${newChatKey}`} chatId={chatId} initialMessages={initial} vehicle={vehicle} pending={null} onPendingSent={() => {}} onTurnFinished={onTurnFinished} onReset={onReset} saving={!!user && !!chatId} workshopId={workshop?.id}/>}
         <div className="assistant-bottom"><span className="swedish-flag"/><span>{t.bottom}</span><Button variant="ghost" size="icon" aria-label={t.about} onClick={() => setInfo("about")}><HelpCircle/></Button></div>
       </section>
     </main>
 
     <footer className="site-footer"><span>© {new Date().getFullYear()} AutoJackie</span><div><Button variant="link" onClick={() => setInfo("privacy")}>{t.privacy}</Button><Button variant="link" onClick={() => setInfo("about")}>{t.about} <ArrowUpRight/></Button></div></footer>
 
-    <RequestVisitDialog card={directBooking} vehicleLabel={vehicle && !vehicle.confidential ? vehicle.label : ""} onClose={() => setDirectBooking(null)}/>
+    <RequestVisitDialog card={directBooking} vehicleLabel={vehicle && !vehicle.confidential ? vehicle.label : ""} onClose={() => setDirectBooking(null)} workshopId={workshop?.id}/>
     <GarageDialog key={garageOpen ? "open" : "closed"} open={garageOpen} onOpenChange={setGarageOpen} vehicle={vehicle} onSave={saveVehicle} signedIn={!!user}/>
     <SignInDialog open={signInOpen} onOpenChange={setSignInOpen}/>
     <Dialog open={info !== null} onOpenChange={open => { if (!open) setInfo(null); }}><DialogContent><DialogHeader><DialogTitle>{info === "privacy" ? t.privacyTitle : t.aboutTitle}</DialogTitle><DialogDescription>{info === "privacy" ? t.privacyBody : t.aboutBody}</DialogDescription></DialogHeader><Button onClick={() => setInfo(null)}>{t.gotIt}</Button></DialogContent></Dialog>

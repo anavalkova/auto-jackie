@@ -432,3 +432,23 @@
 .ws-soon-head { display: flex; justify-content: space-between; align-items: center; }
 .ws-soon { border-style: dashed; }
 .why-points { list-style: disc; } .why-points li::marker { color: var(--primary); }
+
+/* Workshop-branded driver page */
+.shop-badge { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; padding: 4px 10px 4px 4px; border: 1px solid var(--border); border-radius: 999px; background: var(--card); }
+.shop-badge > span:only-child { padding-left: 6px; }
+.shop-logo { width: 26px; height: 26px; object-fit: contain; border-radius: 6px; background: var(--background); }
+.shop-greeting { font-size: 13px; color: var(--muted-foreground); }
+.ws-tiers { display: grid; gap: 14px; }
+.ws-tier-row { display: grid; grid-template-columns: minmax(150px, 1fr) 2fr; gap: 12px; align-items: start; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.ws-tier-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.ws-tier-row h3 { font-size: 14px; font-weight: 700; margin: 0; }
+.ws-tier-row p { margin: 2px 0 0; }
+.ws-tier-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ws-tier-opt { text-align: left; border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; background: var(--card); font-size: 12px; color: var(--muted-foreground); cursor: pointer; }
+.ws-tier-opt strong { display: flex; justify-content: space-between; color: var(--foreground); font-size: 13px; }
+.ws-tier-opt[aria-pressed="true"] { border-color: var(--primary); background: var(--accent); }
+.ws-tier-opt:disabled { cursor: default; }
+.ws-tier-warn { font-size: 12px; color: var(--primary); margin-top: 6px; }
+.ws-brand-preview { border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: grid; gap: 10px; background: var(--background); }
+.ws-brand-preview .preview-btn { justify-self: start; padding: 6px 12px; border-radius: 8px; color: var(--primary-foreground); font-size: 13px; font-weight: 600; }
+@media (max-width: 720px) { .ws-tier-row { grid-template-columns: 1fr; } .ws-tier-options { grid-template-columns: 1fr; } }

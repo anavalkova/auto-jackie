@@ -96,6 +96,6 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
         </div>
       </PromptInputFooter>
     </PromptInput>
-    <RequestVisitDialog card={booking} vehicleLabel={vehicle && !vehicle.confidential ? vehicle.label : ""} onClose={() => setBooking(null)}/>
+    <RequestVisitDialog card={booking} vehicleLabel={vehicle && !vehicle.confidential ? vehicle.label : ""} onClose={() => setBooking(null)} workshopId={workshopId}/>
   </div>;
 }
