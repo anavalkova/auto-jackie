@@ -418,7 +418,7 @@ function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
           <textarea id="c-ctx" className="native-select ws-textarea ws-textarea-tall" maxLength={3000} placeholder="E.g. We use OEM brake parts only. We always replace pads and discs together. Diagnostics fee is deducted if you repair with us." value={s.jackie_context} onChange={e => setS({ ...s, jackie_context: e.target.value })}/>
         </>}
         {step === 2 && <>
-          <div className="ws-label-row history-note"><Tip><p>Pick a level for each group of jobs Jackie does. Smarter means better answers but higher running costs, which may change your AutoJackie price. ★ is our recommendation.</p></Tip>How smart should Jackie be?</div>
+          <p className="history-note" style={{ margin: 0 }}>How smart should Jackie be? Pick a level per job. Smarter means better answers but higher running costs. ★ is our recommendation.</p>
           <div className="ws-tiers">
             <TierRow title="Everyday chat" hint="Listening, explaining, fault codes and manual lookups. Most of the volume, so cost adds up here." value={s.ai_chat_tier as Tier} recommended={DEFAULT_TIERS.chat} onChange={v => setS({ ...s, ai_chat_tier: v })}/>
             <TierRow title="Rough quotes" hint="Drafting the price range a driver sees, using your price list. Rare, but accuracy builds trust." value={s.ai_quote_tier as Tier} recommended={DEFAULT_TIERS.quote} onChange={v => setS({ ...s, ai_quote_tier: v })}/>
