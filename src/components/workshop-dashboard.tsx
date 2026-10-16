@@ -116,7 +116,21 @@ export function WorkshopDashboard() {
   else body = <>
     <div className="ws-title"><div><span className="eyebrow">WORKSHOP DASHBOARD</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div></div>
     <div className="ws-tabs" role="tablist" aria-label="Dashboard sections">{TABS.map(t => <Button key={t.id} variant={tab === t.id ? "default" : "outline"} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</Button>)}<WhyNote key={tab} overlay {...WHY[tab]}/></div>
-    {tab === "booking" ? <BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>
+    {tab === "booking" ? <BookingTab requests={<>
+    <div className="ws-filters" role="tablist" aria-label="Filter requests">
+      {([{ id: "open", label: "All open" }, ...STATUSES] as { id: Status | "open"; label: string }[]).map(s => <Button key={s.id} size="sm" variant={filter === s.id ? "default" : "outline"} role="tab" aria-selected={filter === s.id} onClick={() => { setFilter(s.id); setPage(0); }}>{s.label}</Button>)}
+    </div>
+    {error && <p className="chat-error" role="alert">Couldn't load or update requests.</p>}
+    {shown.length === 0 ? <div className="ws-list-empty"><p>No requests here yet.</p><p className="history-note">When a driver books {shop.name}, directly or from one of Jackie's cards, it lands here.</p></div>
+      : <ul className="ws-list">{shown.slice(page * PAGE, (page + 1) * PAGE).map(i => <li key={i.id}><button type="button" className="ws-row" onClick={() => setSelected(i)}>
+        <span className={`ws-status s-${i.status}`}>{STATUSES.find(s => s.id === i.status)?.label}</span>
+        <span className="ws-row-main"><strong>{i.issue}</strong><span>{i.contact_name}{i.vehicle_label ? ` · ${i.vehicle_label}` : ""}</span></span>
+        <span className={`ws-urgency u-${i.urgency.replace(" ", "-")}`}>{i.urgency}</span>
+        <span className="ws-price">{i.price_low_sek != null && i.price_high_sek != null ? `${kr(i.price_low_sek)} to ${kr(i.price_high_sek)}` : "No price"}</span>
+        <time dateTime={i.created_at}>{when(i.created_at)}</time>
+      </button></li>)}</ul>}
+    {shown.length > PAGE && <Pager page={page} pages={Math.ceil(shown.length / PAGE)} onPage={setPage}/>}
+    </>} settings={<BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>}/>
     : tab === "context" ? <ContextSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>
     : tab === "pricing" ? <PricingView workshopId={shop.id} canEdit={shop.role === "owner"}/>
     : tab === "profile" ? <ProfileView shop={shop} canEdit={shop.role === "owner"} onSaved={loadShop}/> : <>
@@ -126,20 +140,6 @@ export function WorkshopDashboard() {
       <Kpi icon={<TrendingUp/>} label="Open pipeline (est.)" value={kr(kpis.pipeline)} hint="Midpoint of Jackie's rough ranges, incl. VAT"/>
       <Kpi icon={<Moon/>} label="After hours" value={kpis.afterHours} hint="Requests that came in evenings or weekends, when you were closed"/>
     </div>
-    <h2 className="ws-h2">Requests</h2>
-    <div className="ws-filters" role="tablist" aria-label="Filter requests">
-      {([{ id: "open", label: "All open" }, ...STATUSES] as { id: Status | "open"; label: string }[]).map(s => <Button key={s.id} size="sm" variant={filter === s.id ? "default" : "outline"} role="tab" aria-selected={filter === s.id} onClick={() => { setFilter(s.id); setPage(0); }}>{s.label}</Button>)}
-    </div>
-    {error && <p className="chat-error" role="alert">Couldn't load or update requests.</p>}
-    {shown.length === 0 ? <div className="ws-list-empty"><p>No requests here yet.</p><p className="history-note">When a driver taps “Request a workshop visit” on one of Jackie's cards and picks {shop.name}, it lands here.</p></div>
-      : <ul className="ws-list">{shown.slice(page * PAGE, (page + 1) * PAGE).map(i => <li key={i.id}><button type="button" className="ws-row" onClick={() => setSelected(i)}>
-        <span className={`ws-status s-${i.status}`}>{STATUSES.find(s => s.id === i.status)?.label}</span>
-        <span className="ws-row-main"><strong>{i.issue}</strong><span>{i.contact_name}{i.vehicle_label ? ` · ${i.vehicle_label}` : ""}</span></span>
-        <span className={`ws-urgency u-${i.urgency.replace(" ", "-")}`}>{i.urgency}</span>
-        <span className="ws-price">{i.price_low_sek != null && i.price_high_sek != null ? `${kr(i.price_low_sek)} to ${kr(i.price_high_sek)}` : "No price"}</span>
-        <time dateTime={i.created_at}>{when(i.created_at)}</time>
-      </button></li>)}</ul>}
-    {shown.length > PAGE && <Pager page={page} pages={Math.ceil(shown.length / PAGE)} onPage={setPage}/>}
     <InsightsView items={items} workshopId={shop.id} canEdit={shop.role === "owner"}/>
     </>}
   </>;
@@ -173,7 +173,13 @@ function Pager({ page, pages, onPage }: { page: number; pages: number; onPage: (
   return <div className="ws-pager"><Button type="button" size="sm" variant="outline" disabled={page === 0} onClick={() => onPage(page - 1)}>Previous</Button><span className="history-note">Page {page + 1} of {pages}</span><Button type="button" size="sm" variant="outline" disabled={page >= pages - 1} onClick={() => onPage(page + 1)}>Next</Button></div>;
 }
 
-function Collapsible({ title, children, defaultOpen = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+const BOOKING_STEPS = [{ title: "Requests" }, { title: "Booking settings" }];
+function BookingTab({ requests, settings }: { requests: React.ReactNode; settings: React.ReactNode }) {
+  const [step, setStep] = useState(0);
+  return <div className="ws-section"><Stepper steps={BOOKING_STEPS} step={step} setStep={setStep}/>{step === 0 ? <div className="ws-section">{requests}</div> : settings}</div>;
+}
+
+function Collapsible({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
   return <details className="ws-card ws-collapsible" open={defaultOpen}><summary><h2>{title}</h2></summary>{children}</details>;
 }
 
