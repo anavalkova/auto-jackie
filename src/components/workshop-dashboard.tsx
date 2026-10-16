@@ -581,7 +581,11 @@ function WorkshopPitch({ onSignIn }: { onSignIn: () => void }) {
         <span className="eyebrow">{p.eyebrow}</span>
         <h1>{p.title}</h1>
         <p>{p.sub}</p>
-        <div className="pitch-cta"><Button onClick={onSignIn}>{p.cta}</Button><span className="history-note">{p.ctaNote}</span></div>
+        <div className="pitch-cta">
+          {signedIn && onOpenDemo
+            ? <><Button onClick={onOpenDemo}>{p.demoCta}</Button><span className="history-note">{p.demoNote}</span></>
+            : <><Button onClick={onSignIn}>{p.cta}</Button><span className="history-note">{p.ctaNote}</span></>}
+        </div>
       </div>
       <figure className="pitch-jackie"><img src={jackieImg} alt="Jackie, AutoJackie's assistant"/><figcaption>{p.jackieCaption}</figcaption></figure>
     </section>
