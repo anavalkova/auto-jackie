@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,8 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId }: { card
   const [channel, setChannel] = useState<Channel>("sms"); const [message, setMessage] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [signIn, setSignIn] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => { root.current?.scrollIntoView({ block: "start", behavior: "smooth" }); }, [step, state]);
 
   useEffect(() => { if (user?.email) setEmail(e => e || user.email || ""); }, [user?.email]);
   useEffect(() => {
@@ -74,7 +76,7 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId }: { card
   };
 
   const steps = [b.s1, b.s2, b.s3];
-  return <div className="booking-panel">
+  return <div className="booking-panel" ref={root}>
     <div className="booking-head">
       <Button variant="ghost" size="sm" onClick={onClose}><ArrowLeft/> {b.back}</Button>
       <h2>{state === "sent" ? b.sentTitle : b.title}</h2>
