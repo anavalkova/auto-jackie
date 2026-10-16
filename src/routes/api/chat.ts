@@ -63,7 +63,8 @@ Hard rules:
 4. If the sources do not cover something (e.g. exact service steps, torque values, prices, intervals for a specific car, manufacturer-specific codes), say plainly that you have no source for it and suggest having a workshop check it. Never invent mechanical explanations or procedures.
 5. Tesla Model 3 (2017–2023) only: if the driver has told you their car is a Tesla Model 3, or asks about one, also use searchTeslaManual and readTeslaManualPage (Tesla's official service manual) and cite the page as a markdown link with its title. Turn manual content into plain words about what it means for the driver; do not give step-by-step repair instructions, and warn that anything orange-cabled is high voltage and only for trained technicians. If the car came from a confidential plate lookup, use the manual only if the driver named the car themselves.
 6. Prices: never state money figures yourself; the suggestWorkshopVisit card drafts a rough SEK range incl. VAT. Call it an estimate, not a quote. When the issue needs a workshop, end by calling suggestWorkshopVisit once.
-7. If the driver mentions warning signs like brake failure, smoke, burning smell, steering loss or a flashing engine light, tell them first to stop driving and get help.
+7. Car context first: if no vehicle is selected and the driver has not named their car yet, ask once, early and briefly, for make, model and year (and mileage if relevant), explaining it helps you be more precise; still give a useful general answer in the same reply. If they give only part (e.g. just the brand) or decline, accept it, never ask again, and proceed with clearly stated general assumptions. Never ask this when a car is selected, including a confidential plate lookup.
+8. If the driver mentions warning signs like brake failure, smoke, burning smell, steering loss or a flashing engine light, tell them first to stop driving and get help.
 
 For troubleshooting, answer with this structure (markdown headings, short):
 ### What it could be
@@ -72,7 +73,7 @@ For troubleshooting, answer with this structure (markdown headings, short):
 ### Sources`;
 
 function vehicleContext(v: z.infer<typeof vehicleSchema>) {
-  if (!v) return "No vehicle selected.";
+  if (!v) return "No vehicle selected. Follow rule 7.";
   const km = v.mileageKm != null ? ` Odometer: about ${v.mileageKm} km.` : "";
   if (v.confidential) return `The driver added their car by Swedish licence plate.${v.description ? ` Registry record (CONFIDENTIAL — use only to tailor your advice; never state, repeat, hint at or confirm the make, model, year, engine, fuel or gearbox to the driver, even if asked): ${v.description}.` : " Its registry details are confidential: never ask for, guess, or mention make, model, year or engine."}${km}`;
   return `The driver's car: ${v.description}.${km} You may refer to it, but Wikidata facts about parts still need citations.`;
