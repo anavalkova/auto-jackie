@@ -224,7 +224,12 @@ export type Database = {
       workshop_settings: {
         Row: {
           address: string
+          ai_chat_tier: string
+          ai_quote_tier: string
           booking_days: number[]
+          brand_accent: string
+          brand_greeting: string
+          brand_logo_url: string
           contact_email: string
           hourly_rate_sek: number
           jackie_context: string
@@ -242,7 +247,12 @@ export type Database = {
         }
         Insert: {
           address?: string
+          ai_chat_tier?: string
+          ai_quote_tier?: string
           booking_days?: number[]
+          brand_accent?: string
+          brand_greeting?: string
+          brand_logo_url?: string
           contact_email?: string
           hourly_rate_sek?: number
           jackie_context?: string
@@ -260,7 +270,12 @@ export type Database = {
         }
         Update: {
           address?: string
+          ai_chat_tier?: string
+          ai_quote_tier?: string
           booking_days?: number[]
+          brand_accent?: string
+          brand_greeting?: string
+          brand_logo_url?: string
           contact_email?: string
           hourly_rate_sek?: number
           jackie_context?: string
@@ -293,6 +308,7 @@ export type Database = {
           created_by: string
           id: string
           name: string
+          slug: string | null
           vat_number: string
         }
         Insert: {
@@ -301,6 +317,7 @@ export type Database = {
           created_by?: string
           id?: string
           name: string
+          slug?: string | null
           vat_number?: string
         }
         Update: {
@@ -309,6 +326,7 @@ export type Database = {
           created_by?: string
           id?: string
           name?: string
+          slug?: string | null
           vat_number?: string
         }
         Relationships: []
@@ -340,6 +358,8 @@ export type Database = {
         Returns: boolean
       }
       workshop_booking_rules: { Args: { _workshop: string }; Returns: Json }
+      workshop_jackie_profile: { Args: { _workshop: string }; Returns: Json }
+      workshop_public_profile: { Args: { _slug: string }; Returns: Json }
       workshop_role_of: {
         Args: { _user: string; _workshop: string }
         Returns: Database["public"]["Enums"]["workshop_role"]

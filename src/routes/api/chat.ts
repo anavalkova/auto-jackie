@@ -10,6 +10,7 @@ import {
 import { getWikidataItem, searchWikidata } from "@/lib/ai/wikidata.server";
 import { lookupFaultCode } from "@/lib/ai/obd.server";
 import { createSuggestWorkshopVisit } from "@/lib/ai/workshop.server";
+import { asTier, DEFAULT_TIERS, tierModel } from "@/lib/ai-tiers";
 import { readTeslaManualPage, searchTeslaManual } from "@/lib/ai/tesla.server";
 
 const vehicleSchema = z.object({
@@ -22,7 +23,29 @@ const bodySchema = z.object({
   messages: z.array(z.any()).min(1).max(60),
   vehicle: vehicleSchema,
   lang: z.enum(["en", "sv", "de"]).optional(),
+  workshopId: z.string().uuid().optional(),
 });
+
+type WorkshopProfile = { name: string; city: string; hourly_rate_sek: number; price_list: { task: string; price_sek: number }[]; services: string[]; specialties: string; notes: string; opening_hours: string; chat_tier: string; quote_tier: string };
+
+async function loadWorkshop(id: string): Promise<WorkshopProfile | null> {
+  const url = process.env["SUPABASE_URL"], key = process.env["SUPABASE_PUBLISHABLE_KEY"];
+  if (!url || !key) return null;
+  const res = await fetch(`${url}/rest/v1/rpc/workshop_jackie_profile`, { method: "POST", headers: { apikey: key, "Content-Type": "application/json" }, body: JSON.stringify({ _workshop: id }) }).catch(() => null);
+  if (!res?.ok) return null;
+  return (await res.json().catch(() => null)) as WorkshopProfile | null;
+}
+
+const priceLines = (w: WorkshopProfile) => [`Hourly labour: ${w.hourly_rate_sek} kr`, ...(w.price_list ?? []).map(p => `${p.task}: ${p.price_sek} kr`)].join("\n");
+
+function workshopContext(w: WorkshopProfile) {
+  return `You are speaking on behalf of ${w.name}${w.city ? ` in ${w.city}` : ""}. Drivers on this page are this workshop's potential customers; when a visit is needed, recommend this workshop warmly (no hard selling).
+Services: ${(w.services ?? []).join(", ") || "not listed"}.
+Specialties: ${w.specialties || "not listed"}.
+Opening hours: ${w.opening_hours || "not listed"}.
+How they work (follow this when explaining what the workshop would do): ${w.notes || "no notes"}.
+These workshop details are your source for anything about this workshop; you may state them plainly without Wikidata citations.`;
+}
 
 const BASE_PROMPT = `You are Jackie, AutoJackie's mechanic assistant for drivers in Sweden. Speak plain, warm language. No upselling.
 
@@ -72,10 +95,13 @@ export const Route = createFileRoute("/api/chat")({
           fetch: runIdFetch.fetch,
         });
 
-        const suggestWorkshopVisit = createSuggestWorkshopVisit(provider.responses("openai/gpt-6-astra"));
+        const shop = parsed.data.workshopId ? await loadWorkshop(parsed.data.workshopId) : null;
+        const chatAi = tierModel(asTier(shop?.chat_tier, DEFAULT_TIERS.chat));
+        const quoteAi = tierModel(asTier(shop?.quote_tier, DEFAULT_TIERS.quote));
+        const suggestWorkshopVisit = createSuggestWorkshopVisit(provider.responses(quoteAi.model), quoteAi.effort, shop ? priceLines(shop) : "");
         const result = streamText({
-          model: provider.responses("openai/gpt-5.6-luna"),
-          instructions: `${BASE_PROMPT}\n\nInterface language: ${({ en: "English", sv: "Swedish", de: "German" })[parsed.data.lang ?? "en"]}.\n\nVehicle: ${vehicleContext(parsed.data.vehicle)}`,
+          model: provider.responses(chatAi.model),
+          instructions: `${BASE_PROMPT}${shop ? `\n\n${workshopContext(shop)}` : ""}\n\nInterface language: ${({ en: "English", sv: "Swedish", de: "German" })[parsed.data.lang ?? "en"]}.\n\nVehicle: ${vehicleContext(parsed.data.vehicle)}`,
           messages: await convertToModelMessages(messages),
           tools: { searchWikidata, getWikidataItem, lookupFaultCode, searchTeslaManual, readTeslaManualPage, suggestWorkshopVisit },
           stopWhen: stepCountIs(8),
@@ -83,7 +109,7 @@ export const Route = createFileRoute("/api/chat")({
           providerOptions: {
             openai: {
               forceReasoning: true,
-              reasoningEffort: "low",
+              reasoningEffort: chatAi.effort,
               reasoningSummary: "auto",
               store: false,
               include: ["reasoning.encrypted_content"],

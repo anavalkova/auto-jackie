@@ -14,6 +14,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as WorkshopRouteImport } from './routes/workshop'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as CChatIdRouteImport } from './routes/c.$chatId'
+import { Route as WSlugRouteImport } from './routes/w.$slug'
 import { Route as ApiVehiclesLookupRouteImport } from './routes/api/vehicles.lookup'
 
 const IndexRoute = IndexRouteImport.update({
@@ -41,6 +42,11 @@ const CChatIdRoute = CChatIdRouteImport.update({
   path: '/c/$chatId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WSlugRoute = WSlugRouteImport.update({
+  id: '/w/$slug',
+  path: '/w/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiVehiclesLookupRoute = ApiVehiclesLookupRouteImport.update({
   id: '/api/vehicles/lookup',
   path: '/api/vehicles/lookup',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/workshop': typeof WorkshopRoute
   '/api/chat': typeof ApiChatRoute
   '/c/$chatId': typeof CChatIdRoute
+  '/w/$slug': typeof WSlugRoute
   '/api/vehicles/lookup': typeof ApiVehiclesLookupRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/workshop': typeof WorkshopRoute
   '/api/chat': typeof ApiChatRoute
   '/c/$chatId': typeof CChatIdRoute
+  '/w/$slug': typeof WSlugRoute
   '/api/vehicles/lookup': typeof ApiVehiclesLookupRoute
 }
 export interface FileRoutesById {
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/workshop': typeof WorkshopRoute
   '/api/chat': typeof ApiChatRoute
   '/c/$chatId': typeof CChatIdRoute
+  '/w/$slug': typeof WSlugRoute
   '/api/vehicles/lookup': typeof ApiVehiclesLookupRoute
 }
 export interface FileRouteTypes {
@@ -80,6 +89,7 @@ export interface FileRouteTypes {
     | '/workshop'
     | '/api/chat'
     | '/c/$chatId'
+    | '/w/$slug'
     | '/api/vehicles/lookup'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -88,6 +98,7 @@ export interface FileRouteTypes {
     | '/workshop'
     | '/api/chat'
     | '/c/$chatId'
+    | '/w/$slug'
     | '/api/vehicles/lookup'
   id:
     | '__root__'
@@ -96,6 +107,7 @@ export interface FileRouteTypes {
     | '/workshop'
     | '/api/chat'
     | '/c/$chatId'
+    | '/w/$slug'
     | '/api/vehicles/lookup'
   fileRoutesById: FileRoutesById
 }
@@ -105,6 +117,7 @@ export interface RootRouteChildren {
   WorkshopRoute: typeof WorkshopRoute
   ApiChatRoute: typeof ApiChatRoute
   CChatIdRoute: typeof CChatIdRoute
+  WSlugRoute: typeof WSlugRoute
   ApiVehiclesLookupRoute: typeof ApiVehiclesLookupRoute
 }
 
@@ -145,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CChatIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/w/$slug': {
+      id: '/w/$slug'
+      path: '/w/$slug'
+      fullPath: '/w/$slug'
+      preLoaderRoute: typeof WSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/vehicles/lookup': {
       id: '/api/vehicles/lookup'
       path: '/api/vehicles/lookup'
@@ -161,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   WorkshopRoute: WorkshopRoute,
   ApiChatRoute: ApiChatRoute,
   CChatIdRoute: CChatIdRoute,
+  WSlugRoute: WSlugRoute,
   ApiVehiclesLookupRoute: ApiVehiclesLookupRoute,
 }
 export const routeTree = rootRouteImport

@@ -8,7 +8,7 @@ const quoteSchema = z.object({
 });
 
 // Chat runs on a cheap model; the price estimate is drafted by a stronger model only when this tool fires.
-export function createSuggestWorkshopVisit(quoteModel: LanguageModel) {
+export function createSuggestWorkshopVisit(quoteModel: LanguageModel, effort: "low" | "medium" = "low", workshopPricing = "") {
   return tool({
     description: "Show the driver a card with what happens next: urgency, a rough indicative price range in SEK incl. 25% VAT (drafted by a pricing specialist), and a button to request a workshop visit. Call at most once per answer, only when the issue needs professional hands.",
     inputSchema: z.object({
@@ -19,11 +19,11 @@ export function createSuggestWorkshopVisit(quoteModel: LanguageModel) {
     execute: async ({ issue, urgency, context }, { abortSignal }) => {
       const result = streamText({
         model: quoteModel,
-        instructions: "You estimate typical Swedish independent-workshop prices. Give a realistic SEK range including 25% VAT (parts + labour) for the job. Never mention confidential vehicle details. The note is one plain, friendly sentence on what the price usually covers.",
+        instructions: "You estimate typical Swedish independent-workshop prices. Give a realistic SEK range including 25% VAT (parts + labour) for the job. Never mention confidential vehicle details. The note is one plain, friendly sentence on what the price usually covers." + (workshopPricing ? `\n\nThis workshop's own price list (incl. VAT). Base the range on it when the job matches:\n${workshopPricing}` : ""),
         prompt: `Job: ${issue}\nContext: ${context}`,
         output: Output.object({ schema: quoteSchema }),
         abortSignal: abortSignal ?? new AbortController().signal,
-        providerOptions: { openai: { forceReasoning: true, reasoningEffort: "low", store: false } },
+        providerOptions: { openai: { forceReasoning: true, reasoningEffort: effort, store: false } },
       });
       const q = await result.output;
       const low = Math.min(q.priceLowSek, q.priceHighSek), high = Math.max(q.priceLowSek, q.priceHighSek);
