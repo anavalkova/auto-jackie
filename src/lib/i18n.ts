@@ -71,8 +71,8 @@ const dict = {
       steps: [
         { t: "A driver vents", d: "2 a.m., strange noise, mild panic." },
         { t: "Jackie sorts it", d: "Likely cause, urgency, a rough price from your own list." },
-        { t: "It lands in your inbox", d: "Car, summary, phone number. No phone tag." },
-        { t: "You call, they book", d: "They already know the price. You just fix the car." },
+        { t: "It lands in your inbox", d: "Car, summary, phone number. You both know what to expect." },
+        { t: "The booking comes", d: " You just fix the car." },
       ],
       gains: ["Fewer phone interruptions", "Leads caught at 2 a.m.", "Quotes in your own prices", "English, Swedish and German"],
       stats: [
