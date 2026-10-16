@@ -17,6 +17,20 @@ import jackie from "@/assets/jackie.jpg";
 const fmt = (n: number) => n.toLocaleString("sv-SE");
 type ChatRow = { id: string; title: string; updated_at: string };
 
+function readGuestChat(): UIMessage[] {
+  try {
+    const raw = sessionStorage.getItem("autojackie.guestChat");
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch { return []; }
+}
+function readGuestVehicle(): Vehicle | null {
+  try {
+    const raw = sessionStorage.getItem("autojackie.guestVehicle");
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
 function titleFrom(messages: UIMessage[]) {
   const first = messages.find(m => m.role === "user")?.parts.find(p => p.type === "text");
   const t = first && "text" in first ? first.text.trim() : "New chat";
@@ -26,7 +40,7 @@ function titleFrom(messages: UIMessage[]) {
 export function JackieHome({ chatId }: { chatId?: string }) {
   const navigate = useNavigate();
   const { user, ready } = useSessionUser();
-  const [vehicle, setVehicle] = useState<Vehicle | null>(null);
+  const [vehicle, setVehicle] = useState<Vehicle | null>(() => (chatId ? null : readGuestVehicle()));
   const [garageOpen, setGarageOpen] = useState(false);
   const [signInOpen, setSignInOpen] = useState(false);
   const [chats, setChats] = useState<ChatRow[]>([]);
@@ -34,7 +48,7 @@ export function JackieHome({ chatId }: { chatId?: string }) {
   const [chatsError, setChatsError] = useState(false);
   const [newChatKey, setNewChatKey] = useState(0);
   const [info, setInfo] = useState<"workshop" | "about" | "privacy" | null>(null);
-  const [initial, setInitial] = useState<UIMessage[] | null>(chatId ? null : []);
+  const [initial, setInitial] = useState<UIMessage[] | null>(chatId ? null : readGuestChat());
   const [missing, setMissing] = useState(false);
 
   // Older versions kept the car in this browser; guests are now private by default.
@@ -55,6 +69,20 @@ export function JackieHome({ chatId }: { chatId?: string }) {
     });
   }, [chatId, ready, user?.id]);
 
+  // After a guest signs in, keep their conversation: save it to the account and open it.
+  useEffect(() => {
+    if (!ready || !user || chatId) return;
+    const draft = readGuestChat();
+    if (draft.length === 0) return;
+    void (async () => {
+      const payload = { messages: draft as unknown as Json, title: titleFrom(draft), updated_at: new Date().toISOString() };
+      const { data, error } = await supabase.from("chats").insert({ ...payload, user_id: user.id }).select("id").single();
+      if (error || !data) return console.error("Couldn't save chat", error);
+      try { sessionStorage.removeItem("autojackie.guestChat"); } catch { /* ignore */ }
+      navigate({ to: "/c/$chatId", params: { chatId: data.id }, replace: true });
+    })();
+  }, [ready, user?.id, chatId]);
+
   const loadChats = useCallback(async () => {
     if (!user) return;
     setChatsLoading(true);
@@ -72,9 +100,11 @@ export function JackieHome({ chatId }: { chatId?: string }) {
   const saveVehicle = async (v: Vehicle) => {
     setVehicle(v);
     if (user) await supabase.from("saved_vehicles").upsert({ user_id: user.id, vehicle: v as unknown as Json, updated_at: new Date().toISOString() });
+    else try { sessionStorage.setItem("autojackie.guestVehicle", JSON.stringify(v)); } catch { /* ignore */ }
   };
   const forgetVehicle = async () => {
     setVehicle(null);
+    try { sessionStorage.removeItem("autojackie.guestVehicle"); } catch { /* ignore */ }
     if (user) await supabase.from("saved_vehicles").delete().eq("user_id", user.id);
   };
 
