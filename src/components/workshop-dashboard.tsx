@@ -16,9 +16,9 @@ import type { Database } from "@/integrations/supabase/types";
 type Inquiry = Database["public"]["Tables"]["inquiries"]["Row"];
 type Status = Database["public"]["Enums"]["inquiry_status"];
 type Shop = { id: string; name: string; city: string; vat_number: string; role: string };
-type Tab = "insights" | "requests" | "booking" | "context" | "profile";
+type Tab = "overview" | "booking" | "context" | "profile";
 const TABS: { id: Tab; label: string }[] = [
-  { id: "insights", label: "Insights" }, { id: "requests", label: "Requests" }, { id: "booking", label: "Booking" }, { id: "context", label: "Jackie's context" }, { id: "profile", label: "Profile" },
+  { id: "overview", label: "Overview" }, { id: "booking", label: "Booking" }, { id: "context", label: "Jackie's context" }, { id: "profile", label: "Profile" },
 ];
 
 const STATUSES: { id: Status; label: string }[] = [
@@ -31,7 +31,7 @@ const mid = (i: Inquiry) => i.price_low_sek != null && i.price_high_sek != null 
 
 export function WorkshopDashboard() {
   const { user, ready, isAdmin } = useAccess();
-  const [tab, setTab] = useState<Tab>("insights");
+  const [tab, setTab] = useState<Tab>("overview");
   const [shop, setShop] = useState<Shop | null | undefined>(undefined);
   const [items, setItems] = useState<Inquiry[]>([]);
   const [filter, setFilter] = useState<Status | "open">("open");
@@ -61,6 +61,7 @@ export function WorkshopDashboard() {
       urgent: open.filter(i => i.urgency === "today" || i.urgency === "this week").length,
       pipeline: open.reduce((s, i) => s + mid(i), 0),
       booked: items.filter(i => i.status === "booked").length,
+      afterHours: items.length ? `${Math.round(items.filter(isAfterHours).length / items.length * 100)}%` : "0%",
     };
   }, [items]);
   const shown = items.filter(i => filter === "open" ? OPEN.includes(i.status) : i.status === filter);
@@ -87,7 +88,7 @@ export function WorkshopDashboard() {
   else if (!shop) body = <div className="ws-empty"><Wrench/><h1>Your workshop isn't set up yet</h1><p>AutoJackie's team sets up each workshop personally. If we've onboarded you, sign in with the email you gave us{user.email ? ` (you're signed in as ${user.email})` : ""}.</p>{isAdmin && <Button asChild><Link to="/admin">Go to operations</Link></Button>}</div>;
   else body = <>
     <div className="ws-title"><div><span className="eyebrow">WORKSHOP DASHBOARD</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div></div>
-    {(tab === "requests" || tab === "context") && <div className="ws-overview">
+    {(tab === "overview" || tab === "context") && <div className="ws-overview">
     {tab === "context" ? <WhyNote id="workshop-settings" title="71% of Swedish drivers choose on expertise, not price. Show them yours." summary="71% pick expertise over price. Your settings make that visible." stats={[
       { value: "3 800", text: "workshops in Sweden compete for the same customers.", source: { label: "Mekonomen", url: "https://www.mynewsdesk.com/se/mekonomen/pressreleases/var-tredje-bilaegare-har-kaent-sig-lurad-av-verkstaden-oekad-kunskap-om-godkaend-bilverkstad-kan-vara-en-loesning-3359302" } },
       { value: "71%", text: "of Swedish drivers pick a workshop for skilled staff, not low price.", source: { label: "OKQ8", url: "https://www.mynewsdesk.com/se/okq8/pressreleases/7-av-10-bilister-efterfraagar-kunnig-verkstadspersonal-visar-ny-undersoekning-922496" } },
@@ -102,14 +103,15 @@ export function WorkshopDashboard() {
       <Kpi icon={<Inbox/>} label="New requests" value={String(kpis.fresh)}/>
       <Kpi icon={<CalendarClock/>} label="Need you this week" value={String(kpis.urgent)}/>
       <Kpi icon={<TrendingUp/>} label="Open pipeline (est.)" value={kr(kpis.pipeline)} hint="Midpoint of Jackie's rough ranges, incl. VAT"/>
-      <Kpi icon={<Car/>} label="Booked" value={String(kpis.booked)}/>
+      <Kpi icon={<Moon/>} label="After hours" value={kpis.afterHours} hint="Requests that came in evenings or weekends, when you were closed"/>
     </div>
     </div>}
     <div className="ws-tabs" role="tablist" aria-label="Dashboard sections">{TABS.map(t => <Button key={t.id} variant={tab === t.id ? "default" : "outline"} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</Button>)}</div>
-    {tab === "insights" ? <InsightsView items={items}/>
-    : tab === "booking" ? <BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>
+    {tab === "booking" ? <BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>
     : tab === "context" ? <ContextSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>
     : tab === "profile" ? <ProfileView shop={shop} canEdit={shop.role === "owner"} onSaved={loadShop}/> : <>
+    <InsightsView items={items}/>
+    <h2 className="ws-h2">Requests</h2>
     <div className="ws-filters" role="tablist" aria-label="Filter requests">
       {([{ id: "open", label: "All open" }, ...STATUSES] as { id: Status | "open"; label: string }[]).map(s => <Button key={s.id} size="sm" variant={filter === s.id ? "default" : "outline"} role="tab" aria-selected={filter === s.id} onClick={() => setFilter(s.id)}>{s.label}</Button>)}
     </div>
@@ -174,29 +176,21 @@ function SaveRow({ canEdit, state }: { canEdit: boolean; state: string }) {
   return <div className="ws-span">{canEdit ? <Button type="submit">Save</Button> : <p className="history-note">Only the workshop owner can change these.</p>}{state && <p className="history-note" role="status">{state}</p>}</div>;
 }
 
+function isAfterHours(i: Inquiry) {
+  const d = new Date(i.created_at);
+  const wd = d.toLocaleString("en-GB", { timeZone: "Europe/Stockholm", weekday: "short" });
+  const h = Number(d.toLocaleString("en-GB", { timeZone: "Europe/Stockholm", hour: "2-digit", hour12: false }));
+  return wd === "Sat" || wd === "Sun" || h < 8 || h >= 17;
+}
+
 function InsightsView({ items }: { items: Inquiry[] }) {
   const n = items.length;
   const reached = items.filter(i => i.status !== "new").length;
   const quoted = items.filter(i => ["quoted", "booked"].includes(i.status) || (i.status === "closed" && i.booked_at)).length;
   const booked = items.filter(i => i.booked_at || i.status === "booked").length;
-  const bookedValue = items.filter(i => i.booked_at || i.status === "booked").reduce((s, i) => s + mid(i), 0);
-  const afterHours = items.filter(i => {
-    const d = new Date(i.created_at);
-    const wd = d.toLocaleString("en-GB", { timeZone: "Europe/Stockholm", weekday: "short" });
-    const h = Number(d.toLocaleString("en-GB", { timeZone: "Europe/Stockholm", hour: "2-digit", hour12: false }));
-    return wd === "Sat" || wd === "Sun" || h < 8 || h >= 17;
-  }).length;
-  const pct = (x: number) => n ? `${Math.round((x / n) * 100)}%` : "0%";
   const top = Object.entries(items.reduce<Record<string, number>>((m, i) => { m[i.issue] = (m[i.issue] ?? 0) + 1; return m; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 5);
   const funnel = [{ label: "Received", v: n }, { label: "Contacted", v: reached }, { label: "Quoted", v: quoted }, { label: "Booked", v: booked }];
   return <div className="ws-section">
-    <p className="ws-section-intro">Your business in one picture. Leads, bookings and value in one place, not spread across your calendar, phone and accounting.</p>
-    <div className="ws-big">
-      <div><span className="eyebrow">REQUESTS</span><strong>{n}</strong><small>All time, via Jackie</small></div>
-      <div><span className="eyebrow">BOOKED</span><strong>{pct(booked)}</strong><small>{booked} of {n} requests</small></div>
-      <div><span className="eyebrow">BOOKED VALUE (EST.)</span><strong>{kr(bookedValue)}</strong><small>Midpoint of Jackie's ranges</small></div>
-      <div><span className="eyebrow">AFTER HOURS</span><strong>{pct(afterHours)}</strong><small>Came in evenings or weekends</small></div>
-    </div>
     <div className="ws-grid2">
       <section className="ws-card"><h2>From request to booking</h2><div className="ws-funnel">{funnel.map(f => <div key={f.label} className="ws-funnel-row"><span>{f.label}</span><span className="ws-bar"><span style={{ width: n ? `${(f.v / n) * 100}%` : 0 }}/></span><strong>{f.v}</strong></div>)}</div></section>
       <section className="ws-card"><h2>What drivers ask about</h2>{top.length === 0 ? <p className="history-note">No requests yet.</p> : <table className="ws-table"><tbody>{top.map(([k, v]) => <tr key={k}><td>{k}</td><td><strong>{v}</strong></td></tr>)}</tbody></table>}</section>
