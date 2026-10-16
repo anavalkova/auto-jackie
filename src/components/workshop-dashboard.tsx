@@ -214,18 +214,13 @@ function InsightsView({ items }: { items: Inquiry[] }) {
 
 const WEEKDAYS = [{ d: 1, l: "Mon" }, { d: 2, l: "Tue" }, { d: 3, l: "Wed" }, { d: 4, l: "Thu" }, { d: 5, l: "Fri" }, { d: 6, l: "Sat" }, { d: 0, l: "Sun" }];
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 7);
-const TYPICAL: Duration[] = [
-  { job: "Annual service", minutes: 120 }, { job: "Brake pads & discs", minutes: 90 }, { job: "Tyre change", minutes: 30 },
-  { job: "Diagnostics (engine light)", minutes: 60 }, { job: "Timing belt", minutes: 300 }, { job: "Battery replacement", minutes: 30 }, { job: "AC service", minutes: 60 },
-];
 
 function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit: boolean }) {
   const { s, setS, save, state } = useSettings(workshopId);
   if (!s) return <p className="history-note" role="status">Loading…</p>;
   const durations = s.job_durations as Duration[];
-  const setDur = (d: Duration[]) => setS({ ...s, job_durations: d });
   const flip = (arr: number[], v: number) => arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v].sort((a, b) => a - b);
-  return <form className="ws-section" onSubmit={e => { e.preventDefault(); void save({ booking_days: s.booking_days, slot_hours: s.slot_hours, min_notice_days: s.min_notice_days, job_durations: durations.filter(d => d.job.trim()) }); }}>
+  return <form className="ws-section" onSubmit={e => { e.preventDefault(); void save({ booking_days: s.booking_days, slot_hours: s.slot_hours, min_notice_days: s.min_notice_days }); }}>
     <p className="ws-section-intro">Decide when drivers can book you and how long each job takes. Drivers only see the times you open here.</p>
     <fieldset disabled={!canEdit} className="ws-grid2" style={{ border: 0, padding: 0, margin: 0 }}>
       <section className="ws-card"><h2>When drivers can book</h2>
@@ -235,10 +230,8 @@ function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
         <select id="b-notice" className="native-select" value={s.min_notice_days} onChange={e => setS({ ...s, min_notice_days: Number(e.target.value) })}>{[1, 2, 3, 5, 7].map(d => <option key={d} value={d}>{d === 1 ? "Next day" : `${d} days ahead`}</option>)}</select>
       </section>
       <section className="ws-card"><h2>How long jobs take</h2>
-        <table className="ws-table"><thead><tr><th>Job</th><th>Minutes</th><th/></tr></thead><tbody>
-          {durations.map((d, i) => <tr key={i}><td><Input aria-label="Job" maxLength={80} value={d.job} onChange={e => setDur(durations.map((x, j) => j === i ? { ...x, job: e.target.value } : x))}/></td><td><Input aria-label="Minutes" type="number" min={5} max={2880} step={5} value={d.minutes} onChange={e => setDur(durations.map((x, j) => j === i ? { ...x, minutes: Number(e.target.value) } : x))}/></td><td><Button type="button" size="sm" variant="ghost" aria-label="Remove" onClick={() => setDur(durations.filter((_, j) => j !== i))}>×</Button></td></tr>)}
-        </tbody></table>
-        <div className="ws-chips"><Button type="button" size="sm" variant="outline" onClick={() => setDur([...durations, { job: "", minutes: 60 }])}>Add job</Button><Button type="button" size="sm" variant="outline" onClick={() => setDur(TYPICAL)}>Not sure? Use typical times</Button></div>
+        <table className="ws-table"><tbody>{durations.map((d, i) => <tr key={i}><td>{d.job}</td><td><strong>{d.minutes} min</strong></td></tr>)}</tbody></table>
+        <p className="history-note">Job times are set per service in the Pricing engine tab.</p>
       </section>
     </fieldset>
     <SaveRow canEdit={canEdit} state={state}/>
