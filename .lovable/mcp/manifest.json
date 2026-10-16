@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "sdk_version": "3.1.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://tmrtsgorkuhkbxeqgrtj.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "autojackie",
+      "version": "0.1.0",
+      "title": "AutoJackie"
+    },
+    "tools": [
+      {
+        "name": "list_my_chats",
+        "title": "List my chats with Jackie",
+        "description": "List the signed-in driver's saved conversations with Jackie, newest first.",
+        "annotations": {
+          "readOnlyHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "description": "How many chats to return (default 20).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_my_car",
+        "title": "Get my saved car",
+        "description": "Show the signed-in driver's saved car. Cars added by licence plate only show the plate; registry details stay private.",
+        "annotations": {
+          "readOnlyHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_visit_requests",
+        "title": "List my workshop visit requests",
+        "description": "List workshop visits the signed-in driver has requested, with status, price estimate and booked time.",
+        "annotations": {
+          "readOnlyHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_workshop_requests",
+        "title": "List my workshop's requests",
+        "description": "For workshop staff: list incoming driver requests for the workshop you belong to, optionally filtered by status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "status": {
+              "description": "Only requests with this status.",
+              "type": "string",
+              "enum": [
+                "new",
+                "contacted",
+                "quoted",
+                "booked",
+                "closed"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
