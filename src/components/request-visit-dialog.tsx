@@ -24,6 +24,8 @@ export function RequestVisitDialog({ card, vehicleLabel, onClose }: { card: Visi
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
+  const [issue, setIssue] = useState("");
+  const direct = card !== null && !card.issue;
   const [email, setEmail] = useState("");
   const [channel, setChannel] = useState<Channel>("sms");
   const [picks, setPicks] = useState<string[]>([]);
@@ -34,7 +36,7 @@ export function RequestVisitDialog({ card, vehicleLabel, onClose }: { card: Visi
 
   useEffect(() => {
     if (!card) return;
-    setState("idle"); setPicks([]);
+    setState("idle"); setPicks([]); setIssue("");
     if (user?.email) setEmail(e => e || user.email || "");
     supabase.from("workshops").select("id,name,city").order("name").then(({ data }) => { setShops(data ?? []); if (data?.[0]) { const first = data[0].id; setShopId(s => s || first); }; });
   }, [card]);
@@ -50,10 +52,11 @@ export function RequestVisitDialog({ card, vehicleLabel, onClose }: { card: Visi
   }, [shopId]);
 
   const send = async () => {
-    if (!card || !user || !shopId || picks.length === 0) return;
+    const job = (direct ? issue : card?.issue ?? "").trim();
+    if (!card || !user || !shopId || picks.length === 0 || !job) return;
     setState("sending");
     const { error } = await supabase.from("inquiries").insert({
-      workshop_id: shopId, driver_id: user.id, issue: card.issue.slice(0, 200), urgency: card.urgency ?? "soon",
+      workshop_id: shopId, driver_id: user.id, issue: job.slice(0, 200), urgency: card.urgency ?? "soon",
       price_low_sek: card.priceLowSek ?? null, price_high_sek: card.priceHighSek ?? null, note: (card.note ?? "").slice(0, 1000),
       vehicle_label: vehicleLabel.slice(0, 120), message: message.trim(), contact_name: name.trim(), contact_phone: phone.trim(),
       preferred_slots: [...picks].sort(), contact_channel: channel, contact_email: email.trim(),
@@ -66,7 +69,7 @@ export function RequestVisitDialog({ card, vehicleLabel, onClose }: { card: Visi
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{state === "sent" ? "Request sent. You're in good hands" : "Book a workshop visit"}</DialogTitle>
-          <DialogDescription>{state === "sent" ? `The workshop picks one of your times and confirms by ${CHANNELS.find(c => c.id === channel)?.label}.` : `They'll see “${card?.issue ?? ""}”, Jackie's rough price and your contact details. Nothing else from your chat.`}</DialogDescription>
+          <DialogDescription>{state === "sent" ? `The workshop picks one of your times and confirms by ${CHANNELS.find(c => c.id === channel)?.label}.` : direct ? "Pick a workshop and a time. Sign in needed so the workshop can reach you." : `They'll see “${card?.issue ?? ""}”, Jackie's rough price and your contact details. Nothing else from your chat.`}</DialogDescription>
         </DialogHeader>
         {state === "sent" ? <Button onClick={onClose}>Done</Button>
           : !ready ? null
@@ -75,6 +78,8 @@ export function RequestVisitDialog({ card, vehicleLabel, onClose }: { card: Visi
           : <form className="visit-form" onSubmit={e => { e.preventDefault(); void send(); }}>
             <div><Label htmlFor="v-shop">Workshop</Label>
               <select id="v-shop" className="native-select" value={shopId} onChange={e => setShopId(e.target.value)}>{shops.map(s => <option key={s.id} value={s.id}>{s.name}{s.city ? ` · ${s.city}` : ""}</option>)}</select></div>
+            {direct && <div><Label htmlFor="v-issue">What needs doing?</Label><Input id="v-issue" required minLength={3} maxLength={200} list="v-jobs" placeholder="E.g. Annual service, tyre change" value={issue} onChange={e => setIssue(e.target.value)}/>
+              <datalist id="v-jobs">{["Annual service", "Tyre change", "Brake check", "Diagnostics (engine light)", "AC service", "Battery replacement"].map(j => <option key={j} value={j}/>)}</datalist></div>}
             <div><Label htmlFor="v-name">Your name</Label><Input id="v-name" required maxLength={80} value={name} onChange={e => setName(e.target.value)}/></div>
             <div><Label htmlFor="v-phone">Phone</Label><Input id="v-phone" required type="tel" minLength={5} maxLength={30} placeholder="070 123 45 67" value={phone} onChange={e => setPhone(e.target.value)}/></div>
             <div className="ws-span"><Label>When can you drop the car off? Pick up to {MAX_PICKS}</Label>
