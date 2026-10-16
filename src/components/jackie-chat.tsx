@@ -34,6 +34,15 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
   const send = (text: string) => { if (!text.trim() || busy) return; clearError(); sendMessage({ text }); setInput(""); };
   useEffect(() => { if (pending) { send(pending); onPendingSent(); } }, [pending]);
 
+  // Guests keep their chat only in memory; stash it so a sign-in redirect doesn't wipe it.
+  useEffect(() => {
+    if (chatId) return;
+    try {
+      if (messages.length === 0) sessionStorage.removeItem("autojackie.guestChat");
+      else sessionStorage.setItem("autojackie.guestChat", JSON.stringify(messages));
+    } catch { /* ignore */ }
+  }, [messages, chatId]);
+
   return <div className="chat-shell">
     {messages.length === 0 ? <div className="chat-empty">
       <h1>Confess your car's sins.</h1>
