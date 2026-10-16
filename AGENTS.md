@@ -15,3 +15,4 @@
 - Define AutoJackie visual styling in src/styles.css and use shared design-system controls so future screens inherit the same brand.
 - The shared chat screen loads saved conversations into an always-visible sidebar and refreshes it after completed turns; keep history navigation in sync with saved chats.
 - Jackie tools live in src/lib/ai/*.server.ts and are registered in /api/chat; large reference indexes (OBD codes, Tesla manual contents) are bundled JSON in src/lib/vehicles-data, page bodies fetched live — keeps the worker small and data current.
+- Workshops are tenants: workshops (publicly listable name/city), workshop_members (owner/staff, owner added by trigger), inquiries (driver-sent cards); access via security-definer workshop_role_of() in RLS so tenant data never crosses workshops. Dashboard lives at /workshop.
