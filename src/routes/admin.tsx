@@ -61,7 +61,7 @@ function AdminPage() {
   return <div className="app-frame">
     <header className="site-header">
       <Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span><span className="brand-sub">operations</span></Link>
-      <nav><Button variant="ghost" asChild><Link to="/workshop">Workshop view</Link></Button></nav>
+      <nav><Button variant="ghost" asChild><Link to="/workshop">Workshop view</Link></Button>{user && <Button variant="ghost" onClick={async () => { await supabase.auth.signOut(); window.location.assign("/workshop"); }}>Sign out</Button>}</nav>
     </header>
     <main className="ws-main">
       {!ready ? <p className="history-note" role="status">Loading…</p>

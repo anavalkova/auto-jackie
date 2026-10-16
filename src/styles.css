@@ -284,3 +284,4 @@
 .ws-settings fieldset { border: 0; padding: 0; margin: 0; }
 .ws-textarea { height: 140px; padding: 8px 10px; resize: vertical; }
 @media (max-width: 900px) { .admin-form, .admin-row { grid-template-columns: 1fr; } }
+.signin-divider { text-align: center; font-size: 12px; color: var(--muted-foreground); margin: 6px 0 0; }
