@@ -70,7 +70,6 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId }: { card
   const selDate = day ? fromKey(day) : undefined;
   const firstDate = days[0] ? fromKey(days[0].key) : undefined;
   const lastDate = days.length ? fromKey(days[days.length - 1]!.key) : undefined;
-  const fmtDay = (d: Date) => d.toLocaleDateString(locale, { timeZone: "Europe/Stockholm", weekday: "short", day: "numeric", month: "short" });
   const fmtTime = (d: Date) => d.toLocaleTimeString(locale, { timeZone: "Europe/Stockholm", hour: "2-digit", minute: "2-digit" });
   const job = (direct ? (service === OTHER ? issue : service) : card.issue).trim();
   const suggested = !direct && services.length ? (card.service && services.some(x => x.task === card.service) ? card.service : matchService(card.issue, services)) : "";
@@ -114,8 +113,8 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId }: { card
         {step === 2 && <div className="visit-form">
           {days.length === 0 ? <p className="history-note">{b.noDays}</p> : <>
             <div><Label className="field-tip"><Tip text={b.hTimes}/>{b.day}</Label>
-              <Calendar mode="single" className="booking-cal" weekStartsOn={1} selected={selDate} defaultMonth={selDate}
-                startMonth={firstDate} endMonth={lastDate}
+              <Calendar mode="single" className="booking-cal" weekStartsOn={1} {...(selDate ? { selected: selDate, defaultMonth: selDate } : {})}
+                {...(firstDate ? { startMonth: firstDate } : {})} {...(lastDate ? { endMonth: lastDate } : {})}
                 disabled={d => !dayKeys.has(keyOf(d))}
                 onSelect={d => { if (d) { setDay(keyOf(d)); setPicks([]); } }}/></div>
             <div><Label>{b.time}</Label>
