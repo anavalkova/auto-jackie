@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SignInDialog } from "@/components/sign-in-dialog";
 import { useSessionUser } from "@/hooks/use-session-user";
+import { WhyNote } from "@/components/why-note";
 import { supabase } from "@/integrations/supabase/client";
 
 export type VisitCard = { issue: string; urgency?: string | undefined; priceLowSek?: number | undefined; priceHighSek?: number | undefined; note?: string | undefined };
@@ -56,6 +57,9 @@ export function RequestVisitDialog({ card, vehicleLabel, onClose }: { card: Visi
             <div><Label htmlFor="v-name">Your name</Label><Input id="v-name" required maxLength={80} value={name} onChange={e => setName(e.target.value)}/></div>
             <div><Label htmlFor="v-phone">Phone</Label><Input id="v-phone" required type="tel" minLength={5} maxLength={30} placeholder="070 123 45 67" value={phone} onChange={e => setPhone(e.target.value)}/></div>
             <div><Label htmlFor="v-msg">Anything else? (optional)</Label><Textarea id="v-msg" maxLength={1000} value={message} onChange={e => setMessage(e.target.value)} placeholder="When suits you, how the car feels…"/></div>
+            <WhyNote id="visit" title="No phone queue, no explaining the noise twice." stats={[
+              { value: "1 in 5", text: "calls to auto service businesses go unanswered — your request arrives in writing instead, with Jackie's diagnosis and rough price attached.", source: { label: "Marchex", url: "https://www.marchex.com/up-to-21-percent-of-automotive-service-customer-calls-go-unanswered-creating-significant-revenue-leakage/" } },
+            ]}/>
             {state === "error" && <p className="chat-error" role="alert">Couldn't send it. Please try again.</p>}
             <Button type="submit" disabled={state === "sending"}>{state === "sending" ? "Sending…" : "Send request"}</Button>
           </form>}
