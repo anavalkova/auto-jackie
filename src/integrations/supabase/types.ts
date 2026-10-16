@@ -339,6 +339,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      workshop_booking_rules: { Args: { _workshop: string }; Returns: Json }
       workshop_role_of: {
         Args: { _user: string; _workshop: string }
         Returns: Database["public"]["Enums"]["workshop_role"]
