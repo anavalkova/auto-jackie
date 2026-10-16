@@ -165,18 +165,24 @@ export function WorkshopDashboard() {
         <SheetHeader><SheetTitle>{selected.issue}</SheetTitle><SheetDescription>Received {when(selected.created_at)} · get it looked at: {selected.urgency}</SheetDescription></SheetHeader>
         <div className="ws-detail">
           <section><span className="eyebrow">THE VISIT</span>
-            <table className="ws-table"><tbody>
-              <tr><td>Customer</td><td><strong>{selected.contact_name}</strong></td></tr>
-              {selected.vehicle_label && <tr><td>Car</td><td>{selected.vehicle_label}</td></tr>}
-              <tr><td>Service</td><td>{selected.service ?? OTHER}</td></tr>
-              <tr><td>Wants confirmation by</td><td>{selected.contact_channel === "email" ? `email (${selected.contact_email ?? "not given"})` : selected.contact_channel === "whatsapp" ? "WhatsApp" : "SMS"}</td></tr>
-            </tbody></table>
-            {selected.booked_at ? <p><strong>{slotLabel(selected.booked_at)}</strong> <Button variant="link" size="sm" onClick={() => void book(selected, null)}>Change</Button></p>
-              : selected.preferred_slots.length === 0 ? <p className="history-note">No time chosen yet.</p>
-              : <div className="ws-filters">{selected.preferred_slots.map(t => <Button key={t} size="sm" variant="outline" onClick={() => void book(selected, t)}>Book {slotLabel(t)}</Button>)}</div>}
-            {selected.message && <p className="history-note">The driver wrote: “{selected.message}”</p>}
+            <dl className="ws-dl">
+              {selected.vehicle_label && <><dt>Car</dt><dd>{selected.vehicle_label}</dd></>}
+              <dt>Service</dt><dd>{selected.service ?? OTHER}</dd>
+              <dt>Time</dt><dd>{selected.booked_at ? <><strong>{slotLabel(selected.booked_at)}</strong> <Button variant="link" size="sm" onClick={() => void book(selected, null)}>Change</Button></>
+                : selected.preferred_slots.length === 0 ? "No time chosen yet"
+                : <div className="ws-filters">{selected.preferred_slots.map(t => <Button key={t} size="sm" variant="outline" onClick={() => void book(selected, t)}>Book {slotLabel(t)}</Button>)}</div>}</dd>
+            </dl>
+            {selected.message && <p className="ws-quote-note">“{selected.message}”</p>}
           </section>
-          <QuoteSection key={selected.id} item={selected} shopName={shop?.name ?? ""} onSaved={d => { setItems(xs => xs.map(x => x.id === d.id ? d : x)); setSelected(d); }}/>
+          <QuoteSection item={selected}/>
+          <section><span className="eyebrow">CUSTOMER</span>
+            <dl className="ws-dl">
+              <dt>Name</dt><dd>{selected.contact_name}</dd>
+              <dt>Phone</dt><dd>{selected.contact_phone}</dd>
+              {selected.contact_email && <><dt>Email</dt><dd>{selected.contact_email}</dd></>}
+              <dt>Prefers</dt><dd>{selected.contact_channel === "email" ? "Email" : selected.contact_channel === "whatsapp" ? "WhatsApp" : "SMS"}</dd>
+            </dl>
+          </section>
         </div>
       </>}</SheetContent>
     </Sheet>
@@ -199,37 +205,13 @@ function Collapsible({ title, tip, children, defaultOpen = true }: { title: stri
   return <details className="ws-card ws-collapsible" open={defaultOpen}><summary><h2>{title}</h2>{tip && <span onClick={e => e.preventDefault()}><Tip><p>{tip}</p></Tip></span>}</summary>{children}</details>;
 }
 
-function QuoteSection({ item, shopName, onSaved }: { item: Inquiry; shopName: string; onSaved: (d: Inquiry) => void }) {
-  const [low, setLow] = useState(item.quote_low_sek ?? item.price_low_sek ?? 0);
-  const [high, setHigh] = useState(item.quote_high_sek ?? item.price_high_sek ?? 0);
-  const [adjust, setAdjust] = useState(false);
-  const [msg, setMsg] = useState("");
+function QuoteSection({ item }: { item: Inquiry }) {
   const jackie = item.price_low_sek != null && item.price_high_sek != null ? `${kr(item.price_low_sek)} to ${kr(item.price_high_sek)}` : null;
-  const yours = item.quote_low_sek != null && item.quote_high_sek != null ? `${kr(item.quote_low_sek)} to ${kr(item.quote_high_sek)}` : null;
-  const saveQuote = async () => {
-    const lo = Math.min(low, high), hi = Math.max(low, high);
-    const { data, error } = await supabase.from("inquiries").update({ quote_low_sek: lo, quote_high_sek: hi, status: item.status === "new" || item.status === "contacted" ? "quoted" : item.status }).eq("id", item.id).select("*").single();
-    setMsg(error || !data ? "Couldn't save. Please try again." : "Saved. Now let the driver know.");
-    if (data) onSaved(data);
-  };
-  const price = yours ?? jackie;
-  const text = `Hi ${item.contact_name}, this is ${shopName} about your request "${item.issue}". ${price ? `${yours ? "Our price" : "Jackie's rough estimate"} is ${price} incl. VAT.` : ""}${yours && jackie && yours !== jackie ? ` (Jackie estimated ${jackie}.)` : ""} Does that work for you?`;
-  const phone = item.contact_phone.replace(/[^\d+]/g, "");
-  const intl = phone.startsWith("+") ? phone.slice(1) : phone.startsWith("0") ? `46${phone.slice(1)}` : phone;
-  return <section><span className="eyebrow">THE QUOTE</span>
-    <table className="ws-table"><tbody>
-      <tr><td>Jackie quoted the driver</td><td><strong>{jackie ? `${jackie} incl. VAT` : "No estimate (direct booking)"}</strong></td></tr>
-      {yours && <tr><td>Your price</td><td><strong>{yours} incl. VAT</strong></td></tr>}
-    </tbody></table>
-    {item.note && <p className="history-note">Jackie told the driver: “{item.note}”</p>}
-    {adjust ? <div className="ws-chips"><Input aria-label="From" type="number" min={0} max={500000} value={low} onChange={e => setLow(Number(e.target.value))} style={{ width: 110 }}/><span>to</span><Input aria-label="To" type="number" min={0} max={500000} value={high} onChange={e => setHigh(Number(e.target.value))} style={{ width: 110 }}/><Button type="button" size="sm" onClick={() => void saveQuote()}>Save price</Button><Button type="button" size="sm" variant="ghost" onClick={() => setAdjust(false)}>Cancel</Button>{msg && <p className="history-note" role="status">{msg}</p>}</div>
-      : <Button type="button" variant="link" size="sm" onClick={() => setAdjust(true)}>Adjust the price</Button>}
-    <div className="ws-chips">
-      <Button size="sm" variant="outline" asChild><a href={`sms:${phone}?body=${encodeURIComponent(text)}`}>SMS</a></Button>
-      <Button size="sm" variant="outline" asChild><a href={`https://wa.me/${intl}?text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer">WhatsApp</a></Button>
-      {item.contact_email && <Button size="sm" variant="outline" asChild><a href={`mailto:${item.contact_email}?subject=${encodeURIComponent(`Your quote: ${item.issue}`)}&body=${encodeURIComponent(text)}`}>Email</a></Button>}
-      <Button size="sm" variant="outline" asChild><a href={`tel:${phone}`}><Phone/> Call</a></Button>
-    </div>
+  return <section><span className="eyebrow">WHAT JACKIE TOLD THE DRIVER</span>
+    {jackie ? <div className="ws-quote">
+      <strong className="ws-quote-price">{jackie}</strong><span className="history-note">Rough estimate incl. VAT</span>
+      {item.note && <p className="ws-quote-note">“{item.note}”</p>}
+    </div> : <p className="history-note">No estimate. The driver booked directly.</p>}
   </section>;
 }
 
