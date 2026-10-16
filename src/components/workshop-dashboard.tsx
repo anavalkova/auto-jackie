@@ -5,11 +5,12 @@ import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 import { ensureOther, OTHER } from "@/lib/services";
 import { TIERS, TIER_INFO, DEFAULT_TIERS, type Tier } from "@/lib/ai-tiers";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BadgeCheck, CalendarClock, Car, Clock, Inbox, MessageCircle, Moon, Phone, ShieldCheck, Sparkles, TrendingUp, Wrench } from "lucide-react";
+import { BadgeCheck, CircleHelp, CalendarClock, Car, Clock, Inbox, MessageCircle, Moon, Phone, ShieldCheck, Sparkles, TrendingUp, Wrench } from "lucide-react";
 import jackieImg from "@/assets/jackie.jpg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SignInDialog } from "@/components/sign-in-dialog";
 import { WhyNote, type WhyStat } from "@/components/why-note";
@@ -194,8 +195,8 @@ function BookingTab({ requests, settings }: { requests: React.ReactNode; setting
   return <div className="ws-section"><Stepper steps={BOOKING_STEPS} step={step} setStep={setStep}/>{step === 0 ? <Collapsible title="Requests"><div className="ws-section">{requests}</div></Collapsible> : settings}</div>;
 }
 
-function Collapsible({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
-  return <details className="ws-card ws-collapsible" open={defaultOpen}><summary><h2>{title}</h2></summary>{children}</details>;
+function Collapsible({ title, tip, children, defaultOpen = true }: { title: string; tip?: string; children: React.ReactNode; defaultOpen?: boolean }) {
+  return <details className="ws-card ws-collapsible" open={defaultOpen}><summary><h2>{title}</h2>{tip && <span onClick={e => e.preventDefault()}><Tip><p>{tip}</p></Tip></span>}</summary>{children}</details>;
 }
 
 function QuoteSection({ item, shopName, onSaved }: { item: Inquiry; shopName: string; onSaved: (d: Inquiry) => void }) {
@@ -229,7 +230,6 @@ function QuoteSection({ item, shopName, onSaved }: { item: Inquiry; shopName: st
       {item.contact_email && <Button size="sm" variant="outline" asChild><a href={`mailto:${item.contact_email}?subject=${encodeURIComponent(`Your quote: ${item.issue}`)}&body=${encodeURIComponent(text)}`}>Email</a></Button>}
       <Button size="sm" variant="outline" asChild><a href={`tel:${phone}`}><Phone/> Call</a></Button>
     </div>
-    <p className="history-note">Opens your phone or email with a ready message. The driver prefers {item.contact_channel === "email" ? "email" : item.contact_channel === "whatsapp" ? "WhatsApp" : "SMS"}.</p>
   </section>;
 }
 
@@ -298,21 +298,18 @@ function InsightsView({ items, workshopId, canEdit }: { items: Inquiry[]; worksh
   return <div className="ws-section">
     <h2 className="ws-h2">Insights</h2>
     <div className="ws-insights">
-      <Collapsible title="From request to booking"><div className="ws-funnel">{funnel.map(f => <div key={f.label} className="ws-funnel-row"><span>{f.label}</span><span className="ws-bar"><span style={{ width: n ? `${(f.v / n) * 100}%` : 0 }}/></span><strong>{f.v}</strong></div>)}</div></Collapsible>
-      <Collapsible title="How drivers want to be reached">
-        <p className="ws-hint"><span>The channel each driver picked for confirmation. Automatic messages come in phase 2.</span></p>
+      <Collapsible title="From request to booking" tip="How many requests moved from new to quoted to booked."><div className="ws-funnel">{funnel.map(f => <div key={f.label} className="ws-funnel-row"><span>{f.label}</span><span className="ws-bar"><span style={{ width: n ? `${(f.v / n) * 100}%` : 0 }}/></span><strong>{f.v}</strong></div>)}</div></Collapsible>
+      <Collapsible title="How drivers want to be reached" tip="The channel each driver picked for confirmation. Automatic messages come in phase 2.">
         <div className="ws-funnel">{channels.map(c => <div key={c.label} className="ws-funnel-row"><span>{c.label}</span><span className="ws-bar"><span style={{ width: n ? `${(c.v / n) * 100}%` : 0 }}/></span><strong>{c.v}</strong></div>)}</div>
       </Collapsible>
-      <Collapsible title="Your services">
-        <p className="ws-hint"><span>Requests matched to your Pricing engine. Value = bookings × your price.</span></p>
+      <Collapsible title="Your services" tip="Requests matched to your Pricing engine. Value = bookings × your price.">
         <table className="ws-table"><thead><tr><th>Service</th><th>Requests</th><th>Booked</th><th>Value</th></tr></thead><tbody>
           {rows.slice(sp * PAGE, (sp + 1) * PAGE).map(r => <tr key={r.task}><td>{r.task}</td><td><strong>{r.req}</strong></td><td>{r.booked}</td><td>{r.value ? kr(r.value) : "–"}</td></tr>)}
           <tr><td>Other <small className="history-note">(you price these)</small></td><td><strong>{otherCount}</strong></td><td>{items.filter(i => (!i.service || i.service === OTHER) && isBooked(i)).length}</td><td>–</td></tr>
         </tbody></table>
         {rows.length > PAGE && <Pager page={sp} pages={Math.ceil(rows.length / PAGE)} onPage={setSp}/>}
       </Collapsible>
-      <Collapsible title="Drivers asked, you don't offer yet">
-        <p className="ws-hint"><span>Requests that landed in Other. Add the common ones to your Pricing engine so Jackie can quote them next time.</span></p>
+      <Collapsible title="Drivers asked, you don't offer yet" tip="Requests that landed in Other. Add the common ones to your Pricing engine so Jackie can quote them next time.">
         {missing.length === 0 ? <p className="history-note">Nothing yet. Every request matched one of your services.</p>
           : <table className="ws-table"><tbody>{missing.slice(mp * PAGE, (mp + 1) * PAGE).map(([k, v]) => <tr key={k}><td>{k}</td><td><strong>{v}</strong></td><td style={{ textAlign: "right" }}>{added.includes(k) ? <span className="history-note">Added. Set its price in Pricing engine.</span> : canEdit && <Button type="button" size="sm" variant="outline" onClick={() => void addService(k)}>Add to Pricing engine</Button>}</td></tr>)}</tbody></table>}
         {missing.length > PAGE && <Pager page={mp} pages={Math.ceil(missing.length / PAGE)} onPage={setMp}/>}
@@ -330,17 +327,15 @@ function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
   const durations = s.job_durations as Duration[];
   const flip = (arr: number[], v: number) => arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v].sort((a, b) => a - b);
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); void save({ booking_days: s.booking_days, slot_hours: s.slot_hours, min_notice_days: s.min_notice_days }); }}>
-    <p className="ws-section-intro">Decide when drivers can book you and how long each job takes. Drivers only see the times you open here.</p>
     <fieldset disabled={!canEdit} className="ws-grid2" style={{ border: 0, padding: 0, margin: 0 }}>
-      <section className="ws-card"><h2>When drivers can book</h2>
+      <section className="ws-card"><h2 className="ws-label-row">When drivers can book<Tip><p>Decide when drivers can book you. Drivers only see the times you open here.</p></Tip></h2>
         <Label>Days</Label><div className="ws-chips">{WEEKDAYS.map(w => <Button key={w.d} type="button" size="sm" variant={s.booking_days.includes(w.d) ? "default" : "outline"} onClick={() => setS({ ...s, booking_days: flip(s.booking_days, w.d) })}>{w.l}</Button>)}</div>
         <Label>Drop-off times</Label><div className="ws-chips">{HOURS.map(h => <Button key={h} type="button" size="sm" variant={s.slot_hours.includes(h) ? "default" : "outline"} onClick={() => setS({ ...s, slot_hours: flip(s.slot_hours, h) })}>{String(h).padStart(2, "0")}:00</Button>)}</div>
         <Label htmlFor="b-notice">Earliest booking</Label>
         <select id="b-notice" className="native-select" value={s.min_notice_days} onChange={e => setS({ ...s, min_notice_days: Number(e.target.value) })}>{[1, 2, 3, 5, 7].map(d => <option key={d} value={d}>{d === 1 ? "Next day" : `${d} days ahead`}</option>)}</select>
       </section>
-      <section className="ws-card"><h2>How long jobs take</h2>
+      <section className="ws-card"><h2 className="ws-label-row">How long jobs take<Tip><p>Job times are set per service in the Pricing engine tab.</p></Tip></h2>
         <table className="ws-table"><tbody>{durations.map((d, i) => <tr key={i}><td>{d.job}</td><td><strong>{d.minutes} min</strong></td></tr>)}</tbody></table>
-        <p className="history-note">Job times are set per service in the Pricing engine tab.</p>
       </section>
     </fieldset>
     <SaveRow canEdit={canEdit} state={state}/>
@@ -366,8 +361,13 @@ function WizardActions({ canEdit, last, next }: { canEdit: boolean; last: boolea
   return <div className="ws-chips">{canEdit ? <Button type="submit" variant={last ? "default" : "outline"}>Save this step</Button> : <span className="history-note">Only the workshop owner can change these.</span>}{!last && <Button type="button" onClick={next}>Next</Button>}</div>;
 }
 
+function Tip({ children, label = "What is this?" }: { children: React.ReactNode; label?: string }) {
+  return <Popover><PopoverTrigger asChild><button type="button" className="ws-tip" aria-label={label}><CircleHelp/></button></PopoverTrigger>
+    <PopoverContent className="ws-tip-body" side="top" align="start">{children}</PopoverContent></Popover>;
+}
+
 function Hint({ controls, shows }: { controls: string; shows: string }) {
-  return <p className="ws-hint"><span><b>Controls:</b> {controls}</span><span><b>Shows:</b> {shows}</span></p>;
+  return <Tip><p><b>Controls:</b> {controls}</p><p><b>Shows:</b> {shows}</p></Tip>;
 }
 
 function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit: boolean }) {
@@ -380,7 +380,7 @@ function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
   return <form className="ws-section ws-wizard" onSubmit={e => { e.preventDefault(); void save({ ai_chat_tier: s.ai_chat_tier, ai_quote_tier: s.ai_quote_tier, services: (s.services as string[]).map(x => x.trim()).filter(Boolean), specialties: s.specialties, jackie_context: s.jackie_context }); }}>
     <Stepper steps={CONTEXT_STEPS} step={step} setStep={setStep}/>
     <section className="ws-card">
-      <div className="ws-step-head"><h2>{step + 1}. {cur.title}</h2><p className="ws-hint"><span><b>Drivers see:</b> {cur.sees}</span></p></div>
+      <div className="ws-step-head"><h2 className="ws-label-row">{step + 1}. {cur.title}<Tip><p><b>Drivers see:</b> {cur.sees}</p></Tip></h2></div>
       <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0, display: "grid", gap: 10 }}>
         {step === 0 && <>
           <Label htmlFor="c-serv">Services you offer (one per line)</Label><textarea id="c-serv" className="native-select ws-textarea" value={services} onChange={e => setS({ ...s, services: e.target.value.split("\n") })}/>
@@ -391,7 +391,7 @@ function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
           <textarea id="c-ctx" className="native-select ws-textarea ws-textarea-tall" maxLength={3000} placeholder="E.g. We use OEM brake parts only. We always replace pads and discs together. Diagnostics fee is deducted if you repair with us." value={s.jackie_context} onChange={e => setS({ ...s, jackie_context: e.target.value })}/>
         </>}
         {step === 2 && <>
-          <p className="history-note">Pick a level for each group of jobs Jackie does. Smarter means better answers but higher running costs, which may change your AutoJackie price. ★ is our recommendation.</p>
+          <div className="ws-label-row history-note">How smart should Jackie be?<Tip><p>Pick a level for each group of jobs Jackie does. Smarter means better answers but higher running costs, which may change your AutoJackie price. ★ is our recommendation.</p></Tip></div>
           <div className="ws-tiers">
             <TierRow title="Everyday chat" hint="Listening, explaining, fault codes and manual lookups. Most of the volume, so cost adds up here." value={s.ai_chat_tier as Tier} recommended={DEFAULT_TIERS.chat} onChange={v => setS({ ...s, ai_chat_tier: v })}/>
             <TierRow title="Rough quotes" hint="Drafting the price range a driver sees, using your price list. Rare, but accuracy builds trust." value={s.ai_quote_tier as Tier} recommended={DEFAULT_TIERS.quote} onChange={v => setS({ ...s, ai_quote_tier: v })}/>
@@ -411,7 +411,7 @@ function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
 function TierRow({ title, hint, value, recommended, onChange }: { title: string; hint: string; value: Tier; recommended: Tier; onChange: (t: Tier) => void }) {
   const diff = TIER_INFO[value].costFactor / TIER_INFO[recommended].costFactor;
   return <div className="ws-tier-row">
-    <div><h3>{title}</h3><p className="history-note">{hint}</p></div>
+    <div><h3 className="ws-label-row">{title}<Tip><p>{hint}</p></Tip></h3></div>
     <div>
       <div className="ws-tier-options" role="group" aria-label={title}>{TIERS.map(t => <button key={t} type="button" className="ws-tier-opt" aria-pressed={value === t} onClick={() => onChange(t)}>
         <strong><span>{TIER_INFO[t].label}{t === recommended ? " ★" : ""}</span><span>{TIER_INFO[t].cost}</span></strong>{TIER_INFO[t].text}</button>)}</div>
@@ -442,10 +442,8 @@ function PricingView({ workshopId, canEdit }: { workshopId: string; canEdit: boo
     void save({ hourly_rate_sek: s.hourly_rate_sek, price_list: clean, job_durations: clean.map(p => ({ job: p.task, minutes: p.minutes ?? 60 })) });
   };
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); submit(); }}>
-    <p className="ws-section-intro">Your services, prices and job times drive every rough quote Jackie gives and how long a booking blocks your calendar.</p>
     <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0 }}>
-      <section className="ws-card"><h2>Services, prices and times (incl. VAT)</h2>
-        <Hint controls="the price range in Jackie's “What's next” card and how long each booking takes." shows="prices to drivers on your Jackie page, labelled as an estimate. Times only to you."/>
+      <section className="ws-card"><h2 className="ws-label-row">Services, prices and times (incl. VAT)<Hint controls="every rough quote Jackie gives (the “What's next” card) and how long a booking blocks your calendar." shows="prices to drivers on your Jackie page, labelled as an estimate. Times only to you."/></h2>
         <Label htmlFor="c-rate">Hourly labour rate (kr)</Label><Input id="c-rate" type="number" min={0} max={10000} value={s.hourly_rate_sek} onChange={e => setS({ ...s, hourly_rate_sek: Number(e.target.value) })}/>
         <table className="ws-table"><thead><tr><th>Service</th><th>Price (kr)</th><th>Time (min)</th><th/></tr></thead><tbody>
           {prices.map((p, i) => p.task === OTHER ? <tr key={i} className="ws-other-row"><td><strong>Other</strong><small className="history-note"> Anything Jackie can't match. You price it after a look.</small></td><td><Input aria-label="Price" type="number" min={0} max={200000} value={p.price_sek} title="0 = evaluated by you" onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></td><td><Input aria-label="Minutes" type="number" min={5} max={2880} step={5} value={p.minutes} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, minutes: Number(e.target.value) } : x))}/></td><td/></tr> : <tr key={i}><td><Input aria-label="Service" maxLength={80} value={p.task} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, task: e.target.value } : x))}/></td><td><Input aria-label="Price" type="number" min={0} max={200000} value={p.price_sek} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></td><td><Input aria-label="Minutes" type="number" min={5} max={2880} step={5} value={p.minutes} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, minutes: Number(e.target.value) } : x))}/></td><td><Button type="button" size="sm" variant="ghost" aria-label="Remove" onClick={() => setP(prices.filter((_, j) => j !== i))}>×</Button></td></tr>)}
@@ -477,23 +475,23 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); void submit(); }}>
     <Stepper steps={PROFILE_STEPS} step={step} setStep={setStep}/>
     <section className="ws-card">
-    <div className="ws-step-head"><h2>{step + 1}. {PROFILE_STEPS[step]!.title}</h2><p className="ws-hint"><span><b>Drivers see:</b> {PROFILE_STEPS[step]!.sees}</span></p></div>
+    <div className="ws-step-head"><h2 className="ws-label-row">{step + 1}. {PROFILE_STEPS[step]!.title}<Tip><p><b>Drivers see:</b> {PROFILE_STEPS[step]!.sees}</p></Tip></h2></div>
     <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0 }}>
       {step === 0 && <div className="ws-form-card ws-grid2">
-        <div><Label>Company name</Label><div className="ws-readonly">{shop.name}</div><Hint controls="your name in the booking list and on your Jackie page." shows="to drivers. Managed by AutoJackie."/></div>
-        <div><Label>VAT number</Label><div className="ws-readonly">{shop.vat_number || "Not set"}</div><Hint controls="invoicing between you and AutoJackie." shows="nowhere to drivers. Managed by AutoJackie."/></div>
-        <div><Label htmlFor="p-phone">Phone</Label><Input id="p-phone" maxLength={30} value={s.phone} onChange={e => setS({ ...s, phone: e.target.value })}/><Hint controls="how drivers can call you." shows="to drivers after they book."/></div>
-        <div><Label htmlFor="p-email">Contact email</Label><Input id="p-email" type="email" maxLength={120} value={s.contact_email} onChange={e => setS({ ...s, contact_email: e.target.value })}/><Hint controls="where booking updates are sent." shows="only to AutoJackie and you."/></div>
-        <div><Label htmlFor="p-addr">Address</Label><Input id="p-addr" maxLength={200} value={s.address} onChange={e => setS({ ...s, address: e.target.value })}/><Hint controls="where drivers drop off their car." shows="to drivers after they book."/></div>
-        <div><Label htmlFor="p-city">City</Label><Input id="p-city" maxLength={60} value={city} onChange={e => setCity(e.target.value)}/><Hint controls="which drivers see you when picking a workshop." shows="in the workshop list when booking."/></div>
-        <div><Label htmlFor="p-hours">Opening hours</Label><Input id="p-hours" maxLength={200} value={s.opening_hours} onChange={e => setS({ ...s, opening_hours: e.target.value })}/><Hint controls="what Jackie says when drivers ask when you're open." shows="in Jackie's answers on your page."/></div>
-        <div><Label htmlFor="p-web">Website</Label><Input id="p-web" maxLength={200} value={s.website} onChange={e => setS({ ...s, website: e.target.value })}/><Hint controls="a link back to your own site." shows="to drivers after they book."/></div>
+        <div><div className="ws-label-row"><Label>Company name</Label><Hint controls="your name in the booking list and on your Jackie page." shows="to drivers. Managed by AutoJackie."/></div><div className="ws-readonly">{shop.name}</div></div>
+        <div><div className="ws-label-row"><Label>VAT number</Label><Hint controls="invoicing between you and AutoJackie." shows="nowhere to drivers. Managed by AutoJackie."/></div><div className="ws-readonly">{shop.vat_number || "Not set"}</div></div>
+        <div><div className="ws-label-row"><Label htmlFor="p-phone">Phone</Label><Hint controls="how drivers can call you." shows="to drivers after they book."/></div><Input id="p-phone" maxLength={30} value={s.phone} onChange={e => setS({ ...s, phone: e.target.value })}/></div>
+        <div><div className="ws-label-row"><Label htmlFor="p-email">Contact email</Label><Hint controls="where booking updates are sent." shows="only to AutoJackie and you."/></div><Input id="p-email" type="email" maxLength={120} value={s.contact_email} onChange={e => setS({ ...s, contact_email: e.target.value })}/></div>
+        <div><div className="ws-label-row"><Label htmlFor="p-addr">Address</Label><Hint controls="where drivers drop off their car." shows="to drivers after they book."/></div><Input id="p-addr" maxLength={200} value={s.address} onChange={e => setS({ ...s, address: e.target.value })}/></div>
+        <div><div className="ws-label-row"><Label htmlFor="p-city">City</Label><Hint controls="which drivers see you when picking a workshop." shows="in the workshop list when booking."/></div><Input id="p-city" maxLength={60} value={city} onChange={e => setCity(e.target.value)}/></div>
+        <div><div className="ws-label-row"><Label htmlFor="p-hours">Opening hours</Label><Hint controls="what Jackie says when drivers ask when you're open." shows="in Jackie's answers on your page."/></div><Input id="p-hours" maxLength={200} value={s.opening_hours} onChange={e => setS({ ...s, opening_hours: e.target.value })}/></div>
+        <div><div className="ws-label-row"><Label htmlFor="p-web">Website</Label><Hint controls="a link back to your own site." shows="to drivers after they book."/></div><Input id="p-web" maxLength={200} value={s.website} onChange={e => setS({ ...s, website: e.target.value })}/></div>
       </div>}
       {step === 1 && <div className="ws-form-card">
-        <div><Label>Your Jackie page</Label>{link && <div className="ws-chips"><a href={link} target="_blank" rel="noreferrer" className="text-link">{link}</a><Button type="button" size="sm" variant="outline" onClick={() => void navigator.clipboard?.writeText(link)}>Copy</Button></div>}<Hint controls="the page where drivers chat with Jackie as your workshop." shows="wherever you share it: website, Google profile, SMS."/></div>
-        <div><Label htmlFor="b-accent">Accent color</Label><div className="ws-chips"><input id="b-accent" type="color" value={s.brand_accent || "#f2711c"} onChange={e => setS({ ...s, brand_accent: e.target.value })}/>{s.brand_accent && <Button type="button" size="sm" variant="ghost" onClick={() => setS({ ...s, brand_accent: "" })}>Use AutoJackie orange</Button>}</div><Hint controls="buttons, highlights and links." shows="on your Jackie page."/></div>
-        <div><Label htmlFor="b-logo">Logo link (https)</Label><Input id="b-logo" maxLength={500} placeholder="https://yourworkshop.se/logo.png" value={s.brand_logo_url} onChange={e => setS({ ...s, brand_logo_url: e.target.value })}/><Hint controls="the small logo next to your name." shows="in the top bar of your Jackie page."/></div>
-        <div><Label htmlFor="b-greet">Greeting line</Label><Input id="b-greet" maxLength={160} placeholder="Welcome to Demo Verkstad. Tell Jackie what's up." value={s.brand_greeting} onChange={e => setS({ ...s, brand_greeting: e.target.value })}/><Hint controls="the welcome line above the chat." shows="on your Jackie page, before drivers type."/></div>
+        <div><div className="ws-label-row"><Label>Your Jackie page</Label><Hint controls="the page where drivers chat with Jackie as your workshop." shows="wherever you share it: website, Google profile, SMS."/></div>{link && <div className="ws-chips"><a href={link} target="_blank" rel="noreferrer" className="text-link">{link}</a><Button type="button" size="sm" variant="outline" onClick={() => void navigator.clipboard?.writeText(link)}>Copy</Button></div>}</div>
+        <div><div className="ws-label-row"><Label htmlFor="b-accent">Accent color</Label><Hint controls="buttons, highlights and links." shows="on your Jackie page."/></div><div className="ws-chips"><input id="b-accent" type="color" value={s.brand_accent || "#f2711c"} onChange={e => setS({ ...s, brand_accent: e.target.value })}/>{s.brand_accent && <Button type="button" size="sm" variant="ghost" onClick={() => setS({ ...s, brand_accent: "" })}>Use AutoJackie orange</Button>}</div></div>
+        <div><div className="ws-label-row"><Label htmlFor="b-logo">Logo link (https)</Label><Hint controls="the small logo next to your name." shows="in the top bar of your Jackie page."/></div><Input id="b-logo" maxLength={500} placeholder="https://yourworkshop.se/logo.png" value={s.brand_logo_url} onChange={e => setS({ ...s, brand_logo_url: e.target.value })}/></div>
+        <div><div className="ws-label-row"><Label htmlFor="b-greet">Greeting line</Label><Hint controls="the welcome line above the chat." shows="on your Jackie page, before drivers type."/></div><Input id="b-greet" maxLength={160} placeholder="Welcome to Demo Verkstad. Tell Jackie what's up." value={s.brand_greeting} onChange={e => setS({ ...s, brand_greeting: e.target.value })}/></div>
       </div>}
     </fieldset>
     <div className="ws-wizard-nav"><Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>Back</Button><WizardActions canEdit={canEdit} last={step === PROFILE_STEPS.length - 1} next={() => setStep(step + 1)}/></div>

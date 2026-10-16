@@ -491,3 +491,13 @@
 .ws-insights .ws-hint { font-size: 11px; }
 .ws-insights .ws-pager { margin-top: 6px; }
 @media (max-width: 900px) { .ws-insights { grid-template-columns: 1fr; } }
+
+/* Inline "?" hints that replace explanatory paragraphs */
+.ws-label-row { display: flex; align-items: center; gap: 6px; }
+.ws-collapsible summary { display: flex; align-items: center; gap: 6px; }
+.ws-tip { display: inline-grid; place-items: center; width: 18px; height: 18px; padding: 0; border: 0; background: none; color: var(--muted-foreground); cursor: help; border-radius: 999px; flex: none; }
+.ws-tip:hover, .ws-tip:focus-visible { color: var(--primary); }
+.ws-tip svg { width: 15px; height: 15px; }
+.ws-tip-body { max-width: 280px; font-size: 13px; line-height: 1.45; display: grid; gap: 6px; }
+.ws-tip-body p { margin: 0; }
+.ws-tip-body b { font-weight: 600; }
