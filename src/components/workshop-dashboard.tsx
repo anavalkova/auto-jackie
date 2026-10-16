@@ -142,7 +142,7 @@ export function WorkshopDashboard() {
         <span className="ws-price">{i.price_low_sek != null && i.price_high_sek != null ? `${kr(i.price_low_sek)} to ${kr(i.price_high_sek)}` : "No price"}</span>
         <time dateTime={i.created_at}>{when(i.created_at)}</time>
       </button></li>)}</ul>}
-    {shown.length > PAGE && <Pager page={page} pages={Math.ceil(shown.length / PAGE)} onPage={setPage}/>}
+    {shown.length > 0 && <Pager page={page} pages={Math.max(1, Math.ceil(shown.length / PAGE))} onPage={setPage}/>}
     </>} settings={<BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>}/>
     : tab === "context" ? <ContextSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>
     : tab === "pricing" ? <PricingView workshopId={shop.id} canEdit={shop.role === "owner"}/>
@@ -289,12 +289,12 @@ function InsightsView({ items, workshopId, canEdit }: { items: Inquiry[]; worksh
           {rows.slice(sp * PAGE, (sp + 1) * PAGE).map(r => <tr key={r.task}><td>{r.task}</td><td><strong>{r.req}</strong></td><td>{r.booked}</td><td>{r.value ? kr(r.value) : "–"}</td></tr>)}
           <tr><td>Other <small className="history-note">(you price these)</small></td><td><strong>{otherCount}</strong></td><td>{items.filter(i => (!i.service || i.service === OTHER) && isBooked(i)).length}</td><td>–</td></tr>
         </tbody></table>
-        {rows.length > PAGE && <Pager page={sp} pages={Math.ceil(rows.length / PAGE)} onPage={setSp}/>}
+        {rows.length > 0 && <Pager page={sp} pages={Math.max(1, Math.ceil(rows.length / PAGE))} onPage={setSp}/>}
       </Collapsible>
       <Collapsible title="Drivers asked, you don't offer yet" tip="Requests that landed in Other. Add the common ones to your Pricing engine so Jackie can quote them next time.">
         {missing.length === 0 ? <p className="history-note">Nothing yet. Every request matched one of your services.</p>
           : <table className="ws-table"><tbody>{missing.slice(mp * PAGE, (mp + 1) * PAGE).map(([k, v]) => <tr key={k}><td>{k}</td><td><strong>{v}</strong></td><td style={{ textAlign: "right" }}>{added.includes(k) ? <span className="history-note">Added. Set its price in Pricing engine.</span> : canEdit && <Button type="button" size="sm" variant="outline" onClick={() => void addService(k)}>Add to Pricing engine</Button>}</td></tr>)}</tbody></table>}
-        {missing.length > PAGE && <Pager page={mp} pages={Math.ceil(missing.length / PAGE)} onPage={setMp}/>}
+        {missing.length > 0 && <Pager page={mp} pages={Math.max(1, Math.ceil(missing.length / PAGE))} onPage={setMp}/>}
       </Collapsible>
     </div>
   </div>;
@@ -362,7 +362,7 @@ function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
               <span className="history-note">{hrs.length ? hrs.join(", ") : "All day"}</span>
               <button type="button" className="ws-off-x" aria-label={`Reopen ${dayLabel(d)}`} onClick={() => setClosed(closed.filter(k => k.slice(0, 10) !== d))}>×</button>
             </li>)}</ul>
-            {pages > 1 && <Pager page={pg} pages={pages} onPage={setOffPage}/>}</>}
+            <Pager page={pg} pages={pages} onPage={setOffPage}/>}</>}
       </section>
     </fieldset>
     <SaveRow canEdit={canEdit} state={state}/>
