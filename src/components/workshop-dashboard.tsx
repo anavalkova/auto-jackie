@@ -214,17 +214,14 @@ function QuoteSection({ item, shopName, onSaved }: { item: Inquiry; shopName: st
   const text = `Hi ${item.contact_name}, this is ${shopName} about your request "${item.issue}". ${price ? `${yours ? "Our price" : "Jackie's rough estimate"} is ${price} incl. VAT.` : ""}${yours && jackie && yours !== jackie ? ` (Jackie estimated ${jackie}.)` : ""} Does that work for you?`;
   const phone = item.contact_phone.replace(/[^\d+]/g, "");
   const intl = phone.startsWith("+") ? phone.slice(1) : phone.startsWith("0") ? `46${phone.slice(1)}` : phone;
-  return <section><span className="eyebrow">INDICATIVE QUOTE</span>
+  return <section><span className="eyebrow">THE QUOTE</span>
     <table className="ws-table"><tbody>
-      <tr><td>Service</td><td><strong>{item.service ?? OTHER}</strong></td></tr>
       <tr><td>Jackie quoted the driver</td><td><strong>{jackie ? `${jackie} incl. VAT` : "No estimate (direct booking)"}</strong></td></tr>
-      {yours && <tr><td>Your adjusted price</td><td><strong>{yours} incl. VAT</strong></td></tr>}
+      {yours && <tr><td>Your price</td><td><strong>{yours} incl. VAT</strong></td></tr>}
     </tbody></table>
     {item.note && <p className="history-note">Jackie told the driver: “{item.note}”</p>}
-    <Label>Adjust the price (kr, incl. VAT)</Label>
-    <div className="ws-chips"><Input aria-label="From" type="number" min={0} max={500000} value={low} onChange={e => setLow(Number(e.target.value))} style={{ width: 110 }}/><span>to</span><Input aria-label="To" type="number" min={0} max={500000} value={high} onChange={e => setHigh(Number(e.target.value))} style={{ width: 110 }}/><Button type="button" size="sm" onClick={() => void saveQuote()}>Save price</Button></div>
-    {msg && <p className="history-note" role="status">{msg}</p>}
-    <Label>Contact the driver about the quote</Label>
+    {adjust ? <div className="ws-chips"><Input aria-label="From" type="number" min={0} max={500000} value={low} onChange={e => setLow(Number(e.target.value))} style={{ width: 110 }}/><span>to</span><Input aria-label="To" type="number" min={0} max={500000} value={high} onChange={e => setHigh(Number(e.target.value))} style={{ width: 110 }}/><Button type="button" size="sm" onClick={() => void saveQuote()}>Save price</Button><Button type="button" size="sm" variant="ghost" onClick={() => setAdjust(false)}>Cancel</Button>{msg && <p className="history-note" role="status">{msg}</p>}</div>
+      : <Button type="button" variant="link" size="sm" onClick={() => setAdjust(true)}>Adjust the price</Button>}
     <div className="ws-chips">
       <Button size="sm" variant="outline" asChild><a href={`sms:${phone}?body=${encodeURIComponent(text)}`}>SMS</a></Button>
       <Button size="sm" variant="outline" asChild><a href={`https://wa.me/${intl}?text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer">WhatsApp</a></Button>
