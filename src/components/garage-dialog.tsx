@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { catalog, isSwedishPlate, type Vehicle } from "@/lib/vehicles";
+import { supabase } from "@/integrations/supabase/client";
 
 export function GarageDialog({ open, onOpenChange, vehicle, onSave, signedIn }: {
   open: boolean; onOpenChange: (o: boolean) => void; vehicle: Vehicle | null; onSave: (v: Vehicle) => void; signedIn: boolean;
