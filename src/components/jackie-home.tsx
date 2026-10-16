@@ -34,7 +34,7 @@ export function JackieHome({ chatId }: { chatId?: string }) {
   const [chatsError, setChatsError] = useState(false);
   const [newChatKey, setNewChatKey] = useState(0);
   const [info, setInfo] = useState<"workshop" | "about" | "privacy" | null>(null);
-  const [initial, setInitial] = useState<UIMessage[] | null>(chatId ? null : []);
+  const [initial, setInitial] = useState<UIMessage[] | null>(chatId ? null : readGuestChat());
   const [missing, setMissing] = useState(false);
 
   // Older versions kept the car in this browser; guests are now private by default.
