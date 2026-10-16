@@ -158,8 +158,8 @@
 .symptom-chip { font-size: 11px; height: auto; padding: 6px 10px; white-space: normal; text-align: left; background: var(--card); }
 .assistant-top { padding: 18px 28px; border-bottom: 1px solid var(--border); }
 .chat-shell { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 0 28px 18px; }
-.chat-empty { flex: 1; display: flex; flex-direction: column; justify-content: center; max-width: 580px; }
-.chat-shell .chat-empty { max-width: 520px; }
+.chat-empty { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.chat-shell .chat-empty { max-width: none; }
 .chat-empty .eyebrow { color: var(--primary); }
 .chat-empty h1 { font-size: 40px; font-weight: 800; line-height: 1.2; margin: 12px 0 12px; }
 .chat-empty p { color: var(--muted-foreground); font-size: 13px; line-height: 1.7; margin: 0 0 22px; }
@@ -194,7 +194,7 @@
   .portrait-wrap.compact { display: block; height: 215px; }
   .portrait-label { bottom: 12px; left: 14px; padding: 6px 10px; }
   .chat-shell { padding: 0 16px 16px; min-height: 560px; }
-  .chat-empty h1 { font-size: 32px; }
+  .chat-empty h1 { font-size: 32px; text-wrap: balance; }
   .starter-grid { grid-template-columns: 1fr; }
   .assistant-top { padding: 16px; }
 }
