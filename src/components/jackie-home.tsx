@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { nextService, type Vehicle } from "@/lib/vehicles";
 import jackie from "@/assets/jackie.jpg";
+import { LANGS, setLang, useT } from "@/lib/i18n";
 
 const fmt = (n: number) => n.toLocaleString("sv-SE");
 type ChatRow = { id: string; title: string; updated_at: string };
@@ -40,6 +41,7 @@ function titleFrom(messages: UIMessage[]) {
 export function JackieHome({ chatId }: { chatId?: string }) {
   const navigate = useNavigate();
   const { user, ready } = useSessionUser();
+  const { t, lang } = useT();
   const [vehicle, setVehicle] = useState<Vehicle | null>(() => (chatId ? null : readGuestVehicle()));
   const [garageOpen, setGarageOpen] = useState(false);
   const [signInOpen, setSignInOpen] = useState(false);
@@ -47,7 +49,7 @@ export function JackieHome({ chatId }: { chatId?: string }) {
   const [chatsLoading, setChatsLoading] = useState(true);
   const [chatsError, setChatsError] = useState(false);
   const [newChatKey, setNewChatKey] = useState(0);
-  const [info, setInfo] = useState<"workshop" | "about" | "privacy" | null>(null);
+  const [info, setInfo] = useState<"about" | "privacy" | null>(null);
   const [initial, setInitial] = useState<UIMessage[] | null>(chatId ? null : readGuestChat());
   const [missing, setMissing] = useState(false);
 
@@ -137,65 +139,65 @@ export function JackieHome({ chatId }: { chatId?: string }) {
     <header className="site-header">
       <Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span></Link>
       <nav aria-label="Main navigation">
-        <span className="market-label"><span className="swedish-flag"/>Made for Sweden</span>
-        <Button variant="ghost" asChild className="workshop-link"><Link to="/workshop">For workshops <ArrowUpRight/></Link></Button>
+        <span className="market-label"><span className="swedish-flag"/>{t.madeForSweden}</span>
+        <Button variant="ghost" asChild className="workshop-link"><Link to="/workshop">{t.forWorkshops} <ArrowUpRight/></Link></Button>
         {ready && (user ? <>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="Your account"><UserRound/></Button></DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label={t.account}><UserRound/></Button></DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel className="account-email">{user.email}</DropdownMenuLabel>
               <DropdownMenuSeparator/>
-              <DropdownMenuItem onSelect={signOut}><LogOut/> Sign out</DropdownMenuItem>
+              <DropdownMenuItem onSelect={signOut}><LogOut/> {t.signOut}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </> : <Button variant="outline" onClick={() => setSignInOpen(true)}><UserRound/> Sign in to save</Button>)}
-        <Button variant="outline" className="language-control" onClick={() => setInfo("about")} aria-label="Language: English"><Globe2/> EN <ChevronDown/></Button>
+        </> : <Button variant="outline" onClick={() => setSignInOpen(true)}><UserRound/> {t.signInToSave}</Button>)}
+        <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="language-control" aria-label="Language"><Globe2/> {LANGS.find(l => l.code === lang)?.short} <ChevronDown/></Button></DropdownMenuTrigger><DropdownMenuContent align="end">{LANGS.map(l => <DropdownMenuItem key={l.code} onSelect={() => setLang(l.code)} aria-current={l.code === lang ? "true" : undefined}>{l.short} · {l.label}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>
       </nav>
     </header>
 
     <main className="workspace">
       <aside className="jackie-panel">
-        <div className="portrait-wrap compact"><img src={jackie} alt="Jackie, a mechanic in an orange work jacket" width={1024} height={1024}/><span className="portrait-label">Jackie is new. Go easy on her</span></div>
+        <div className="portrait-wrap compact"><img src={jackie} alt="Jackie, a mechanic in an orange work jacket" width={1024} height={1024}/><span className="portrait-label">{t.jackieNew}</span></div>
 
         <section className="vehicle-card" aria-label="Your car">
-          <div className="vehicle-head"><span className="eyebrow">{user ? "YOUR SAVED CAR" : "CAR FOR THIS CHAT"}</span>{vehicle && <Button variant="ghost" size="sm" onClick={() => setGarageOpen(true)}><Pencil/> Change</Button>}</div>
+          <div className="vehicle-head"><span className="eyebrow">{user ? t.yourSavedCar : t.carForChat}</span>{vehicle && <Button variant="ghost" size="sm" onClick={() => setGarageOpen(true)}><Pencil/> {t.change}</Button>}</div>
           {!vehicle ? <div className="vehicle-empty"><Car/>
-            <p>{user ? "No car saved yet. Add it once and Jackie remembers it." : "Share a plate, HSN/TSN or pick it by hand. Used for this chat only. Nothing is saved."}</p>
-            <Button onClick={() => setGarageOpen(true)}><Plus/> {user ? "Add your car" : "Tell Jackie about your car"}</Button>
+            <p>{user ? t.noCarSaved : t.noCarGuest}</p>
+            <Button onClick={() => setGarageOpen(true)}><Plus/> {user ? t.addCar : t.tellCar}</Button>
           </div> : <>
             <h2 className="vehicle-name">{vehicle.confidential ? <span className="plate-chip"><span className="plate-eu">S</span>{vehicle.label}</span> : vehicle.label}</h2>
-            <p className="vehicle-spec">{vehicle.confidential ? <><LockKeyhole/> Registry details kept private</> : vehicle.description}</p>
-            <div className="service-box"><Gauge/>{service ? <div><strong>Next service in about {fmt(service.remaining)} km</strong><span>Estimated at {fmt(service.dueAt)} km · every {fmt(vehicle.serviceKm)} km</span><div className="service-bar"><span style={{ width: `${Math.round(service.progress * 100)}%` }}/></div></div> : <div><strong>Add your odometer reading</strong><span>to estimate the next service.</span></div>}</div>
-            <p className="estimate-note">{user ? "Saved to your account." : "Not saved. Gone when you start a new chat."} <button type="button" className="text-link" onClick={forgetVehicle}>Remove car</button></p>
+            <p className="vehicle-spec">{vehicle.confidential ? <><LockKeyhole/> {t.privateDetails}</> : vehicle.description}</p>
+            <div className="service-box"><Gauge/>{service ? <div><strong>{t.nextService(fmt(service.remaining))}</strong><span>{t.estimatedAt(fmt(service.dueAt), fmt(vehicle.serviceKm))}</span><div className="service-bar"><span style={{ width: `${Math.round(service.progress * 100)}%` }}/></div></div> : <div><strong>{t.addOdo}</strong><span>{t.toEstimate}</span></div>}</div>
+            <p className="estimate-note">{user ? t.savedToAccount : t.notSaved} <button type="button" className="text-link" onClick={forgetVehicle}>{t.removeCar}</button></p>
           </>}
         </section>
 
         <section className="chat-history" aria-label="Chat history">
-          <div className="history-heading"><h2>My chats</h2><Button variant="ghost" size="icon" onClick={onReset} aria-label="Start a new chat" title="Start a new chat"><Plus/></Button></div>
-          {!ready || chatsLoading ? <p className="history-note" role="status">Loading chats…</p>
-            : !user ? <div className="history-guest"><p className="history-note">Private chat · not saved</p><Button variant="outline" size="sm" onClick={() => setSignInOpen(true)}><UserRound/> Sign in to save chats</Button></div>
-            : chatsError ? <div><p className="history-note" role="alert">Couldn't load or update your chats.</p><Button variant="ghost" size="sm" onClick={() => void loadChats()}>Try again</Button></div>
-            : chats.length === 0 ? <p className="history-note">No saved chats yet.</p>
+          <div className="history-heading"><h2>{t.myChats}</h2><Button variant="ghost" size="icon" onClick={onReset} aria-label={t.newChat} title={t.newChat}><Plus/></Button></div>
+          {!ready || chatsLoading ? <p className="history-note" role="status">{t.loadingChats}</p>
+            : !user ? <div className="history-guest"><p className="history-note">{t.privateNotSaved}</p><Button variant="outline" size="sm" onClick={() => setSignInOpen(true)}><UserRound/> {t.signInChats}</Button></div>
+            : chatsError ? <div><p className="history-note" role="alert">{t.chatsError}</p><Button variant="ghost" size="sm" onClick={() => void loadChats()}>{t.tryAgain}</Button></div>
+            : chats.length === 0 ? <p className="history-note">{t.noChats}</p>
             : <ul className="history-list">{chats.map(c => <li key={c.id} className={c.id === chatId ? "active" : undefined}>
-              <Link to="/c/$chatId" params={{ chatId: c.id }} className="history-item" aria-current={c.id === chatId ? "page" : undefined} title={c.title}><MessageSquare/><span className="history-item-copy"><span>{c.title}</span><time dateTime={c.updated_at}>{new Date(c.updated_at).toLocaleString("en-GB", { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</time></span></Link>
-              <Button variant="ghost" size="icon" className="history-delete" aria-label={`Delete chat: ${c.title}`} title="Delete chat" onClick={() => deleteChat(c.id)}><Trash2/></Button>
+              <Link to="/c/$chatId" params={{ chatId: c.id }} className="history-item" aria-current={c.id === chatId ? "page" : undefined} title={c.title}><MessageSquare/><span className="history-item-copy"><span>{c.title}</span><time dateTime={c.updated_at}>{new Date(c.updated_at).toLocaleString(lang === "en" ? "en-GB" : lang, { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</time></span></Link>
+              <Button variant="ghost" size="icon" className="history-delete" aria-label={`${t.deleteChat}: ${c.title}`} title={t.deleteChat} onClick={() => deleteChat(c.id)}><Trash2/></Button>
             </li>)}</ul>}
         </section>
       </aside>
 
       <section className="assistant-area" aria-label="Chat with Jackie">
-        <div className="assistant-top"><span/><span className="preview-badge">{user ? "Chats saved" : "Private chat"}</span></div>
-        {missing ? <div className="chat-empty"><h1>This chat isn't here.</h1><p>{user ? "It may have been deleted." : "Sign in with the account that saved it to see it."}</p><div className="starter-grid">{!user && <Button onClick={() => setSignInOpen(true)}>Sign in</Button>}<Button variant="outline" asChild><Link to="/">Start a new chat</Link></Button></div></div>
-          : initial === null ? <div className="chat-empty"><p>Opening your chat…</p></div>
+        <div className="assistant-top"><span/><span className="preview-badge">{user ? t.chatsSaved : t.privateChat}</span></div>
+        {missing ? <div className="chat-empty"><h1>{t.missingTitle}</h1><p>{user ? t.missingDeleted : t.missingSignIn}</p><div className="starter-grid">{!user && <Button onClick={() => setSignInOpen(true)}>{t.signIn}</Button>}<Button variant="outline" asChild><Link to="/">{t.startNew}</Link></Button></div></div>
+          : initial === null ? <div className="chat-empty"><p>{t.opening}</p></div>
           : <JackieChat key={chatId ?? `new-${newChatKey}`} chatId={chatId} initialMessages={initial} vehicle={vehicle} pending={null} onPendingSent={() => {}} onTurnFinished={onTurnFinished} onReset={onReset} saving={!!user && !!chatId}/>}
-        <div className="assistant-bottom"><span className="swedish-flag"/><span>Jackie helps you understand the problem. A real workshop confirms the fix before you pay for anything.</span><Button variant="ghost" size="icon" aria-label="About this preview" onClick={() => setInfo("about")}><HelpCircle/></Button></div>
+        <div className="assistant-bottom"><span className="swedish-flag"/><span>{t.bottom}</span><Button variant="ghost" size="icon" aria-label={t.about} onClick={() => setInfo("about")}><HelpCircle/></Button></div>
       </section>
     </main>
 
-    <footer className="site-footer"><span>© {new Date().getFullYear()} AutoJackie</span><div><Button variant="link" onClick={() => setInfo("privacy")}>Privacy</Button><Button variant="link" onClick={() => setInfo("about")}>About Jackie <ArrowUpRight/></Button></div></footer>
+    <footer className="site-footer"><span>© {new Date().getFullYear()} AutoJackie</span><div><Button variant="link" onClick={() => setInfo("privacy")}>{t.privacy}</Button><Button variant="link" onClick={() => setInfo("about")}>{t.about} <ArrowUpRight/></Button></div></footer>
 
     <GarageDialog key={garageOpen ? "open" : "closed"} open={garageOpen} onOpenChange={setGarageOpen} vehicle={vehicle} onSave={saveVehicle} signedIn={!!user}/>
     <SignInDialog open={signInOpen} onOpenChange={setSignInOpen}/>
-    <Dialog open={info !== null} onOpenChange={open => { if (!open) setInfo(null); }}><DialogContent><DialogHeader><DialogTitle>{info === "workshop" ? "A helping hand for your workshop" : info === "privacy" ? "Your details stay yours" : "Nice to meet you. I'm Jackie."}</DialogTitle><DialogDescription>{info === "workshop" ? "The workshop space comes in a later phase. Right now AutoJackie focuses on helping drivers understand their car." : info === "privacy" ? "Without signing in, nothing is saved: your car and chat disappear when you start over or close the tab. If you sign in, your car and chats are stored in your account, visible only to you, and you can delete them any time. Registry details from a plate are never shown on screen." : "I explain car problems in plain English, using facts from Wikidata and linking every source. German HSN/TSN codes are checked against the official KBA register; Swedish plates use sample data for now."}</DialogDescription></DialogHeader><Button onClick={() => setInfo(null)}>Got it</Button></DialogContent></Dialog>
+    <Dialog open={info !== null} onOpenChange={open => { if (!open) setInfo(null); }}><DialogContent><DialogHeader><DialogTitle>{info === "privacy" ? t.privacyTitle : t.aboutTitle}</DialogTitle><DialogDescription>{info === "privacy" ? t.privacyBody : t.aboutBody}</DialogDescription></DialogHeader><Button onClick={() => setInfo(null)}>{t.gotIt}</Button></DialogContent></Dialog>
   </div>;
 }
