@@ -26,6 +26,24 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_quota: {
+        Row: {
+          key: string
+          month: string
+          used: number
+        }
+        Insert: {
+          key: string
+          month: string
+          used?: number
+        }
+        Update: {
+          key?: string
+          month?: string
+          used?: number
+        }
+        Relationships: []
+      }
       chats: {
         Row: {
           created_at: string
@@ -368,6 +386,10 @@ export type Database = {
         Returns: undefined
       }
       claim_my_access: { Args: never; Returns: Json }
+      consume_chat_quota: {
+        Args: { _key: string; _limit: number }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

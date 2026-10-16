@@ -78,6 +78,13 @@
       "when": 1792168574367,
       "tag": "0010_booking_closures_horizon",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792173560811,
+      "tag": "0011_chat_quota",
+      "breakpoints": true
     }
   ]
 }
