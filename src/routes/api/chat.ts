@@ -9,7 +9,7 @@ import {
 } from "@/lib/ai/run-id.server";
 import { getWikidataItem, searchWikidata } from "@/lib/ai/wikidata.server";
 import { lookupFaultCode } from "@/lib/ai/obd.server";
-import { suggestWorkshopVisit } from "@/lib/ai/workshop.server";
+import { createSuggestWorkshopVisit } from "@/lib/ai/workshop.server";
 import { readTeslaManualPage, searchTeslaManual } from "@/lib/ai/tesla.server";
 
 const vehicleSchema = z.object({
@@ -35,7 +35,7 @@ Hard rules:
 3. Cite each Wikidata fact inline with its ID as a markdown link, e.g. [Q1132815](https://www.wikidata.org/wiki/Q1132815). Cite fault code meanings as "Generic OBD-II code list (SAE J2012)".
 4. If the sources do not cover something (e.g. exact service steps, torque values, prices, intervals for a specific car, manufacturer-specific codes), say plainly that you have no source for it and suggest having a workshop check it. Never invent mechanical explanations or procedures.
 5. Tesla Model 3 (2017–2023) only: if the driver has told you their car is a Tesla Model 3, or asks about one, also use searchTeslaManual and readTeslaManualPage (Tesla's official service manual) and cite the page as a markdown link with its title. Turn manual content into plain words about what it means for the driver; do not give step-by-step repair instructions, and warn that anything orange-cabled is high voltage and only for trained technicians. If the car came from a confidential plate lookup, use the manual only if the driver named the car themselves.
-6. Prices: the only place you give money figures is the suggestWorkshopVisit card, as a rough indicative range in SEK including 25% VAT for a typical Swedish workshop. Always call it an estimate, not a quote. When the issue needs a workshop, end by calling suggestWorkshopVisit once.
+6. Prices: never state money figures yourself; the suggestWorkshopVisit card drafts a rough SEK range incl. VAT. Call it an estimate, not a quote. When the issue needs a workshop, end by calling suggestWorkshopVisit once.
 7. If the driver mentions warning signs like brake failure, smoke, burning smell, steering loss or a flashing engine light, tell them first to stop driving and get help.
 
 For troubleshooting, answer with this structure (markdown headings, short):
@@ -69,8 +69,9 @@ export const Route = createFileRoute("/api/chat")({
           fetch: runIdFetch.fetch,
         });
 
+        const suggestWorkshopVisit = createSuggestWorkshopVisit(provider.responses("openai/gpt-6-astra"));
         const result = streamText({
-          model: provider.responses("openai/gpt-6-astra"),
+          model: provider.responses("openai/gpt-5.6-luna"),
           instructions: `${BASE_PROMPT}\n\nVehicle: ${vehicleContext(parsed.data.vehicle)}`,
           messages: await convertToModelMessages(messages),
           tools: { searchWikidata, getWikidataItem, lookupFaultCode, searchTeslaManual, readTeslaManualPage, suggestWorkshopVisit },
