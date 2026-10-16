@@ -60,11 +60,17 @@
 .brand-orange { color: var(--primary); }
 .brand-mark { position: relative; display: grid; place-items: center; width: 37px; height: 40px; background: var(--primary); color: var(--primary-foreground); border-radius: 10px 10px 10px 3px; font-size: 31px; font-weight: 800; line-height: 1; }
 .brand-mark-dot { position: absolute; width: 5px; height: 5px; top: 7px; right: 6px; background: var(--primary-foreground); border-radius: 50%; }
-.site-header nav { display: flex; align-items: center; gap: 22px; }
+.site-header nav { display: flex; align-items: center; gap: 8px; }
+.site-header nav .nav-control, .site-header nav .nav-cta, .site-header nav .workshop-link { height: 36px; border-radius: 10px; font-size: 13px; }
+.site-header nav .nav-control { background: var(--card); padding: 0 12px; gap: 6px; }
+.site-header nav .nav-icon { width: 36px; padding: 0; }
+.site-header nav .nav-control svg, .site-header nav .nav-cta svg, .site-header nav .workshop-link svg { width: 15px; height: 15px; }
+.site-header nav .nav-cta { margin-left: 4px; padding: 0 14px; }
+.nav-divider { width: 1px; height: 20px; background: var(--border); margin: 0 6px; }
 .market-label { display: flex; align-items: center; gap: 9px; color: var(--muted-foreground); font-size: 12px; }
 .swedish-flag { display: inline-block; width: 18px; height: 12px; background: linear-gradient(transparent 40%,var(--flag-yellow) 40%,var(--flag-yellow) 59%,transparent 59%),linear-gradient(90deg,transparent 29%,var(--flag-yellow) 29%,var(--flag-yellow) 42%,transparent 42%),var(--flag-blue); border-radius: 2px; flex-shrink: 0; }
 .workshop-link { font-size: 12px; }
-.language-control { background: var(--card); font-size: 11px; gap: 8px; height: 33px; padding: 0 10px; }
+.language-control { font-variant-numeric: tabular-nums; }
 .language-control svg { width: 13px; }
 .workspace { display: grid; grid-template-columns: 30% 70%; min-height: 715px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--card); box-shadow: var(--frame-shadow); }
 .jackie-panel { display: flex; flex-direction: column; background: var(--secondary); border-right: 1px solid var(--border); }
@@ -531,6 +537,7 @@
   .site-header { height: auto; min-height: 76px; padding: 12px 0; flex-wrap: wrap; gap: 10px 12px; }
   .site-header nav { flex-wrap: wrap; justify-content: flex-end; gap: 6px 8px; min-width: 0; }
   .site-header nav .workshop-link { padding: 0 4px; }
+  .nav-divider { display: none; }
 }
 .sources-used { margin: 2px 0 6px; font-size: 12px; color: var(--muted-foreground); }
 .sources-used > summary { cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); }

@@ -148,19 +148,20 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
       <Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span></Link>
       <nav aria-label="Main navigation">
         {workshop && <span className="shop-badge">{workshop.logo && <img src={workshop.logo} alt="" className="shop-logo"/>}<span>{workshop.name}</span></span>}
-        <Button onClick={() => setDirectBooking({ issue: "" })}><CalendarPlus/> {t.bookVisit}</Button>
         {!workshop && <Button variant="ghost" asChild className="workshop-link"><Link to="/workshop">{t.forWorkshops} <ArrowUpRight/></Link></Button>}
+        <span className="nav-divider" aria-hidden="true"/>
         {ready && (user ? <>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label={t.account}><UserRound/></Button></DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild><Button variant="outline" size="icon" className="nav-control nav-icon" aria-label={t.account}><UserRound/></Button></DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel className="account-email">{user.email}</DropdownMenuLabel>
               <DropdownMenuSeparator/>
               <DropdownMenuItem onSelect={signOut}><LogOut/> {t.signOut}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </> : <Button variant="outline" onClick={() => setSignInOpen(true)}><UserRound/> {t.signInToSave}</Button>)}
-        <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="language-control" aria-label="Language"><Globe2/> {LANGS.find(l => l.code === lang)?.short} <ChevronDown/></Button></DropdownMenuTrigger><DropdownMenuContent align="end">{LANGS.map(l => <DropdownMenuItem key={l.code} onSelect={() => setLang(l.code)} aria-current={l.code === lang ? "true" : undefined}>{l.short} · {l.label}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>
+        </> : <Button variant="outline" className="nav-control" onClick={() => setSignInOpen(true)}><UserRound/> {t.signInToSave}</Button>)}
+        <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="nav-control language-control" aria-label="Language"><Globe2/> {LANGS.find(l => l.code === lang)?.short} <ChevronDown/></Button></DropdownMenuTrigger><DropdownMenuContent align="end">{LANGS.map(l => <DropdownMenuItem key={l.code} onSelect={() => setLang(l.code)} aria-current={l.code === lang ? "true" : undefined}>{l.short} · {l.label}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>
+        <Button className="nav-cta" onClick={() => setDirectBooking({ issue: "" })}><CalendarPlus/> {t.bookVisit}</Button>
       </nav>
     </header>
 
