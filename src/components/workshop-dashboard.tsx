@@ -72,7 +72,7 @@ export function WorkshopDashboard() {
 
   let body;
   if (!ready || (user && shop === undefined)) body = <p className="history-note" role="status">Loading…</p>;
-  else if (!user) body = <div className="ws-empty"><Wrench/><h1>Your workshop, with Jackie on the front desk.</h1><p>Drivers explain their trouble to Jackie. You get a clear summary, a rough price and their phone number, ready to call.</p><Button onClick={() => setSignIn(true)}>Sign in to open your workshop</Button></div>;
+  else if (!user) body = <WorkshopPitch onSignIn={() => setSignIn(true)}/>;
   else if (!shop) body = <div className="ws-empty"><Wrench/><h1>Your workshop isn't set up yet</h1><p>AutoJackie's team sets up each workshop personally. If we've onboarded you, sign in with the email you gave us{user.email ? ` (you're signed in as ${user.email})` : ""}.</p>{isAdmin && <Button asChild><Link to="/admin">Go to operations</Link></Button>}</div>;
   else body = <>
     <div className="ws-title"><div><span className="eyebrow">WORKSHOP DASHBOARD</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div><div className="ws-filters"><Button variant={tab === "requests" ? "default" : "outline"} onClick={() => setTab("requests")}>Requests</Button><Button variant={tab === "settings" ? "default" : "outline"} onClick={() => setTab("settings")}>Settings</Button></div></div>

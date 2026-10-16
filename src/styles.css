@@ -322,3 +322,34 @@
 .why-plain a:hover { color: var(--foreground); }
 .chat-empty { justify-content: flex-start; padding-top: 24px; }
 .try-row { margin: 0 0 8px; }
+
+/* Workshop elevator pitch (signed out) */
+.pitch { display: grid; gap: 28px; max-width: 1040px; margin: 0 auto; padding: 8px 0 40px; }
+.pitch-hero { display: grid; grid-template-columns: 1fr 260px; gap: 32px; align-items: center; }
+.pitch-hero h1 { font-size: clamp(1.8rem, 3.4vw, 2.6rem); line-height: 1.1; margin: 8px 0 10px; }
+.pitch-hero p { font-size: 1.1rem; color: var(--muted-foreground); max-width: 46ch; margin: 0 0 18px; }
+.pitch-cta { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.pitch-jackie { margin: 0; text-align: center; }
+.pitch-jackie img { width: 100%; aspect-ratio: 1; object-fit: cover; object-position: center top; border-radius: 50%; border: 3px solid var(--primary); }
+.pitch-jackie figcaption { font-size: .8rem; color: var(--muted-foreground); margin-top: 8px; }
+.pitch-flow { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; counter-reset: none; }
+.pitch-flow li { position: relative; display: grid; gap: 6px; padding: 18px 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
+.pitch-flow li > svg { width: 22px; height: 22px; color: var(--primary); }
+.pitch-flow li span:last-child { font-size: .85rem; color: var(--muted-foreground); }
+.pitch-flow li:not(:last-child)::after { content: "→"; position: absolute; right: -11px; top: 50%; transform: translateY(-50%); color: var(--primary); font-weight: 700; z-index: 1; }
+.pitch-step { position: absolute; top: 10px; right: 12px; font-size: .75rem; font-weight: 700; color: var(--muted-foreground); }
+.pitch-gains ul { list-style: none; padding: 0; margin: 10px 0 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.pitch-gains li { display: grid; gap: 4px; padding: 14px 16px; border-radius: var(--radius); background: color-mix(in oklab, var(--primary) 10%, transparent); }
+.pitch-gains li svg { width: 20px; height: 20px; color: var(--primary); }
+.pitch-gains li span { font-size: .85rem; color: var(--muted-foreground); }
+.pitch-stats { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--border); border-radius: var(--radius); }
+.pitch-stats > div { display: grid; gap: 4px; padding: 18px 20px; text-align: center; }
+.pitch-stats > div + div { border-left: 1px solid var(--border); }
+.pitch-stats strong { font-size: 2rem; color: var(--primary); line-height: 1; }
+.pitch-stats span { font-size: .9rem; }
+.pitch-stats a { font-size: .75rem; color: var(--muted-foreground); }
+@media (max-width: 800px) {
+  .pitch-hero { grid-template-columns: 1fr; } .pitch-jackie { max-width: 180px; }
+  .pitch-flow, .pitch-gains ul { grid-template-columns: 1fr 1fr; } .pitch-flow li::after { display: none; }
+  .pitch-stats { grid-template-columns: 1fr; } .pitch-stats > div + div { border-left: 0; border-top: 1px solid var(--border); }
+}
