@@ -59,6 +59,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
     } catch { /* ignore */ }
   }, [messages, chatId]);
 
+  const quotaHint = quota ? (quota.signedIn ? t.quotaHintUser : t.quotaHintGuest).replace("%n", String(quota.remaining)).replace("%m", String(quota.limit)) : "";
   return <div className="chat-shell">
     {messages.length === 0 ? <div className="chat-empty">
       <h1>{t.heroTitle}</h1>
@@ -105,7 +106,8 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
     <PromptInput className="chat-composer" onSubmit={({ text }) => send(text)}>
       <PromptInputTextarea value={input} onChange={e => setInput(e.target.value)} placeholder={t.placeholder}/>
       <PromptInputFooter>
-        <span className="composer-hint">{saving ? t.savedToChats : ""}</span>
+        <span className="composer-hint">{saving ? t.savedToChats : quotaHint}</span>
+        {!quota?.signedIn && quota != null && quota.remaining <= 2 && onSignIn && <Button variant="ghost" size="sm" type="button" onClick={onSignIn}>{t.signIn}</Button>}
         <div className="composer-actions">
           {messages.length > 0 && !busy && <Button variant="ghost" size="sm" type="button" onClick={() => { setMessages([]); clearError(); onReset?.(); }}><RotateCcw/> New chat</Button>}
           <PromptInputSubmit status={status} onStop={stop} disabled={!busy && !input.trim()}/>
