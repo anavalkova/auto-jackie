@@ -479,3 +479,15 @@
 .consent-page { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
 .consent-card { max-width: 480px; width: 100%; display: grid; gap: 12px; }
 .consent-card h1 { font-size: 22px; margin: 0; }
+/* Overview insights: four compact boxes, two per row */
+.ws-insights { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+.ws-insights .ws-card { padding: 12px 14px; gap: 8px; border-radius: 10px; }
+.ws-insights .ws-card h2 { font-size: 13px; }
+.ws-insights .ws-table { font-size: 12px; }
+.ws-insights .ws-table th { font-size: 10px; padding: 4px 6px; }
+.ws-insights .ws-table td { padding: 4px 6px; }
+.ws-insights .ws-funnel { gap: 5px; }
+.ws-insights .ws-funnel-row { grid-template-columns: 72px 1fr 34px; gap: 8px; font-size: 12px; }
+.ws-insights .ws-hint { font-size: 11px; }
+.ws-insights .ws-pager { margin-top: 6px; }
+@media (max-width: 900px) { .ws-insights { grid-template-columns: 1fr; } }
