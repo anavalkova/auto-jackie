@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { GarageDialog } from "@/components/garage-dialog";
 import { JackieChat } from "@/components/jackie-chat";
-import { BookingPanel, type VisitCard } from "@/components/request-visit-dialog";
+import { BookingPanel, Tip, type VisitCard } from "@/components/request-visit-dialog";
 import { WhyNote } from "@/components/why-note";
 import { SignInDialog } from "@/components/sign-in-dialog";
 import { useSessionUser } from "@/hooks/use-session-user";
