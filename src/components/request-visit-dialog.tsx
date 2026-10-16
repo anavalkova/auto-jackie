@@ -25,7 +25,7 @@ export function RequestVisitDialog({ card, vehicleLabel, onClose }: { card: Visi
   useEffect(() => {
     if (!card) return;
     setState("idle");
-    supabase.from("workshops").select("id,name,city").order("name").then(({ data }) => { setShops(data ?? []); if (data?.[0]) setShopId(s => s || data[0].id); });
+    supabase.from("workshops").select("id,name,city").order("name").then(({ data }) => { setShops(data ?? []); if (data?.[0]) { const first = data[0].id; setShopId(s => s || first); }; });
   }, [card]);
 
   const send = async () => {
