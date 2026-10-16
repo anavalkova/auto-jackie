@@ -9,9 +9,10 @@ import { PromptInput, PromptInputFooter, PromptInputSubmit, PromptInputTextarea 
 import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from "@/components/ai-elements/tool";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
+import { WhyNote } from "@/components/why-note";
 import type { Vehicle } from "@/lib/vehicles";
 
-const starters = ["My brakes squeal and I've been ignoring it for weeks", "An orange light came on and I panicked", "My code reader says P0301 — is it bad?"];
+const starters = ["He said it's “probably nothing” — it was the brakes", "The noise disappears whenever the mechanic gets in", "I named the warning light. We coexist now."];
 
 export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMessages, onTurnFinished, onReset, saving }: {
   vehicle: Vehicle | null; pending: string | null; onPendingSent: () => void;
@@ -37,8 +38,10 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
     {messages.length === 0 ? <div className="chat-empty">
       <h1>Confess your car's sins.</h1>
       <p>Jackie listens without judging — then explains it in plain words, with urgency and a rough price.</p>
-      <div className="try-row"><span>Try:</span>{starters.map(s => <button key={s} type="button" onClick={() => send(s)}>{s}</button>)}</div>
-      <p className="why-plain">Why this exists — 36% of privately owned cars in Sweden are registered to women, yet car talk still assumes everyone speaks “mechanic”. Jackie translates. <a href="https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" target="_blank" rel="noreferrer">Trafikanalys, 2022</a></p>
+      <WhyNote id="driver" title="Car talk assumes everyone speaks 'mechanic'. Most drivers don't — and shouldn't have to." stats={[
+        { value: "36%", text: "of privately owned cars in Sweden are registered to women, yet most workshop communication still assumes deep technical knowledge.", source: { label: "Trafikanalys, 2022", url: "https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" } },
+        { value: "P0301?", text: "Warning lights, HSN/TSN codes, service intervals — the industry speaks in codes. Jackie translates them into plain words, with sources." },
+      ]}/>
     </div> : <Conversation className="chat-log">
       <ConversationContent>
         {messages.map(m => <Message from={m.role} key={m.id}>
@@ -71,6 +74,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
       <ConversationScrollButton/>
     </Conversation>}
 
+    {messages.length === 0 && <div className="try-row"><span>Try:</span>{starters.map(s => <button key={s} type="button" onClick={() => send(s)}>{s}</button>)}</div>}
     <PromptInput className="chat-composer" onSubmit={({ text }) => send(text)}>
       <PromptInputTextarea value={input} onChange={e => setInput(e.target.value)} placeholder="Describe the noise, light or part you're wondering about…"/>
       <PromptInputFooter>
