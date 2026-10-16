@@ -568,3 +568,4 @@
 .vehicle-empty > svg { display: block; width: 16px; height: 16px; flex-shrink: 0; }
 .vehicle-empty button { padding: 0 6px; }
 .field-tip { display: flex; align-items: center; gap: 6px; }
+.assistant-bottom strong { color: var(--foreground); font-weight: 600; }

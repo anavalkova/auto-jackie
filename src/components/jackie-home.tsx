@@ -147,7 +147,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
     <header className="site-header">
       <Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span></Link>
       <nav aria-label="Main navigation">
-        {workshop ? <span className="shop-badge">{workshop.logo && <img src={workshop.logo} alt="" className="shop-logo"/>}<span>{workshop.name}</span></span> : <span className="market-label"><span className="swedish-flag"/>{t.madeForSweden}</span>}
+        {workshop && <span className="shop-badge">{workshop.logo && <img src={workshop.logo} alt="" className="shop-logo"/>}<span>{workshop.name}</span></span>}
         <Button onClick={() => setDirectBooking({ issue: "" })}><CalendarPlus/> {t.bookVisit}</Button>
         {!workshop && <Button variant="ghost" asChild className="workshop-link"><Link to="/workshop">{t.forWorkshops} <ArrowUpRight/></Link></Button>}
         {ready && (user ? <>
@@ -204,7 +204,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
           : initial === null ? <div className="chat-empty"><p>{t.opening}</p></div>
           : <JackieChat key={chatId ?? `new-${newChatKey}`} chatId={chatId} initialMessages={initial} vehicle={vehicle} pending={null} onPendingSent={() => {}} onTurnFinished={onTurnFinished} onReset={onReset} saving={!!user && !!chatId} workshopId={workshop?.id} onSignIn={() => setSignInOpen(true)} onBook={setDirectBooking}/>}
         </div>
-        <div className="assistant-bottom"><span className="swedish-flag"/><span>{t.bottom}</span><Button variant="ghost" size="icon" aria-label={t.about} onClick={() => setInfo("about")}><HelpCircle/></Button></div>
+        <div className="assistant-bottom"><span className="swedish-flag"/><span><strong>{t.madeForSweden}</strong> · {t.bottom}</span><Button variant="ghost" size="icon" aria-label={t.about} onClick={() => setInfo("about")}><HelpCircle/></Button></div>
       </section>
     </main>
 

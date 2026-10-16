@@ -19,3 +19,4 @@
 - [x] Driver page: "Why this exists" as a corner chip in English, Swedish and German, like the workshop tabs.
 - [x] Jackie's portrait: show more of her on desktop, keep her visible on phone view.
 - [x] Booking: inline 3-step flow (no pop-up), day strip + times, EN/SV/DE; Jackie books in chat (free times + confirm).
+- [x] Driver page: "Made for Sweden" moved out of the top bar into the bottom line with the existing note.
