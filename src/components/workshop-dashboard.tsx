@@ -116,12 +116,6 @@ export function WorkshopDashboard() {
     if (error || !data) return;
     setItems(xs => xs.map(x => x.id === data.id ? data : x)); setSelected(data);
   };
-  const setStatus = async (i: Inquiry, status: Status) => {
-    const { data, error } = await supabase.from("inquiries").update({ status }).eq("id", i.id).select("*").single();
-    if (error || !data) { setError(true); return; }
-    setItems(xs => xs.map(x => x.id === data.id ? data : x)); setSelected(data);
-  };
-
   const header = <header className="site-header">
     <Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span><span className="brand-sub">for workshops</span></Link>
     <nav aria-label="Workshop navigation">{isAdmin && <Button variant="outline" asChild><Link to="/admin">Operations</Link></Button>}<Button variant="ghost" asChild><Link to="/">Driver view</Link></Button>{user && <Button variant="ghost" onClick={async () => { await supabase.auth.signOut(); window.location.assign("/workshop"); }}>Sign out</Button>}</nav>
