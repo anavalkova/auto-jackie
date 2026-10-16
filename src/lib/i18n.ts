@@ -71,6 +71,8 @@ const dict = {
       title: "Your phone can keep ringing. Jackie already answered.",
       sub: "Jackie chats with drivers around the clock, in plain words, in three languages. You wake up to booked jobs instead of missed calls.",
       cta: "Sign in to your workshop", ctaNote: "Invite only. We set you up personally.",
+      demoCta: "Explore the demo workshop", demoNote: "Signed in? Open Demo Verkstad in read-only mode and click around freely.",
+      demoBanner: "You're viewing Demo Verkstad, a sample workshop with made-up requests so you can explore every tab. It's read-only: nothing you click can change or break it, and it always stays in this pristine state for the next visitor.",
       jackieCaption: "Jackie. Never sleeps, never judges.",
       steps: [
         { t: "A driver vents", d: "2 a.m., strange noise, mild panic." },
@@ -127,6 +129,8 @@ const dict = {
       title: "Din telefon får gärna ringa. Jackie har redan svarat.",
       sub: "Jackie pratar med förare dygnet runt, med enkla ord, på tre språk. Du vaknar till bokade jobb istället för missade samtal.",
       cta: "Logga in på din verkstad", ctaNote: "Endast inbjudan. Vi sätter upp dig personligen.",
+      demoCta: "Utforska demoverkstaden", demoNote: "Inloggad? Öppna Demo Verkstad i skrivskyddat läge och klicka runt fritt.",
+      demoBanner: "Du tittar på Demo Verkstad, en exempelverkstad med påhittade förfrågningar så att du kan utforska alla flikar. Den är skrivskyddad: inget du klickar på kan ändra eller förstöra den, och den ligger alltid kvar i sitt ursprungsskick för nästa besökare.",
       jackieCaption: "Jackie. Sover aldrig, dömer aldrig.",
       steps: [
         { t: "En förare bikt sig", d: "Klockan två på natten, konstigt ljud, lätt panik." },
@@ -183,6 +187,8 @@ const dict = {
       title: "Dein Telefon darf weiter klingeln. Jackie hat schon abgenommen.",
       sub: "Jackie spricht rund um die Uhr mit Fahrern, in einfachen Worten, in drei Sprachen. Du wachst mit gebuchten Aufträgen auf statt mit verpassten Anrufen.",
       cta: "In deine Werkstatt einloggen", ctaNote: "Nur auf Einladung. Wir richten alles persönlich ein.",
+      demoCta: "Demo-Werkstatt entdecken", demoNote: "Eingeloggt? Öffne die Demo Verkstad im schreibgeschützten Modus und klick dich durch.",
+      demoBanner: "Du siehst die Demo Verkstad, eine Beispielwerkstatt mit erfundenen Anfragen, damit du alle Bereiche erkunden kannst. Sie ist schreibgeschützt: Nichts, was du anklickst, kann sie verändern, und sie bleibt immer im Originalzustand für den nächsten Besucher.",
       jackieCaption: "Jackie. Schläft nie, urteilt nie.",
       steps: [
         { t: "Ein Fahrer beichtet", d: "2 Uhr nachts, komisches Geräusch, leichte Panik." },
