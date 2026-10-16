@@ -74,7 +74,7 @@ const dict = {
         { t: "It lands in your inbox", d: "Car, summary, phone number. You both know what to expect." },
         { t: "The booking comes", d: " You just fix the car." },
       ],
-      gains: ["Drivers don't speak car. Jackie explains it, using your know-how.", "Instant answers and easy booking, like drivers now expect.", "Rough quotes from your own price list, so no sticker shock.", "Your parts, methods and strengths shape every answer.", "Every request, booking and value in one place.", "Your brand, in English, Swedish and German."],
+      gains: ["Drivers don't speak car. Jackie explains with your know-how.", "Instant answers and easy booking, like drivers now expect.", "Rough quotes from your own price list, so no sticker shock.", "Your parts, methods and strengths shape every answer.", "Every request, booking and value in one place.", "Your brand, in English, Swedish and German."],
       stats: [
         { value: "21%", text: "of calls to workshops go unanswered.", src: { label: "Marchex", url: "https://www.marchex.com/up-to-21-percent-of-automotive-service-customer-calls-go-unanswered-creating-significant-revenue-leakage/" } },
         { value: "68%", text: "of missed callers never call back.", src: { label: "Auto Service World", url: "https://www.autoserviceworld.com/phone-fails-lead-to-missed-automotive-service-revenue-report/" } },
