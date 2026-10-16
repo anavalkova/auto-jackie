@@ -201,6 +201,7 @@ function Collapsible({ title, children, defaultOpen = true }: { title: string; c
 function QuoteSection({ item, shopName, onSaved }: { item: Inquiry; shopName: string; onSaved: (d: Inquiry) => void }) {
   const [low, setLow] = useState(item.quote_low_sek ?? item.price_low_sek ?? 0);
   const [high, setHigh] = useState(item.quote_high_sek ?? item.price_high_sek ?? 0);
+  const [adjust, setAdjust] = useState(false);
   const [msg, setMsg] = useState("");
   const jackie = item.price_low_sek != null && item.price_high_sek != null ? `${kr(item.price_low_sek)} to ${kr(item.price_high_sek)}` : null;
   const yours = item.quote_low_sek != null && item.quote_high_sek != null ? `${kr(item.quote_low_sek)} to ${kr(item.quote_high_sek)}` : null;
