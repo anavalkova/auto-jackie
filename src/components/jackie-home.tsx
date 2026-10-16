@@ -147,7 +147,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
     <header className="site-header">
       <Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span></Link>
       <nav aria-label="Main navigation">
-        {workshop && <span className="shop-badge">{workshop.logo && <img src={workshop.logo} alt="" className="shop-logo"/>}<span>{workshop.name}</span></span>}
+        {workshop && <span className="shop-badge">{/^data:image\/(webp|png|jpeg);base64,/.test(workshop.logo) && <img src={workshop.logo} alt="" className="shop-logo"/>}<span>{workshop.name}</span></span>}
         {!workshop && <Button variant="ghost" asChild className="workshop-link"><Link to="/workshop">{t.forWorkshops} <ArrowUpRight/></Link></Button>}
         <span className="nav-divider" aria-hidden="true"/>
         {ready && (user ? <>
