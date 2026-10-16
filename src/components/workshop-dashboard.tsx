@@ -5,7 +5,7 @@ import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 import { ensureOther, OTHER } from "@/lib/services";
 import { TIERS, TIER_INFO, DEFAULT_TIERS, type Tier } from "@/lib/ai-tiers";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CircleHelp, CalendarClock, Car, ChevronDown, Globe2, Inbox, MessageCircle, Moon, Phone, Sparkles, TrendingUp, Wrench } from "lucide-react";
+import { CircleHelp, CalendarCheck, CalendarClock, Car, ChevronDown, Globe2, Inbox, MessageCircle, Moon, Sparkles, TrendingUp, Wrench } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { LANGS, setLang, useT } from "@/lib/i18n";
 import jackieImg from "@/assets/jackie.jpg";
@@ -36,15 +36,15 @@ const WHY: Record<Tab, { id: string; title: string; pitch: string; stats: WhySta
     { value: "63%", text: "of drivers don't trust repair shops. Requests here arrive with an upfront price range already explained.", source: { label: "AAA", url: "https://newsroom.aaa.com/wp-content/uploads/2016/12/Auto-Repair-Survey-FINAL.pdf" } },
     { value: "72%", text: "feel anxious about repair costs. Drivers who used Jackie already have a number in mind.", source: { label: "RepairPal / Harris", url: "https://repairpal.com/consumer-survey-march-2013" } },
   ] },
-  booking: { id: "ws-booking", title: "Bookings that don't depend on your phone.", pitch: "Drivers book online in your open times and get confirmed by email, SMS or WhatsApp, whatever they prefer. No lost booking because nobody picked up or it was after hours.", stats: [
+  booking: { id: "ws-booking", title: "Bookings that don't depend on your phone.", pitch: "Drivers book online in your open times and get confirmed by email, SMS or WhatsApp, whatever they prefer. No lost booking because nobody picked up or it was after hours.", points: ["Drivers are used to AI and instant answers. Booking has to feel just as fast.", "A few taps, no calls, no forms to decode."], stats: [
     { value: "7x", text: "more likely to win a lead when you respond within an hour.", source: { label: "Harvard Business Review", url: "https://hbr.org/2011/03/the-short-life-of-online-sales-leads" } },
     { value: "1 in 4", text: "service bookings end as no-shows. Confirmations in the driver's own channel cut that down.", source: { label: "Solera via Dealership Guy", url: "https://news.dealershipguy.com/p/broken-service-scheduling-is-costing-dealers-big-time-here-s-how-some-are-closing-the-gaps" } },
   ] },
-  context: { id: "ws-context", title: "Your expertise is your advantage. Teach it to Jackie.", pitch: "Your strengths and way of working shape every answer Jackie gives. You also choose how smart she is per job, so you only pay for quality where it wins customers.", points: ["Fair use is built in: guests get 5 questions a month, signed-in drivers 50. Your page can't be overused and your AI costs stay predictable."], stats: [
+  context: { id: "ws-context", title: "Your expertise is your advantage. Teach it to Jackie.", pitch: "Your strengths and way of working shape every answer Jackie gives. You also choose how smart she is per job, so you only pay for quality where it wins customers.", points: ["Drivers don't speak car. Jackie translates for them, using your know-how.", "Your preferred parts, methods and order of work, in every answer.", "She explains, calms and triages. You decide and repair.", "Fair use is built in: guests get 5 questions a month, signed-in drivers 50. Your page can't be overused and your AI costs stay predictable."], stats: [
     { value: "71%", text: "of Swedish drivers pick a workshop for skilled staff, not low price.", source: { label: "OKQ8", url: "https://www.mynewsdesk.com/se/okq8/pressreleases/7-av-10-bilister-efterfraagar-kunnig-verkstadspersonal-visar-ny-undersoekning-922496" } },
     { value: "3 800", text: "workshops in Sweden compete for the same customers.", source: { label: "Mekonomen", url: "https://www.mynewsdesk.com/se/mekonomen/pressreleases/var-tredje-bilaegare-har-kaent-sig-lurad-av-verkstaden-oekad-kunskap-om-godkaend-bilverkstad-kan-vara-en-loesning-3359302" } },
   ] },
-  pricing: { id: "ws-pricing", title: "Your prices, in every quote.", pitch: "Jackie's rough quotes start from your own price list, not a market average. Drivers arrive expecting your number, so fewer surprises at the counter.", stats: [
+  pricing: { id: "ws-pricing", title: "Your prices, in every quote.", pitch: "Jackie's rough quotes start from your own price list, not a market average. Drivers arrive expecting your number, so fewer surprises at the counter.", points: ["Unclear prices scare drivers away. A range in your prices builds trust.", "Unusual jobs go to Other, priced by you after a look."], stats: [
     { value: "72%", text: "of drivers feel anxious about what a repair will cost.", source: { label: "RepairPal / Harris", url: "https://repairpal.com/consumer-survey-march-2013" } },
     { value: "1 in 3", text: "Swedish car owners have felt cheated by a workshop.", source: { label: "Mekonomen", url: "https://www.mynewsdesk.com/se/mekonomen/pressreleases/var-tredje-bilaegare-har-kaent-sig-lurad-av-verkstaden-oekad-kunskap-om-godkaend-bilverkstad-kan-vara-en-loesning-3359302" } },
   ] },
@@ -536,7 +536,7 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
 function WorkshopPitch({ onSignIn }: { onSignIn: () => void }) {
   const { lang, t } = useT();
   const p = t.pitch;
-  const icons = [<MessageCircle key="m"/>, <Sparkles key="s"/>, <Inbox key="i"/>, <Phone key="p"/>];
+  const icons = [<MessageCircle key="m"/>, <Sparkles key="s"/>, <Inbox key="i"/>, <CalendarCheck key="p"/>];
   return <div className="pitch">
     <section className="pitch-hero">
       <div>
