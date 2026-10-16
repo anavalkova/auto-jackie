@@ -46,7 +46,7 @@ export const setUpDemoWorkshop = createServerFn({ method: "POST" })
         { issue: "Engine light on, code P0301", urgency: "today", price_low_sek: 800, price_high_sek: 2500, note: "Misfire cylinder 1 — coil or spark plug", vehicle_label: "VW Golf 2016", contact_name: "Sara Nilsson", contact_phone: "073 444 55 66", message: "It shakes at red lights. Can I still drive to you?", status: "new" as const, created_at: new Date(now - 5 * 3600_000).toISOString() },
         { issue: "Timing belt due at 150,000 km", urgency: "next service", price_low_sek: 6000, price_high_sek: 9000, note: "Belt, tensioner and water pump together", vehicle_label: "Skoda Octavia 2014", contact_name: "Johan Berg", contact_phone: "076 777 88 99", status: "contacted" as const, created_at: new Date(now - day).toISOString() },
         { issue: "Winter tyre change", urgency: "soon", price_low_sek: 500, price_high_sek: 900, note: "Swap and balance, storage optional", vehicle_label: "Toyota RAV4 2021", contact_name: "Lina Ek", contact_phone: "072 123 98 76", status: "booked" as const, created_at: new Date(now - 3 * day).toISOString() },
-      ].map(i => ({ ...i, workshop_id: workshopId!, driver_id: demo!.id })));
+      ].map(i => ({ message: "", ...i, workshop_id: workshopId!, driver_id: demo!.id })));
     }
     return { email: DEMO_EMAIL, password };
   });
