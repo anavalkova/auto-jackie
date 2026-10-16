@@ -61,6 +61,7 @@ const when = (d: string) => new Date(d).toLocaleString("en-GB", { timeZone: "Eur
 const mid = (i: Inquiry) => i.price_low_sek != null && i.price_high_sek != null ? (i.price_low_sek + i.price_high_sek) / 2 : 0;
 
 export function WorkshopDashboard() {
+  const { lang } = useT();
   const { user, ready, isAdmin } = useAccess();
   const [tab, setTab] = useState<Tab>("overview");
   const [shop, setShop] = useState<Shop | null | undefined>(undefined);
@@ -121,7 +122,7 @@ export function WorkshopDashboard() {
   };
   const header = <header className="site-header">
     <Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span><span className="brand-sub">for workshops</span></Link>
-    <nav aria-label="Workshop navigation">{isAdmin && <Button variant="outline" asChild><Link to="/admin">Operations</Link></Button>}<Button variant="ghost" asChild><Link to="/">Driver view</Link></Button>{user && <Button variant="ghost" onClick={async () => { await supabase.auth.signOut(); window.location.assign("/workshop"); }}>Sign out</Button>}</nav>
+    <nav aria-label="Workshop navigation">{isAdmin && <Button variant="outline" asChild><Link to="/admin">Operations</Link></Button>}<DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="sm" className="language-control" aria-label="Language"><Globe2/> {LANGS.find(l => l.code === lang)?.short} <ChevronDown/></Button></DropdownMenuTrigger><DropdownMenuContent align="end">{LANGS.map(l => <DropdownMenuItem key={l.code} onSelect={() => setLang(l.code)} aria-current={l.code === lang ? "true" : undefined}>{l.short} · {l.label}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu><Button variant="ghost" asChild><Link to="/">Driver view</Link></Button>{user && <Button variant="ghost" onClick={async () => { await supabase.auth.signOut(); window.location.assign("/workshop"); }}>Sign out</Button>}</nav>
   </header>;
 
   let body;
@@ -534,17 +535,13 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
 }
 
 function WorkshopPitch({ onSignIn }: { onSignIn: () => void }) {
-  const { lang, t } = useT();
+  const { t } = useT();
   const p = t.pitch;
   const icons = [<MessageCircle key="m"/>, <Sparkles key="s"/>, <Inbox key="i"/>, <CalendarCheck key="p"/>];
   return <div className="pitch">
     <section className="pitch-hero">
       <div>
-        <div className="pitch-top"><span className="eyebrow">{p.eyebrow}</span>
-          <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" size="sm" className="language-control" aria-label="Language"><Globe2/> {LANGS.find(l => l.code === lang)?.short} <ChevronDown/></Button></DropdownMenuTrigger>
-            <DropdownMenuContent align="end">{LANGS.map(l => <DropdownMenuItem key={l.code} onSelect={() => setLang(l.code)} aria-current={l.code === lang ? "true" : undefined}>{l.short} · {l.label}</DropdownMenuItem>)}</DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        <span className="eyebrow">{p.eyebrow}</span>
         <h1>{p.title}</h1>
         <p>{p.sub}</p>
         <div className="pitch-cta"><Button onClick={onSignIn}>{p.cta}</Button><span className="history-note">{p.ctaNote}</span></div>
