@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as WorkshopRouteImport } from './routes/workshop'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as CChatIdRouteImport } from './routes/c.$chatId'
@@ -18,6 +19,11 @@ import { Route as ApiVehiclesLookupRouteImport } from './routes/api/vehicles.loo
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WorkshopRoute = WorkshopRouteImport.update({
@@ -43,6 +49,7 @@ const ApiVehiclesLookupRoute = ApiVehiclesLookupRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/workshop': typeof WorkshopRoute
   '/api/chat': typeof ApiChatRoute
   '/c/$chatId': typeof CChatIdRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/workshop': typeof WorkshopRoute
   '/api/chat': typeof ApiChatRoute
   '/c/$chatId': typeof CChatIdRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/workshop': typeof WorkshopRoute
   '/api/chat': typeof ApiChatRoute
   '/c/$chatId': typeof CChatIdRoute
@@ -66,12 +75,24 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/workshop' | '/api/chat' | '/c/$chatId' | '/api/vehicles/lookup'
+    | '/'
+    | '/admin'
+    | '/workshop'
+    | '/api/chat'
+    | '/c/$chatId'
+    | '/api/vehicles/lookup'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/workshop' | '/api/chat' | '/c/$chatId' | '/api/vehicles/lookup'
+  to:
+    | '/'
+    | '/admin'
+    | '/workshop'
+    | '/api/chat'
+    | '/c/$chatId'
+    | '/api/vehicles/lookup'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/workshop'
     | '/api/chat'
     | '/c/$chatId'
@@ -80,6 +101,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   WorkshopRoute: typeof WorkshopRoute
   ApiChatRoute: typeof ApiChatRoute
   CChatIdRoute: typeof CChatIdRoute
@@ -93,6 +115,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/workshop': {
@@ -128,6 +157,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   WorkshopRoute: WorkshopRoute,
   ApiChatRoute: ApiChatRoute,
   CChatIdRoute: CChatIdRoute,

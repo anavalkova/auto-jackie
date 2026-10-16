@@ -1,0 +1,89 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useCallback, useEffect, useState } from "react";
+import { ShieldCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { SignInDialog } from "@/components/sign-in-dialog";
+import { useAccess } from "@/hooks/use-access";
+import { supabase } from "@/integrations/supabase/client";
+import { setUpDemoWorkshop } from "@/lib/admin.functions";
+
+export const Route = createFileRoute("/admin")({
+  ssr: false,
+  head: () => ({ meta: [
+    { title: "Operations — AutoJackie" },
+    { name: "description", content: "AutoJackie operations: onboard partner workshops." },
+    { property: "og:title", content: "Operations — AutoJackie" },
+    { property: "og:description", content: "Internal operations panel for onboarding AutoJackie workshops." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+    { name: "robots", content: "noindex" },
+  ] }),
+  component: AdminPage,
+});
+
+type Row = { id: string; name: string; city: string; created_at: string; email: string; claimed: boolean };
+
+function AdminPage() {
+  const { user, ready, isAdmin } = useAccess();
+  const [rows, setRows] = useState<Row[]>([]);
+  const [name, setName] = useState(""); const [email, setEmail] = useState(""); const [city, setCity] = useState("");
+  const [busy, setBusy] = useState(false); const [msg, setMsg] = useState("");
+  const [demo, setDemo] = useState<{ email: string; password: string } | null>(null);
+  const [signIn, setSignIn] = useState(false);
+  const demoFn = useServerFn(setUpDemoWorkshop);
+
+  const load = useCallback(async () => {
+    const [{ data: ws }, { data: inv }] = await Promise.all([
+      supabase.from("workshops").select("id,name,city,created_at").order("created_at", { ascending: false }),
+      supabase.from("workshop_invites").select("workshop_id,email,claimed_at"),
+    ]);
+    setRows((ws ?? []).map(w => { const i = inv?.find(x => x.workshop_id === w.id); return { ...w, email: i?.email ?? "—", claimed: !!i?.claimed_at }; }));
+  }, []);
+  useEffect(() => { if (isAdmin) void load(); }, [isAdmin, load]);
+
+  const onboard = async () => {
+    setBusy(true); setMsg("");
+    const { error } = await supabase.rpc("admin_onboard_workshop", { _name: name, _email: email, _city: city });
+    setBusy(false);
+    if (error) return setMsg("Couldn't onboard — check the name and email.");
+    setMsg(`${name} is ready. When ${email} signs in, they'll land in their dashboard.`);
+    setName(""); setEmail(""); setCity(""); void load();
+  };
+  const makeDemo = async () => {
+    setBusy(true); setMsg("");
+    try { setDemo(await demoFn()); void load(); } catch { setMsg("Couldn't set up the demo workshop."); }
+    setBusy(false);
+  };
+
+  return <div className="app-frame">
+    <header className="site-header">
+      <Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span><span className="brand-sub">operations</span></Link>
+      <nav><Button variant="ghost" asChild><Link to="/workshop">Workshop view</Link></Button></nav>
+    </header>
+    <main className="ws-main">
+      {!ready ? <p className="history-note" role="status">Loading…</p>
+        : !user ? <div className="ws-empty"><ShieldCheck/><h1>Operations team only</h1><Button onClick={() => setSignIn(true)}>Sign in</Button></div>
+        : !isAdmin ? <div className="ws-empty"><ShieldCheck/><h1>Operations team only</h1><p>This account isn't an AutoJackie admin.</p></div>
+        : <>
+          <div className="ws-title"><div><span className="eyebrow">OPERATIONS</span><h1>Onboard a workshop</h1><p className="history-note">Each workshop gets its own space, started from the standard template (rates, opening hours, services).</p></div></div>
+          <form className="admin-form" onSubmit={e => { e.preventDefault(); void onboard(); }}>
+            <div><Label htmlFor="a-name">Workshop name</Label><Input id="a-name" required minLength={2} maxLength={80} value={name} onChange={e => setName(e.target.value)}/></div>
+            <div><Label htmlFor="a-email">Owner's email</Label><Input id="a-email" required type="email" value={email} onChange={e => setEmail(e.target.value)}/></div>
+            <div><Label htmlFor="a-city">City (optional)</Label><Input id="a-city" maxLength={60} value={city} onChange={e => setCity(e.target.value)}/></div>
+            <Button type="submit" disabled={busy}>Onboard</Button>
+          </form>
+          {msg && <p className="history-note" role="status">{msg}</p>}
+
+          <div className="ws-title admin-demo"><div><span className="eyebrow">DEMO</span><h2>Demo Verkstad for judges</h2><p className="history-note">Creates the demo workshop with sample requests the first time. Each click issues a new password.</p></div><Button variant="outline" onClick={() => void makeDemo()} disabled={busy}>Set up / reset demo login</Button></div>
+          {demo && <div className="offer-card"><span className="eyebrow">DEMO LOGIN — COPY IT NOW</span><p>Email: <strong>{demo.email}</strong></p><p>Password: <strong>{demo.password}</strong></p></div>}
+
+          <h2 className="admin-h2">Workshops ({rows.length})</h2>
+          <ul className="ws-list">{rows.map(r => <li key={r.id} className="admin-row"><strong>{r.name}</strong><span>{r.city}</span><span>{r.email}</span><span className={`ws-status ${r.claimed ? "s-booked" : ""}`}>{r.claimed ? "Signed in" : "Invited"}</span></li>)}</ul>
+        </>}
+    </main>
+    <SignInDialog open={signIn} onOpenChange={setSignIn}/>
+  </div>;
+}

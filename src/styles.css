@@ -274,3 +274,13 @@
   .ws-row .ws-row-main { grid-column: 1 / -1; grid-row: 1; }
   .ws-row time, .ws-price { display: none; }
 }
+.admin-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; align-items: end; margin-bottom: 12px; }
+.admin-form > div { display: grid; gap: 6px; }
+.admin-demo { margin-top: 32px; }
+.admin-demo h2, .admin-h2 { font-size: 20px; margin: 4px 0; }
+.admin-h2 { margin: 28px 0 12px; }
+.admin-row { display: grid; grid-template-columns: 1.4fr 1fr 1.6fr 100px; gap: 12px; align-items: center; padding: 12px 16px; font-size: 14px; }
+.ws-settings { max-width: 560px; }
+.ws-settings fieldset { border: 0; padding: 0; margin: 0; }
+.ws-textarea { height: 140px; padding: 8px 10px; resize: vertical; }
+@media (max-width: 900px) { .admin-form, .admin-row { grid-template-columns: 1fr; } }

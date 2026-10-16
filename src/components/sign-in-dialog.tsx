@@ -1,22 +1,32 @@
 import { useState } from "react";
 import "@lovable.dev/cloud-auth-js/styles.css";
 import { lovable } from "@/integrations/lovable/index";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export function SignInDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const [error, setError] = useState("");
+  const [withPassword, setWithPassword] = useState(false);
+  const [email, setEmail] = useState(""); const [password, setPassword] = useState("");
   const go = async (provider: "google" | "lovable") => {
     setError("");
     const r = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin });
     if (r.error) return setError("Sign-in didn't go through. Please try again.");
     if (!r.redirected) onOpenChange(false);
   };
+  const passwordSignIn = async () => {
+    setError("");
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    if (error) return setError("That email and password didn't match.");
+    onOpenChange(false);
+  };
   return <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="signin-dialog">
       <DialogHeader>
-        <DialogTitle>Save your car and chats</DialogTitle>
-        <DialogDescription>Signing in is optional. Without it, Jackie forgets your car and the conversation when you start over or close the tab.</DialogDescription>
+        <DialogTitle>Sign in to AutoJackie</DialogTitle>
+        <DialogDescription>Drivers: optional — it saves your car and chats. Workshops: use the email we set you up with.</DialogDescription>
       </DialogHeader>
       <ul className="signin-perks">
         <li>Your car is remembered next time</li>
@@ -28,6 +38,12 @@ export function SignInDialog({ open, onOpenChange }: { open: boolean; onOpenChan
         Continue with Google
       </Button>
       <button type="button" className="lovable-auth-button" onClick={() => go("lovable")}>Continue with Lovable</button>
+      {!withPassword ? <Button variant="link" onClick={() => setWithPassword(true)}>Have a workshop or demo password?</Button>
+        : <form className="visit-form" onSubmit={e => { e.preventDefault(); void passwordSignIn(); }}>
+          <Input type="email" required aria-label="Email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)}/>
+          <Input type="password" required aria-label="Password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)}/>
+          <Button type="submit">Sign in</Button>
+        </form>}
       {error && <p className="garage-error" role="alert">{error}</p>}
     </DialogContent>
   </Dialog>;
