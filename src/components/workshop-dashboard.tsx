@@ -305,10 +305,6 @@ const HOURS = Array.from({ length: 12 }, (_, i) => i + 7);
 
 const AHEAD = [{ d: 30, l: "1 month" }, { d: 60, l: "2 months" }, { d: 90, l: "3 months" }, { d: 180, l: "6 months" }, { d: 365, l: "1 year" }];
 
-function closedLabel(k: string) {
-  const day = new Date(`${k.slice(0, 10)}T12:00:00Z`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
-  return k.length > 10 ? `${day}, ${k.slice(11)}:00` : `${day}, all day`;
-}
 
 function dayLabel(d: string) {
   return new Date(`${d}T12:00:00Z`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
