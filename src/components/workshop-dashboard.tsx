@@ -1,5 +1,6 @@
 import { slotLabel } from "@/lib/booking";
 import { Link } from "@tanstack/react-router";
+import { TIERS, TIER_INFO, DEFAULT_TIERS, type Tier } from "@/lib/ai-tiers";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BadgeCheck, CalendarClock, Car, Clock, Inbox, MessageCircle, Moon, Phone, ShieldCheck, Sparkles, TrendingUp, Wrench } from "lucide-react";
 import jackieImg from "@/assets/jackie.jpg";
@@ -15,7 +16,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 type Inquiry = Database["public"]["Tables"]["inquiries"]["Row"];
 type Status = Database["public"]["Enums"]["inquiry_status"];
-type Shop = { id: string; name: string; city: string; vat_number: string; role: string };
+type Shop = { id: string; name: string; city: string; vat_number: string; slug: string | null; role: string };
 type Tab = "overview" | "booking" | "context" | "profile";
 const TABS: { id: Tab; label: string }[] = [
   { id: "overview", label: "Overview" }, { id: "booking", label: "Booking" }, { id: "context", label: "Jackie's context" }, { id: "profile", label: "Profile" },
@@ -33,7 +34,7 @@ const WHY: Record<Tab, { id: string; title: string; pitch: string; stats: WhySta
     { value: "7x", text: "more likely to win a lead when you respond within an hour.", source: { label: "Harvard Business Review", url: "https://hbr.org/2011/03/the-short-life-of-online-sales-leads" } },
     { value: "1 in 4", text: "service bookings end as no-shows. Confirmations in the driver's own channel cut that down.", source: { label: "Solera via Dealership Guy", url: "https://news.dealershipguy.com/p/broken-service-scheduling-is-costing-dealers-big-time-here-s-how-some-are-closing-the-gaps" } },
   ] },
-  context: { id: "ws-context", title: "Your expertise is your advantage. Teach it to Jackie.", pitch: "Your prices, specialties and way of working shape every answer Jackie gives. Drivers see why your workshop fits them, not just another price.", stats: [
+  context: { id: "ws-context", title: "Your expertise is your advantage. Teach it to Jackie.", pitch: "Your specialties, way of working and Jackie's brain shape every answer Jackie gives. Drivers see why your workshop fits them, not just another price.", stats: [
     { value: "71%", text: "of Swedish drivers pick a workshop for skilled staff, not low price.", source: { label: "OKQ8", url: "https://www.mynewsdesk.com/se/okq8/pressreleases/7-av-10-bilister-efterfraagar-kunnig-verkstadspersonal-visar-ny-undersoekning-922496" } },
     { value: "3 800", text: "workshops in Sweden compete for the same customers.", source: { label: "Mekonomen", url: "https://www.mynewsdesk.com/se/mekonomen/pressreleases/var-tredje-bilaegare-har-kaent-sig-lurad-av-verkstaden-oekad-kunskap-om-godkaend-bilverkstad-kan-vara-en-loesning-3359302" } },
   ] },
@@ -61,8 +62,8 @@ export function WorkshopDashboard() {
 
   const loadShop = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase.from("workshop_members").select("role, workshops(id,name,city,vat_number)").eq("user_id", user.id).limit(1).maybeSingle();
-    const w = data?.workshops as { id: string; name: string; city: string; vat_number: string } | null | undefined;
+    const { data } = await supabase.from("workshop_members").select("role, workshops(id,name,city,vat_number,slug)").eq("user_id", user.id).limit(1).maybeSingle();
+    const w = data?.workshops as { id: string; name: string; city: string; vat_number: string; slug: string | null } | null | undefined;
     setShop(w ? { ...w, role: data!.role } : null);
   }, [user?.id]);
   useEffect(() => { if (ready && user) void loadShop(); }, [ready, loadShop]);
@@ -242,18 +243,17 @@ function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
 function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit: boolean }) {
   const { s, setS, save, state } = useSettings(workshopId);
   if (!s) return <p className="history-note" role="status">Loading…</p>;
-  const prices = s.price_list as PriceItem[];
-  const setP = (p: PriceItem[]) => setS({ ...s, price_list: p });
   const services = (s.services as string[]).join("\n");
-  return <form className="ws-section" onSubmit={e => { e.preventDefault(); void save({ hourly_rate_sek: s.hourly_rate_sek, price_list: prices.filter(p => p.task.trim()), services: (s.services as string[]).map(x => x.trim()).filter(Boolean), specialties: s.specialties, jackie_context: s.jackie_context }); }}>
-    <p className="ws-section-intro">This is what makes Jackie sound like your workshop. Your prices, your strengths, the way you like to work.</p>
+  return <form className="ws-section" onSubmit={e => { e.preventDefault(); void save({ ai_chat_tier: s.ai_chat_tier, ai_quote_tier: s.ai_quote_tier, services: (s.services as string[]).map(x => x.trim()).filter(Boolean), specialties: s.specialties, jackie_context: s.jackie_context }); }}>
+    <p className="ws-section-intro">This is what makes Jackie sound like your workshop. Your strengths, the way you like to work, and how smart she should be.</p>
     <fieldset disabled={!canEdit} className="ws-grid2" style={{ border: 0, padding: 0, margin: 0 }}>
-      <section className="ws-card"><h2>Your prices (incl. VAT)</h2>
-        <Label htmlFor="c-rate">Hourly labour rate (kr)</Label><Input id="c-rate" type="number" min={0} max={10000} value={s.hourly_rate_sek} onChange={e => setS({ ...s, hourly_rate_sek: Number(e.target.value) })}/>
-        <table className="ws-table"><thead><tr><th>Standard job</th><th>Price (kr)</th><th/></tr></thead><tbody>
-          {prices.map((p, i) => <tr key={i}><td><Input aria-label="Job" maxLength={80} value={p.task} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, task: e.target.value } : x))}/></td><td><Input aria-label="Price" type="number" min={0} max={200000} value={p.price_sek} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></td><td><Button type="button" size="sm" variant="ghost" aria-label="Remove" onClick={() => setP(prices.filter((_, j) => j !== i))}>×</Button></td></tr>)}
-        </tbody></table>
-        <div><Button type="button" size="sm" variant="outline" onClick={() => setP([...prices, { task: "", price_sek: 0 }])}>Add price</Button></div>
+      <section className="ws-card ws-span" style={{ gridColumn: "1 / -1" }}><h2>Jackie's brain</h2>
+        <p className="history-note">Pick how smart Jackie is for each job. Smarter means better answers but higher running costs, which may change your AutoJackie price. Changes apply to the next conversation.</p>
+        <div className="ws-tiers">
+          <TierRow title="Everyday chat" hint="Answering drivers' questions. Most of the volume, so cost adds up here." value={s.ai_chat_tier as Tier} recommended={DEFAULT_TIERS.chat} onChange={v => setS({ ...s, ai_chat_tier: v })}/>
+          <TierRow title="Rough quotes" hint="Drafting the price range a driver sees. Rare, but accuracy builds trust." value={s.ai_quote_tier as Tier} recommended={DEFAULT_TIERS.quote} onChange={v => setS({ ...s, ai_quote_tier: v })}/>
+        </div>
+        <div><Button type="button" size="sm" variant="outline" onClick={() => setS({ ...s, ai_chat_tier: DEFAULT_TIERS.chat, ai_quote_tier: DEFAULT_TIERS.quote })}>Reset to recommended</Button></div>
       </section>
       <section className="ws-card"><h2>What you're good at</h2>
         <Label htmlFor="c-serv">Services you offer (one per line)</Label><textarea id="c-serv" className="native-select ws-textarea" value={services} onChange={e => setS({ ...s, services: e.target.value.split("\n") })}/>
@@ -268,13 +268,30 @@ function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
   </form>;
 }
 
+function TierRow({ title, hint, value, recommended, onChange }: { title: string; hint: string; value: Tier; recommended: Tier; onChange: (t: Tier) => void }) {
+  const diff = TIER_INFO[value].costFactor / TIER_INFO[recommended].costFactor;
+  return <div className="ws-tier-row">
+    <div><h3>{title}</h3><p className="history-note">{hint}</p></div>
+    <div>
+      <div className="ws-tier-options" role="group" aria-label={title}>{TIERS.map(t => <button key={t} type="button" className="ws-tier-opt" aria-pressed={value === t} onClick={() => onChange(t)}>
+        <strong><span>{TIER_INFO[t].label}{t === recommended ? " ★" : ""}</span><span>{TIER_INFO[t].cost}</span></strong>{TIER_INFO[t].text}</button>)}</div>
+      {value !== recommended && <p className="ws-tier-warn">{diff > 1 ? `About ${Math.round(diff)}× the running cost of the recommended setting. This may raise your monthly price.` : "Cheaper, but answers may be less careful. Recommended (★) is the best balance."}</p>}
+    </div>
+  </div>;
+}
+
 function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean; onSaved: () => void }) {
   const { s, setS, save, state } = useSettings(shop.id);
   const [city, setCity] = useState(shop.city);
   if (!s) return <p className="history-note" role="status">Loading…</p>;
+  const prices = s.price_list as PriceItem[];
+  const setP = (p: PriceItem[]) => setS({ ...s, price_list: p });
+  const link = shop.slug && typeof window !== "undefined" ? `${window.location.origin}/w/${shop.slug}` : "";
   const submit = async () => {
     if (city !== shop.city) { await supabase.from("workshops").update({ city }).eq("id", shop.id); onSaved(); }
-    await save({ phone: s.phone, address: s.address, opening_hours: s.opening_hours, contact_email: s.contact_email, website: s.website });
+    await save({ phone: s.phone, address: s.address, opening_hours: s.opening_hours, contact_email: s.contact_email, website: s.website,
+      hourly_rate_sek: s.hourly_rate_sek, price_list: prices.filter(p => p.task.trim()),
+      brand_accent: /^#[0-9a-fA-F]{6}$/.test(s.brand_accent) ? s.brand_accent : "", brand_logo_url: /^https:\/\//.test(s.brand_logo_url) ? s.brand_logo_url : "", brand_greeting: s.brand_greeting });
   };
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); void submit(); }}>
     <p className="ws-section-intro">How drivers find and reach you. Set up by AutoJackie at onboarding. Keep it up to date.</p>
@@ -289,9 +306,32 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
       <div><Label htmlFor="p-web">Website</Label><Input id="p-web" maxLength={200} value={s.website} onChange={e => setS({ ...s, website: e.target.value })}/></div>
       <p className="history-note ws-span">Company name and VAT number are managed by AutoJackie. Contact us to change them.</p>
     </fieldset>
+    <fieldset disabled={!canEdit} className="ws-grid2" style={{ border: 0, padding: 0, margin: 0 }}>
+      <section className="ws-card"><h2>Your brand</h2>
+        <p className="history-note">Your own Jackie page for drivers. Share it on your website, Google profile or SMS.</p>
+        {link && <div className="ws-chips"><a href={link} target="_blank" rel="noreferrer" className="text-link">{link}</a><Button type="button" size="sm" variant="outline" onClick={() => void navigator.clipboard?.writeText(link)}>Copy</Button></div>}
+        <Label htmlFor="b-accent">Accent color</Label>
+        <div className="ws-chips"><input id="b-accent" type="color" value={s.brand_accent || "#f2711c"} onChange={e => setS({ ...s, brand_accent: e.target.value })}/>{s.brand_accent && <Button type="button" size="sm" variant="ghost" onClick={() => setS({ ...s, brand_accent: "" })}>Use AutoJackie orange</Button>}</div>
+        <Label htmlFor="b-logo">Logo link (https)</Label><Input id="b-logo" maxLength={500} placeholder="https://yourworkshop.se/logo.png" value={s.brand_logo_url} onChange={e => setS({ ...s, brand_logo_url: e.target.value })}/>
+        <Label htmlFor="b-greet">Greeting line</Label><Input id="b-greet" maxLength={160} placeholder="Welcome to Demo Verkstad. Tell Jackie what's up." value={s.brand_greeting} onChange={e => setS({ ...s, brand_greeting: e.target.value })}/>
+        <div className="ws-brand-preview" style={s.brand_accent ? { ["--primary" as string]: s.brand_accent } : undefined} aria-label="Preview">
+          <span className="shop-badge">{/^https:\/\//.test(s.brand_logo_url) && <img src={s.brand_logo_url} alt="" className="shop-logo"/>}<span>{shop.name}</span></span>
+          <span className="shop-greeting">{s.brand_greeting || "Your greeting appears here."}</span>
+          <span className="preview-btn" style={{ background: "var(--primary)" }}>Book a visit</span>
+        </div>
+      </section>
+      <section className="ws-card"><h2>Your prices (incl. VAT)</h2>
+        <p className="history-note">Jackie bases rough quotes on these when a job matches.</p>
+        <Label htmlFor="c-rate">Hourly labour rate (kr)</Label><Input id="c-rate" type="number" min={0} max={10000} value={s.hourly_rate_sek} onChange={e => setS({ ...s, hourly_rate_sek: Number(e.target.value) })}/>
+        <table className="ws-table"><thead><tr><th>Standard job</th><th>Price (kr)</th><th/></tr></thead><tbody>
+          {prices.map((p, i) => <tr key={i}><td><Input aria-label="Job" maxLength={80} value={p.task} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, task: e.target.value } : x))}/></td><td><Input aria-label="Price" type="number" min={0} max={200000} value={p.price_sek} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></td><td><Button type="button" size="sm" variant="ghost" aria-label="Remove" onClick={() => setP(prices.filter((_, j) => j !== i))}>×</Button></td></tr>)}
+        </tbody></table>
+        <div><Button type="button" size="sm" variant="outline" onClick={() => setP([...prices, { task: "", price_sek: 0 }])}>Add price</Button></div>
+      </section>
+    </fieldset>
     <SaveRow canEdit={canEdit} state={state}/>
     <section className="ws-card ws-soon"><div className="ws-soon-head"><h2>Pricing engine</h2><span className="ws-status">Coming soon</span></div>
-      <p className="history-note">Fine-tune how Jackie builds indicative quotes for you: parts margins, brand and car-age multipliers, seasonal campaigns and price floors. More competitive quotes, still on your terms.</p></section>
+      <p className="history-note">Next step for the prices above: parts margins, brand and car-age multipliers, seasonal campaigns and price floors. More competitive quotes, still on your terms.</p></section>
   </form>;
 }
 
