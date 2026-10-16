@@ -372,3 +372,12 @@
   .ws-overview .ws-kpis { grid-template-columns: repeat(2, minmax(0,1fr)); }
 }
 @media (max-width: 640px) { .ws-settings fieldset.visit-form { grid-template-columns: 1fr; } }
+
+/* Booking time picker */
+.slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; margin-top: 6px; }
+.slot-day { display: flex; flex-direction: column; gap: 4px; }
+.slot-day-name { font-size: 12px; color: var(--muted-foreground); text-align: center; }
+.slot { border: 1px solid var(--border); border-radius: 8px; padding: 5px 8px; font-size: 13px; background: var(--background); color: var(--foreground); cursor: pointer; }
+.slot:disabled { opacity: .4; cursor: not-allowed; }
+.slot.is-on { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+.channel-row { display: flex; gap: 8px; margin-top: 6px; }
