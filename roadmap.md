@@ -21,3 +21,4 @@
 - [x] Booking: inline 3-step flow (no pop-up), day strip + times, EN/SV/DE; Jackie books in chat (free times + confirm).
 - [x] Driver page: "Made for Sweden" moved out of the top bar into the bottom line with the existing note.
 - [x] Driver page: dropped the "Chats saved"/"Private chat" badge from the chat header (already covered by the note under the message box and the chat-history panel).
+- [x] "Add your car" row: single car icon + label, discreet chevron at the right edge; whole row clickable.
