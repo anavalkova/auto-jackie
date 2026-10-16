@@ -1,5 +1,6 @@
 import { tool, streamText, Output, type LanguageModel } from "ai";
 import { z } from "zod";
+import { matchService, OTHER, type ServiceItem } from "@/lib/services";
 
 const quoteSchema = z.object({
   priceLowSek: z.number().int().min(0).max(200000),
@@ -8,7 +9,7 @@ const quoteSchema = z.object({
 });
 
 // Chat runs on a cheap model; the price estimate is drafted by a stronger model only when this tool fires.
-export function createSuggestWorkshopVisit(quoteModel: LanguageModel, effort: "low" | "medium" = "low", workshopPricing = "") {
+export function createSuggestWorkshopVisit(quoteModel: LanguageModel, effort: "low" | "medium" = "low", workshopPricing = "", services: ServiceItem[] = []) {
   return tool({
     description: "Show the driver a card with what happens next: urgency, a rough indicative price range in SEK incl. 25% VAT (drafted by a pricing specialist), and a button to request a workshop visit. Call at most once per answer, only when the issue needs professional hands.",
     inputSchema: z.object({
@@ -26,8 +27,9 @@ export function createSuggestWorkshopVisit(quoteModel: LanguageModel, effort: "l
         providerOptions: { openai: { forceReasoning: true, reasoningEffort: effort, store: false } },
       });
       const q = await result.output;
+      const service = services.length ? matchService(issue, services) : undefined;
       const low = Math.min(q.priceLowSek, q.priceHighSek), high = Math.max(q.priceLowSek, q.priceHighSek);
-      return { shown: true, issue, urgency, priceLowSek: low, priceHighSek: high, note: q.note.slice(0, 160) };
+      return { shown: true, issue, ...(service ? { service } : {}), urgency, priceLowSek: low, priceHighSek: high, note: q.note.slice(0, 160) };
     },
   });
 }

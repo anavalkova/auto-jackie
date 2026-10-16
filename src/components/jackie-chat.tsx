@@ -68,7 +68,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
                   <span className="offer-urgency">{t.getLooked} {o.urgency}</span>
                   {o.priceLowSek != null && o.priceHighSek != null && <p className="offer-price">{t.about_} {o.priceLowSek.toLocaleString("sv-SE")} {t.to} {o.priceHighSek.toLocaleString("sv-SE")} kr <small>{t.vatNote}</small></p>}
                   {o.note && <p className="offer-note">{o.note}</p>}
-                  <Button onClick={() => setBooking({ issue: o.issue ?? "", urgency: o.urgency, priceLowSek: o.priceLowSek, priceHighSek: o.priceHighSek, note: o.note })}><CalendarCheck/> {t.requestVisit}</Button>
+                  <Button onClick={() => setBooking({ issue: o.issue ?? "", service: o.service, urgency: o.urgency, priceLowSek: o.priceLowSek, priceHighSek: o.priceHighSek, note: o.note })}><CalendarCheck/> {t.requestVisit}</Button>
                 </div>;
               }
               if (isToolUIPart(part)) {
