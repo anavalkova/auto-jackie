@@ -244,7 +244,7 @@
 .native-select { height: 36px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; background: var(--card); color: var(--foreground); font: inherit; font-size: 14px; }
 .ws-title { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
 .ws-title h1 { font-size: 28px; margin: 4px 0 0; }
-.ws-kpis { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 20px; }
+.ws-kpis { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 14px; }
 .ws-kpi { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--secondary); min-height: 0; }
 .ws-kpi > svg { color: var(--primary); width: 15px; height: 15px; flex-shrink: 0; }
 .ws-kpi .eyebrow { font-size: 10px; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -417,7 +417,7 @@
 .ws-big > div { padding: 8px 12px; border-radius: 8px; background: var(--secondary); }
 .ws-big > div .eyebrow { font-size: 10px; }
 .ws-big strong { font-family: var(--font-heading); font-size: 18px; line-height: 1; }
-.ws-h2 { font-size: 16px; margin: 24px 0 10px; }
+.ws-h2 { font-size: 16px; margin: 0 0 10px; }
 /* Why-this-exists overlay */
 .ws-tabs { position: relative; align-items: center; }
 .why-overlay { margin-left: auto; position: relative; }
