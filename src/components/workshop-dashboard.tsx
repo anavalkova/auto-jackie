@@ -17,9 +17,9 @@ import type { Database } from "@/integrations/supabase/types";
 type Inquiry = Database["public"]["Tables"]["inquiries"]["Row"];
 type Status = Database["public"]["Enums"]["inquiry_status"];
 type Shop = { id: string; name: string; city: string; vat_number: string; slug: string | null; role: string };
-type Tab = "overview" | "booking" | "context" | "profile";
+type Tab = "overview" | "booking" | "context" | "pricing" | "profile";
 const TABS: { id: Tab; label: string }[] = [
-  { id: "overview", label: "Overview" }, { id: "booking", label: "Booking" }, { id: "context", label: "Jackie's context" }, { id: "profile", label: "Profile" },
+  { id: "overview", label: "Overview" }, { id: "booking", label: "Booking" }, { id: "context", label: "Jackie's context" }, { id: "pricing", label: "Pricing engine" }, { id: "profile", label: "Profile" },
 ];
 
 const STATUSES: { id: Status; label: string }[] = [
@@ -34,13 +34,17 @@ const WHY: Record<Tab, { id: string; title: string; pitch: string; stats: WhySta
     { value: "7x", text: "more likely to win a lead when you respond within an hour.", source: { label: "Harvard Business Review", url: "https://hbr.org/2011/03/the-short-life-of-online-sales-leads" } },
     { value: "1 in 4", text: "service bookings end as no-shows. Confirmations in the driver's own channel cut that down.", source: { label: "Solera via Dealership Guy", url: "https://news.dealershipguy.com/p/broken-service-scheduling-is-costing-dealers-big-time-here-s-how-some-are-closing-the-gaps" } },
   ] },
-  context: { id: "ws-context", title: "Your expertise is your advantage. Teach it to Jackie.", pitch: "Your specialties, way of working and Jackie's brain shape every answer Jackie gives. Drivers see why your workshop fits them, not just another price.", stats: [
+  context: { id: "ws-context", title: "Your expertise is your advantage. Teach it to Jackie.", pitch: "Your strengths and way of working shape every answer Jackie gives. You also choose how smart she is per job, so you only pay for quality where it wins customers.", stats: [
     { value: "71%", text: "of Swedish drivers pick a workshop for skilled staff, not low price.", source: { label: "OKQ8", url: "https://www.mynewsdesk.com/se/okq8/pressreleases/7-av-10-bilister-efterfraagar-kunnig-verkstadspersonal-visar-ny-undersoekning-922496" } },
     { value: "3 800", text: "workshops in Sweden compete for the same customers.", source: { label: "Mekonomen", url: "https://www.mynewsdesk.com/se/mekonomen/pressreleases/var-tredje-bilaegare-har-kaent-sig-lurad-av-verkstaden-oekad-kunskap-om-godkaend-bilverkstad-kan-vara-en-loesning-3359302" } },
   ] },
-  profile: { id: "ws-profile", title: "How Jackie works for you.", pitch: "Jackie is your friendly front desk. Drivers talk to her first and arrive feeling helped, not sold to.", stats: [], points: [
-    "Drivers are already in a friendly conversation before they reach you.",
-    "Advice feels tailored to your workshop's expertise, not generic.",
+  pricing: { id: "ws-pricing", title: "Your prices, in every quote.", pitch: "Jackie's rough quotes start from your own price list, not a market average. Drivers arrive expecting your number, so fewer surprises at the counter.", stats: [
+    { value: "72%", text: "of drivers feel anxious about what a repair will cost.", source: { label: "RepairPal / Harris", url: "https://repairpal.com/consumer-survey-march-2013" } },
+    { value: "1 in 3", text: "Swedish car owners have felt cheated by a workshop.", source: { label: "Mekonomen", url: "https://www.mynewsdesk.com/se/mekonomen/pressreleases/var-tredje-bilaegare-har-kaent-sig-lurad-av-verkstaden-oekad-kunskap-om-godkaend-bilverkstad-kan-vara-en-loesning-3359302" } },
+  ] },
+  profile: { id: "ws-profile", title: "Your workshop, your brand.", pitch: "Jackie is your friendly front desk on your own page, in your colors and with your logo. Drivers talk to her first and arrive feeling helped, not sold to.", stats: [], points: [
+    "Your own Jackie link to share on your website, Google profile or SMS.",
+    "Your logo, accent color and greeting, so drivers see your workshop, not ours.",
     "Made for drivers without deep car knowledge. No jargon, no judging.",
     "Service in English, Swedish and German, so you don't miss foreign customers.",
   ] },
@@ -112,6 +116,7 @@ export function WorkshopDashboard() {
     <div className="ws-tabs" role="tablist" aria-label="Dashboard sections">{TABS.map(t => <Button key={t.id} variant={tab === t.id ? "default" : "outline"} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</Button>)}<WhyNote key={tab} overlay {...WHY[tab]}/></div>
     {tab === "booking" ? <BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>
     : tab === "context" ? <ContextSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>
+    : tab === "pricing" ? <PricingView workshopId={shop.id} canEdit={shop.role === "owner"}/>
     : tab === "profile" ? <ProfileView shop={shop} canEdit={shop.role === "owner"} onSaved={loadShop}/> : <>
     <div className="ws-kpis">
       <Kpi icon={<Inbox/>} label="New requests" value={String(kpis.fresh)}/>
@@ -240,31 +245,63 @@ function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
   </form>;
 }
 
+const CONTEXT_STEPS = [
+  { title: "Your strengths", sees: "Drivers on your Jackie page hear why your workshop fits their problem." },
+  { title: "How you work", sees: "Jackie explains what you would do, in your order and with your parts." },
+  { title: "Jackie's brain", sees: "Nothing visible. It controls answer quality, speed and running cost." },
+  { title: "Review", sees: "Check everything, then save. Changes apply to the next conversation." },
+];
+
+function Stepper({ steps, step, setStep }: { steps: { title: string }[]; step: number; setStep: (n: number) => void }) {
+  return <ol className="ws-stepper">{steps.map((st, i) => <li key={st.title}><button type="button" aria-current={i === step ? "step" : undefined} data-done={i < step || undefined} onClick={() => setStep(i)}><span className="ws-step-num">{i + 1}</span>{st.title}</button></li>)}</ol>;
+}
+
+function Hint({ controls, shows }: { controls: string; shows: string }) {
+  return <p className="ws-hint"><span><b>Controls:</b> {controls}</span><span><b>Shows:</b> {shows}</span></p>;
+}
+
 function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit: boolean }) {
   const { s, setS, save, state } = useSettings(workshopId);
+  const [step, setStep] = useState(0);
   if (!s) return <p className="history-note" role="status">Loading…</p>;
   const services = (s.services as string[]).join("\n");
-  return <form className="ws-section" onSubmit={e => { e.preventDefault(); void save({ ai_chat_tier: s.ai_chat_tier, ai_quote_tier: s.ai_quote_tier, services: (s.services as string[]).map(x => x.trim()).filter(Boolean), specialties: s.specialties, jackie_context: s.jackie_context }); }}>
-    <p className="ws-section-intro">This is what makes Jackie sound like your workshop. Your strengths, the way you like to work, and how smart she should be.</p>
-    <fieldset disabled={!canEdit} className="ws-grid2" style={{ border: 0, padding: 0, margin: 0 }}>
-      <section className="ws-card ws-span" style={{ gridColumn: "1 / -1" }}><h2>Jackie's brain</h2>
-        <p className="history-note">Pick how smart Jackie is for each job. Smarter means better answers but higher running costs, which may change your AutoJackie price. Changes apply to the next conversation.</p>
-        <div className="ws-tiers">
-          <TierRow title="Everyday chat" hint="Answering drivers' questions. Most of the volume, so cost adds up here." value={s.ai_chat_tier as Tier} recommended={DEFAULT_TIERS.chat} onChange={v => setS({ ...s, ai_chat_tier: v })}/>
-          <TierRow title="Rough quotes" hint="Drafting the price range a driver sees. Rare, but accuracy builds trust." value={s.ai_quote_tier as Tier} recommended={DEFAULT_TIERS.quote} onChange={v => setS({ ...s, ai_quote_tier: v })}/>
-        </div>
-        <div><Button type="button" size="sm" variant="outline" onClick={() => setS({ ...s, ai_chat_tier: DEFAULT_TIERS.chat, ai_quote_tier: DEFAULT_TIERS.quote })}>Reset to recommended</Button></div>
-      </section>
-      <section className="ws-card"><h2>What you're good at</h2>
-        <Label htmlFor="c-serv">Services you offer (one per line)</Label><textarea id="c-serv" className="native-select ws-textarea" value={services} onChange={e => setS({ ...s, services: e.target.value.split("\n") })}/>
-        <Label htmlFor="c-spec">Specialties and brands</Label><textarea id="c-spec" className="native-select ws-textarea" maxLength={1000} placeholder="E.g. Volvo and VW specialists, EV certified, own tyre hotel" value={s.specialties} onChange={e => setS({ ...s, specialties: e.target.value })}/>
-      </section>
-      <section className="ws-card ws-span" style={{ gridColumn: "1 / -1" }}><h2>Notes for Jackie</h2>
-        <Label htmlFor="c-ctx">How you work: preferred parts and materials, order of operations, what you always check</Label>
-        <textarea id="c-ctx" className="native-select ws-textarea" maxLength={3000} placeholder="E.g. We use OEM brake parts only. We always replace pads and discs together. Diagnostics fee is deducted if you repair with us." value={s.jackie_context} onChange={e => setS({ ...s, jackie_context: e.target.value })}/>
-      </section>
-    </fieldset>
-    <SaveRow canEdit={canEdit} state={state}/>
+  const last = step === CONTEXT_STEPS.length - 1;
+  const cur = CONTEXT_STEPS[step]!;
+  return <form className="ws-section ws-wizard" onSubmit={e => { e.preventDefault(); if (!last) { setStep(step + 1); return; } void save({ ai_chat_tier: s.ai_chat_tier, ai_quote_tier: s.ai_quote_tier, services: (s.services as string[]).map(x => x.trim()).filter(Boolean), specialties: s.specialties, jackie_context: s.jackie_context }); }}>
+    <Stepper steps={CONTEXT_STEPS} step={step} setStep={setStep}/>
+    <section className="ws-card">
+      <div className="ws-step-head"><h2>{step + 1}. {cur.title}</h2><p className="ws-hint"><span><b>Drivers see:</b> {cur.sees}</span></p></div>
+      <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0, display: "grid", gap: 10 }}>
+        {step === 0 && <>
+          <Label htmlFor="c-serv">Services you offer (one per line)</Label><textarea id="c-serv" className="native-select ws-textarea" value={services} onChange={e => setS({ ...s, services: e.target.value.split("\n") })}/>
+          <Label htmlFor="c-spec">Specialties and brands</Label><textarea id="c-spec" className="native-select ws-textarea" maxLength={1000} placeholder="E.g. Volvo and VW specialists, EV certified, own tyre hotel" value={s.specialties} onChange={e => setS({ ...s, specialties: e.target.value })}/>
+        </>}
+        {step === 1 && <>
+          <Label htmlFor="c-ctx">Preferred parts and materials, order of operations, what you always check</Label>
+          <textarea id="c-ctx" className="native-select ws-textarea ws-textarea-tall" maxLength={3000} placeholder="E.g. We use OEM brake parts only. We always replace pads and discs together. Diagnostics fee is deducted if you repair with us." value={s.jackie_context} onChange={e => setS({ ...s, jackie_context: e.target.value })}/>
+        </>}
+        {step === 2 && <>
+          <p className="history-note">Pick a level for each group of jobs Jackie does. Smarter means better answers but higher running costs, which may change your AutoJackie price. ★ is our recommendation.</p>
+          <div className="ws-tiers">
+            <TierRow title="Everyday chat" hint="Listening, explaining, fault codes and manual lookups. Most of the volume, so cost adds up here." value={s.ai_chat_tier as Tier} recommended={DEFAULT_TIERS.chat} onChange={v => setS({ ...s, ai_chat_tier: v })}/>
+            <TierRow title="Rough quotes" hint="Drafting the price range a driver sees, using your price list. Rare, but accuracy builds trust." value={s.ai_quote_tier as Tier} recommended={DEFAULT_TIERS.quote} onChange={v => setS({ ...s, ai_quote_tier: v })}/>
+          </div>
+          <div><Button type="button" size="sm" variant="outline" onClick={() => setS({ ...s, ai_chat_tier: DEFAULT_TIERS.chat, ai_quote_tier: DEFAULT_TIERS.quote })}>Reset to recommended</Button></div>
+        </>}
+        {step === 3 && <table className="ws-table"><tbody>
+          <tr><td>Services</td><td>{(s.services as string[]).filter(x => x.trim()).length || "None"} listed</td></tr>
+          <tr><td>Specialties</td><td>{s.specialties || "Not set"}</td></tr>
+          <tr><td>How you work</td><td>{s.jackie_context ? `${s.jackie_context.slice(0, 90)}${s.jackie_context.length > 90 ? "…" : ""}` : "Not set"}</td></tr>
+          <tr><td>Everyday chat</td><td>{TIER_INFO[s.ai_chat_tier as Tier].label} ({TIER_INFO[s.ai_chat_tier as Tier].cost})</td></tr>
+          <tr><td>Rough quotes</td><td>{TIER_INFO[s.ai_quote_tier as Tier].label} ({TIER_INFO[s.ai_quote_tier as Tier].cost})</td></tr>
+        </tbody></table>}
+      </fieldset>
+      <div className="ws-wizard-nav">
+        <Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>Back</Button>
+        {last ? (canEdit ? <Button type="submit">Save</Button> : <span className="history-note">Only the workshop owner can change these.</span>) : <Button type="submit">Next</Button>}
+      </div>
+      {state && <p className="history-note" role="status">{state}</p>}
+    </section>
   </form>;
 }
 
@@ -280,48 +317,16 @@ function TierRow({ title, hint, value, recommended, onChange }: { title: string;
   </div>;
 }
 
-function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean; onSaved: () => void }) {
-  const { s, setS, save, state } = useSettings(shop.id);
-  const [city, setCity] = useState(shop.city);
+function PricingView({ workshopId, canEdit }: { workshopId: string; canEdit: boolean }) {
+  const { s, setS, save, state } = useSettings(workshopId);
   if (!s) return <p className="history-note" role="status">Loading…</p>;
   const prices = s.price_list as PriceItem[];
   const setP = (p: PriceItem[]) => setS({ ...s, price_list: p });
-  const link = shop.slug && typeof window !== "undefined" ? `${window.location.origin}/w/${shop.slug}` : "";
-  const submit = async () => {
-    if (city !== shop.city) { await supabase.from("workshops").update({ city }).eq("id", shop.id); onSaved(); }
-    await save({ phone: s.phone, address: s.address, opening_hours: s.opening_hours, contact_email: s.contact_email, website: s.website,
-      hourly_rate_sek: s.hourly_rate_sek, price_list: prices.filter(p => p.task.trim()),
-      brand_accent: /^#[0-9a-fA-F]{6}$/.test(s.brand_accent) ? s.brand_accent : "", brand_logo_url: /^https:\/\//.test(s.brand_logo_url) ? s.brand_logo_url : "", brand_greeting: s.brand_greeting });
-  };
-  return <form className="ws-section" onSubmit={e => { e.preventDefault(); void submit(); }}>
-    <p className="ws-section-intro">How drivers find and reach you. Set up by AutoJackie at onboarding. Keep it up to date.</p>
-    <fieldset disabled={!canEdit} className="ws-form" style={{ border: 0, padding: 0, margin: 0 }}>
-      <div><Label>Company name</Label><div className="ws-readonly">{shop.name}</div></div>
-      <div><Label>VAT number</Label><div className="ws-readonly">{shop.vat_number || "Not set"}</div></div>
-      <div><Label htmlFor="p-phone">Phone</Label><Input id="p-phone" maxLength={30} value={s.phone} onChange={e => setS({ ...s, phone: e.target.value })}/></div>
-      <div><Label htmlFor="p-email">Contact email</Label><Input id="p-email" type="email" maxLength={120} value={s.contact_email} onChange={e => setS({ ...s, contact_email: e.target.value })}/></div>
-      <div><Label htmlFor="p-addr">Address</Label><Input id="p-addr" maxLength={200} value={s.address} onChange={e => setS({ ...s, address: e.target.value })}/></div>
-      <div><Label htmlFor="p-city">City</Label><Input id="p-city" maxLength={60} value={city} onChange={e => setCity(e.target.value)}/></div>
-      <div><Label htmlFor="p-hours">Opening hours</Label><Input id="p-hours" maxLength={200} value={s.opening_hours} onChange={e => setS({ ...s, opening_hours: e.target.value })}/></div>
-      <div><Label htmlFor="p-web">Website</Label><Input id="p-web" maxLength={200} value={s.website} onChange={e => setS({ ...s, website: e.target.value })}/></div>
-      <p className="history-note ws-span">Company name and VAT number are managed by AutoJackie. Contact us to change them.</p>
-    </fieldset>
-    <fieldset disabled={!canEdit} className="ws-grid2" style={{ border: 0, padding: 0, margin: 0 }}>
-      <section className="ws-card"><h2>Your brand</h2>
-        <p className="history-note">Your own Jackie page for drivers. Share it on your website, Google profile or SMS.</p>
-        {link && <div className="ws-chips"><a href={link} target="_blank" rel="noreferrer" className="text-link">{link}</a><Button type="button" size="sm" variant="outline" onClick={() => void navigator.clipboard?.writeText(link)}>Copy</Button></div>}
-        <Label htmlFor="b-accent">Accent color</Label>
-        <div className="ws-chips"><input id="b-accent" type="color" value={s.brand_accent || "#f2711c"} onChange={e => setS({ ...s, brand_accent: e.target.value })}/>{s.brand_accent && <Button type="button" size="sm" variant="ghost" onClick={() => setS({ ...s, brand_accent: "" })}>Use AutoJackie orange</Button>}</div>
-        <Label htmlFor="b-logo">Logo link (https)</Label><Input id="b-logo" maxLength={500} placeholder="https://yourworkshop.se/logo.png" value={s.brand_logo_url} onChange={e => setS({ ...s, brand_logo_url: e.target.value })}/>
-        <Label htmlFor="b-greet">Greeting line</Label><Input id="b-greet" maxLength={160} placeholder="Welcome to Demo Verkstad. Tell Jackie what's up." value={s.brand_greeting} onChange={e => setS({ ...s, brand_greeting: e.target.value })}/>
-        <div className="ws-brand-preview" style={s.brand_accent ? { ["--primary" as string]: s.brand_accent } : undefined} aria-label="Preview">
-          <span className="shop-badge">{/^https:\/\//.test(s.brand_logo_url) && <img src={s.brand_logo_url} alt="" className="shop-logo"/>}<span>{shop.name}</span></span>
-          <span className="shop-greeting">{s.brand_greeting || "Your greeting appears here."}</span>
-          <span className="preview-btn" style={{ background: "var(--primary)" }}>Book a visit</span>
-        </div>
-      </section>
-      <section className="ws-card"><h2>Your prices (incl. VAT)</h2>
-        <p className="history-note">Jackie bases rough quotes on these when a job matches.</p>
+  return <form className="ws-section" onSubmit={e => { e.preventDefault(); void save({ hourly_rate_sek: s.hourly_rate_sek, price_list: prices.filter(p => p.task.trim()) }); }}>
+    <p className="ws-section-intro">Your prices drive every rough quote Jackie gives on your page.</p>
+    <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0 }}>
+      <section className="ws-card"><h2>Base prices (incl. VAT)</h2>
+        <Hint controls="the price range in Jackie's “What's next” card." shows="to drivers on your Jackie page, labelled as an estimate."/>
         <Label htmlFor="c-rate">Hourly labour rate (kr)</Label><Input id="c-rate" type="number" min={0} max={10000} value={s.hourly_rate_sek} onChange={e => setS({ ...s, hourly_rate_sek: Number(e.target.value) })}/>
         <table className="ws-table"><thead><tr><th>Standard job</th><th>Price (kr)</th><th/></tr></thead><tbody>
           {prices.map((p, i) => <tr key={i}><td><Input aria-label="Job" maxLength={80} value={p.task} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, task: e.target.value } : x))}/></td><td><Input aria-label="Price" type="number" min={0} max={200000} value={p.price_sek} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></td><td><Button type="button" size="sm" variant="ghost" aria-label="Remove" onClick={() => setP(prices.filter((_, j) => j !== i))}>×</Button></td></tr>)}
@@ -330,8 +335,40 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
       </section>
     </fieldset>
     <SaveRow canEdit={canEdit} state={state}/>
-    <section className="ws-card ws-soon"><div className="ws-soon-head"><h2>Pricing engine</h2><span className="ws-status">Coming soon</span></div>
-      <p className="history-note">Next step for the prices above: parts margins, brand and car-age multipliers, seasonal campaigns and price floors. More competitive quotes, still on your terms.</p></section>
+  </form>;
+}
+
+function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean; onSaved: () => void }) {
+  const { s, setS, save, state } = useSettings(shop.id);
+  const [city, setCity] = useState(shop.city);
+  if (!s) return <p className="history-note" role="status">Loading…</p>;
+  const link = shop.slug && typeof window !== "undefined" ? `${window.location.origin}/w/${shop.slug}` : "";
+  const submit = async () => {
+    if (city !== shop.city) { await supabase.from("workshops").update({ city }).eq("id", shop.id); onSaved(); }
+    await save({ phone: s.phone, address: s.address, opening_hours: s.opening_hours, contact_email: s.contact_email, website: s.website,
+      brand_accent: /^#[0-9a-fA-F]{6}$/.test(s.brand_accent) ? s.brand_accent : "", brand_logo_url: /^https:\/\//.test(s.brand_logo_url) ? s.brand_logo_url : "", brand_greeting: s.brand_greeting });
+  };
+  return <form className="ws-section" onSubmit={e => { e.preventDefault(); void submit(); }}>
+    <p className="ws-section-intro">How drivers find, reach and recognise you. Set up by AutoJackie at onboarding. Keep it up to date.</p>
+    <fieldset disabled={!canEdit} className="ws-grid2" style={{ border: 0, padding: 0, margin: 0 }}>
+      <section className="ws-card ws-form-card"><h2>Contact details</h2>
+        <div><Label>Company name</Label><div className="ws-readonly">{shop.name}</div><Hint controls="your name in the booking list and on your Jackie page." shows="to drivers. Managed by AutoJackie."/></div>
+        <div><Label>VAT number</Label><div className="ws-readonly">{shop.vat_number || "Not set"}</div><Hint controls="invoicing between you and AutoJackie." shows="nowhere to drivers. Managed by AutoJackie."/></div>
+        <div><Label htmlFor="p-phone">Phone</Label><Input id="p-phone" maxLength={30} value={s.phone} onChange={e => setS({ ...s, phone: e.target.value })}/><Hint controls="how drivers can call you." shows="to drivers after they book."/></div>
+        <div><Label htmlFor="p-email">Contact email</Label><Input id="p-email" type="email" maxLength={120} value={s.contact_email} onChange={e => setS({ ...s, contact_email: e.target.value })}/><Hint controls="where booking updates are sent." shows="only to AutoJackie and you."/></div>
+        <div><Label htmlFor="p-addr">Address</Label><Input id="p-addr" maxLength={200} value={s.address} onChange={e => setS({ ...s, address: e.target.value })}/><Hint controls="where drivers drop off their car." shows="to drivers after they book."/></div>
+        <div><Label htmlFor="p-city">City</Label><Input id="p-city" maxLength={60} value={city} onChange={e => setCity(e.target.value)}/><Hint controls="which drivers see you when picking a workshop." shows="in the workshop list when booking."/></div>
+        <div><Label htmlFor="p-hours">Opening hours</Label><Input id="p-hours" maxLength={200} value={s.opening_hours} onChange={e => setS({ ...s, opening_hours: e.target.value })}/><Hint controls="what Jackie says when drivers ask when you're open." shows="in Jackie's answers on your page."/></div>
+        <div><Label htmlFor="p-web">Website</Label><Input id="p-web" maxLength={200} value={s.website} onChange={e => setS({ ...s, website: e.target.value })}/><Hint controls="a link back to your own site." shows="to drivers after they book."/></div>
+      </section>
+      <section className="ws-card ws-form-card"><h2>Your brand</h2>
+        <div><Label>Your Jackie page</Label>{link && <div className="ws-chips"><a href={link} target="_blank" rel="noreferrer" className="text-link">{link}</a><Button type="button" size="sm" variant="outline" onClick={() => void navigator.clipboard?.writeText(link)}>Copy</Button></div>}<Hint controls="the page where drivers chat with Jackie as your workshop." shows="wherever you share it: website, Google profile, SMS."/></div>
+        <div><Label htmlFor="b-accent">Accent color</Label><div className="ws-chips"><input id="b-accent" type="color" value={s.brand_accent || "#f2711c"} onChange={e => setS({ ...s, brand_accent: e.target.value })}/>{s.brand_accent && <Button type="button" size="sm" variant="ghost" onClick={() => setS({ ...s, brand_accent: "" })}>Use AutoJackie orange</Button>}</div><Hint controls="buttons, highlights and links." shows="on your Jackie page."/></div>
+        <div><Label htmlFor="b-logo">Logo link (https)</Label><Input id="b-logo" maxLength={500} placeholder="https://yourworkshop.se/logo.png" value={s.brand_logo_url} onChange={e => setS({ ...s, brand_logo_url: e.target.value })}/><Hint controls="the small logo next to your name." shows="in the top bar of your Jackie page."/></div>
+        <div><Label htmlFor="b-greet">Greeting line</Label><Input id="b-greet" maxLength={160} placeholder="Welcome to Demo Verkstad. Tell Jackie what's up." value={s.brand_greeting} onChange={e => setS({ ...s, brand_greeting: e.target.value })}/><Hint controls="the welcome line above the chat." shows="on your Jackie page, before drivers type."/></div>
+      </section>
+    </fieldset>
+    <SaveRow canEdit={canEdit} state={state}/>
   </form>;
 }
 

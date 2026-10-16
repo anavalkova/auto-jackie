@@ -452,3 +452,14 @@
 .ws-brand-preview { border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: grid; gap: 10px; background: var(--background); }
 .ws-brand-preview .preview-btn { justify-self: start; padding: 6px 12px; border-radius: 8px; color: var(--primary-foreground); font-size: 13px; font-weight: 600; }
 @media (max-width: 720px) { .ws-tier-row { grid-template-columns: 1fr; } .ws-tier-options { grid-template-columns: 1fr; } }
+.ws-hint { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 4px 0 0; font-size: 12px; color: var(--muted-foreground); }
+.ws-hint b { color: var(--foreground); font-weight: 600; }
+.ws-form-card > div { display: grid; gap: 6px; }
+.ws-stepper { display: flex; gap: 8px; list-style: none; padding: 0; margin: 0 0 4px; flex-wrap: wrap; }
+.ws-stepper button { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border); background: var(--card); border-radius: 999px; padding: 6px 14px 6px 6px; font-size: 13px; color: var(--muted-foreground); cursor: pointer; }
+.ws-step-num { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--muted); color: var(--foreground); font-size: 12px; font-weight: 700; }
+.ws-stepper button[aria-current="step"] { border-color: var(--primary); color: var(--foreground); font-weight: 600; }
+.ws-stepper button[aria-current="step"] .ws-step-num, .ws-stepper button[data-done] .ws-step-num { background: var(--primary); color: var(--primary-foreground); }
+.ws-step-head { display: grid; gap: 2px; margin-bottom: 8px; }
+.ws-wizard-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+.ws-textarea-tall { min-height: 180px; }
