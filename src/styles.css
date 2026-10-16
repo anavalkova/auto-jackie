@@ -194,7 +194,7 @@
   .portrait-wrap.compact { display: block; height: 215px; }
   .portrait-label { bottom: 12px; left: 14px; padding: 6px 10px; }
   .chat-shell { padding: 0 16px 16px; min-height: 560px; }
-  .chat-empty h1 { font-size: 32px; }
+  .chat-empty h1 { font-size: 32px; text-wrap: balance; }
   .starter-grid { grid-template-columns: 1fr; }
   .assistant-top { padding: 16px; }
 }
