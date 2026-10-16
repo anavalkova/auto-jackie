@@ -16,8 +16,9 @@ import { QUOTA_ERROR } from "@/lib/chat-quota";
 import { chatQuotaStatus, type ChatQuotaStatus } from "@/lib/chat-quota.functions";
 
 
-export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMessages, onTurnFinished, onReset, saving, workshopId, onSignIn, onBook }: {
+export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMessages, onTurnFinished, onReset, saving, workshopId, onSignIn, onBook, onEmptyChange }: {
   workshopId?: string | undefined; onSignIn?: (() => void) | undefined; onBook: (card: VisitCard) => void;
+  onEmptyChange?: ((empty: boolean) => void) | undefined;
   vehicle: Vehicle | null; pending: string | null; onPendingSent: () => void;
   chatId?: string | undefined; initialMessages?: UIMessage[] | undefined;
   onTurnFinished?: ((messages: UIMessage[]) => void) | undefined; onReset?: (() => void) | undefined; saving?: boolean | undefined;
@@ -47,6 +48,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
 
   const send = (text: string) => { if (!text.trim() || busy) return; clearError(); sendMessage({ text }); setInput(""); };
   useEffect(() => { if (pending) { send(pending); onPendingSent(); } }, [pending]);
+  useEffect(() => { onEmptyChange?.(messages.length === 0); }, [messages.length, onEmptyChange]);
 
   // Guests keep their chat only in memory; stash it so a sign-in redirect doesn't wipe it.
   useEffect(() => {
