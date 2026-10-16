@@ -239,10 +239,13 @@ export type Database = {
           brand_accent: string
           brand_greeting: string
           brand_logo_url: string
+          close_holidays: boolean
+          closed_slots: string[]
           contact_email: string
           hourly_rate_sek: number
           jackie_context: string
           job_durations: Json
+          max_ahead_days: number
           min_notice_days: number
           opening_hours: string
           phone: string
@@ -262,10 +265,13 @@ export type Database = {
           brand_accent?: string
           brand_greeting?: string
           brand_logo_url?: string
+          close_holidays?: boolean
+          closed_slots?: string[]
           contact_email?: string
           hourly_rate_sek?: number
           jackie_context?: string
           job_durations?: Json
+          max_ahead_days?: number
           min_notice_days?: number
           opening_hours?: string
           phone?: string
@@ -285,10 +291,13 @@ export type Database = {
           brand_accent?: string
           brand_greeting?: string
           brand_logo_url?: string
+          close_holidays?: boolean
+          closed_slots?: string[]
           contact_email?: string
           hourly_rate_sek?: number
           jackie_context?: string
           job_durations?: Json
+          max_ahead_days?: number
           min_notice_days?: number
           opening_hours?: string
           phone?: string
