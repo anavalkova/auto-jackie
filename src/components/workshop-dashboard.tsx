@@ -1,4 +1,4 @@
-import { slotLabel } from "@/lib/booking";
+import { holidayName, slotLabel, swedishHolidays } from "@/lib/booking";
 import { Link } from "@tanstack/react-router";
 import { useWebMCP } from "use-webmcp-tool";
 import { runWebMCPTool } from "@/lib/webmcp-telemetry";
@@ -303,21 +303,51 @@ function InsightsView({ items, workshopId, canEdit }: { items: Inquiry[]; worksh
 const WEEKDAYS = [{ d: 1, l: "Mon" }, { d: 2, l: "Tue" }, { d: 3, l: "Wed" }, { d: 4, l: "Thu" }, { d: 5, l: "Fri" }, { d: 6, l: "Sat" }, { d: 0, l: "Sun" }];
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 7);
 
+const AHEAD = [{ d: 30, l: "1 month" }, { d: 60, l: "2 months" }, { d: 90, l: "3 months" }, { d: 180, l: "6 months" }, { d: 365, l: "1 year" }];
+
+function closedLabel(k: string) {
+  const day = new Date(`${k.slice(0, 10)}T12:00:00Z`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+  return k.length > 10 ? `${day}, ${k.slice(11)}:00` : `${day}, all day`;
+}
+
 function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit: boolean }) {
   const { s, setS, save, state } = useSettings(workshopId);
+  const [date, setDate] = useState("");
+  const [hour, setHour] = useState("");
   if (!s) return <p className="history-note" role="status">Loading…</p>;
-  const durations = s.job_durations as Duration[];
   const flip = (arr: number[], v: number) => arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v].sort((a, b) => a - b);
-  return <form className="ws-section" onSubmit={e => { e.preventDefault(); void save({ booking_days: s.booking_days, slot_hours: s.slot_hours, min_notice_days: s.min_notice_days }); }}>
+  const today = new Date().toISOString().slice(0, 10);
+  const closed = (s.closed_slots as string[]).filter(k => k.slice(0, 10) >= today);
+  const add = () => {
+    if (!date) return;
+    const k = hour ? `${date}T${hour.padStart(2, "0")}` : date;
+    if (!closed.includes(k)) setS({ ...s, closed_slots: [...closed, k].sort() });
+    setDate(""); setHour("");
+  };
+  const y = new Date().getFullYear();
+  const holidays = [...swedishHolidays(y), ...swedishHolidays(y + 1)].filter(([k]) => k >= today).slice(0, 6);
+  return <form className="ws-section" onSubmit={e => { e.preventDefault(); void save({ booking_days: s.booking_days, slot_hours: s.slot_hours, min_notice_days: s.min_notice_days, max_ahead_days: s.max_ahead_days, close_holidays: s.close_holidays, closed_slots: closed }); }}>
     <fieldset disabled={!canEdit} className="ws-grid2" style={{ border: 0, padding: 0, margin: 0 }}>
-      <section className="ws-card"><h2 className="ws-label-row">When drivers can book<Tip><p>Decide when drivers can book you. Drivers only see the times you open here.</p></Tip></h2>
+      <section className="ws-card"><h2 className="ws-label-row">Your normal week<Tip><p>The days and drop-off times drivers can pick. How long each job takes is set in Pricing engine.</p></Tip></h2>
         <Label>Days</Label><div className="ws-chips">{WEEKDAYS.map(w => <Button key={w.d} type="button" size="sm" variant={s.booking_days.includes(w.d) ? "default" : "outline"} onClick={() => setS({ ...s, booking_days: flip(s.booking_days, w.d) })}>{w.l}</Button>)}</div>
         <Label>Drop-off times</Label><div className="ws-chips">{HOURS.map(h => <Button key={h} type="button" size="sm" variant={s.slot_hours.includes(h) ? "default" : "outline"} onClick={() => setS({ ...s, slot_hours: flip(s.slot_hours, h) })}>{String(h).padStart(2, "0")}:00</Button>)}</div>
-        <Label htmlFor="b-notice">Earliest booking</Label>
-        <select id="b-notice" className="native-select" value={s.min_notice_days} onChange={e => setS({ ...s, min_notice_days: Number(e.target.value) })}>{[1, 2, 3, 5, 7].map(d => <option key={d} value={d}>{d === 1 ? "Next day" : `${d} days ahead`}</option>)}</select>
+        <div className="ws-grid2">
+          <div><Label htmlFor="b-notice">Earliest booking</Label>
+            <select id="b-notice" className="native-select" value={s.min_notice_days} onChange={e => setS({ ...s, min_notice_days: Number(e.target.value) })}>{[1, 2, 3, 5, 7].map(d => <option key={d} value={d}>{d === 1 ? "Next day" : `${d} days ahead`}</option>)}</select></div>
+          <div><Label htmlFor="b-ahead">Latest booking</Label>
+            <select id="b-ahead" className="native-select" value={s.max_ahead_days} onChange={e => setS({ ...s, max_ahead_days: Number(e.target.value) })}>{AHEAD.map(a => <option key={a.d} value={a.d}>Up to {a.l} ahead</option>)}</select></div>
+        </div>
       </section>
-      <section className="ws-card"><h2 className="ws-label-row">How long jobs take<Tip><p>Job times are set per service in the Pricing engine tab.</p></Tip></h2>
-        <table className="ws-table"><tbody>{durations.map((d, i) => <tr key={i}><td>{d.job}</td><td><strong>{d.minutes} min</strong></td></tr>)}</tbody></table>
+      <section className="ws-card"><h2 className="ws-label-row">Days off<Tip><p>Close a whole day (vacation, inventory) or a single drop-off time. Drivers simply won't see it.</p></Tip></h2>
+        <label className="ws-label-row"><input type="checkbox" checked={s.close_holidays} onChange={e => setS({ ...s, close_holidays: e.target.checked })}/> Closed on Swedish public holidays<Tip><p>Built into AutoJackie, no calendar needed. Includes Midsummer Eve, Christmas Eve and New Year's Eve. Next up: {holidays.map(([k, n]) => `${n} (${k.slice(5)})`).join(", ")}.</p></Tip></label>
+        <div className="ws-chips">
+          <Input aria-label="Date" type="date" min={today} value={date} onChange={e => setDate(e.target.value)} style={{ width: 160 }}/>
+          <select aria-label="Time" className="native-select" style={{ width: "auto" }} value={hour} onChange={e => setHour(e.target.value)}><option value="">All day</option>{s.slot_hours.map(h => <option key={h} value={String(h)}>{String(h).padStart(2, "0")}:00 only</option>)}</select>
+          <Button type="button" size="sm" variant="outline" disabled={!date} onClick={add}>Close</Button>
+        </div>
+        {date && s.close_holidays && holidayName(date) && <p className="history-note">That's {holidayName(date)}, already closed.</p>}
+        {closed.length === 0 ? <p className="history-note">No days off planned.</p>
+          : <div className="ws-chips">{closed.map(k => <span key={k} className="ws-closed">{closedLabel(k)}<button type="button" aria-label={`Reopen ${closedLabel(k)}`} onClick={() => setS({ ...s, closed_slots: closed.filter(x => x !== k) })}>×</button></span>)}</div>}
       </section>
     </fieldset>
     <SaveRow canEdit={canEdit} state={state}/>
