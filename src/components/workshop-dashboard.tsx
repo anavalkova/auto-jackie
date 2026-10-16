@@ -339,7 +339,7 @@ function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
         </div>
       </section>
       <section className="ws-card"><h2 className="ws-label-row"><Tip><p>Close a whole day (vacation, inventory) or a single drop-off time. Drivers simply won't see it.</p></Tip>Days off</h2>
-        <label className="ws-label-row"><input type="checkbox" checked={s.close_holidays} onChange={e => setS({ ...s, close_holidays: e.target.checked })}/> Closed on Swedish public holidays<Tip><p>Built into AutoJackie, no calendar needed. Includes Midsummer Eve, Christmas Eve and New Year's Eve. Next up: {holidays.map(([k, n]) => `${n} (${k.slice(5)})`).join(", ")}.</p></Tip></label>
+        <label className="ws-label-row"><input type="checkbox" checked={s.close_holidays} onChange={e => setS({ ...s, close_holidays: e.target.checked })}/><Tip><p>Built into AutoJackie, no calendar needed. Includes Midsummer Eve, Christmas Eve and New Year's Eve. Next up: {holidays.map(([k, n]) => `${n} (${k.slice(5)})`).join(", ")}.</p></Tip><span>Closed on Swedish public holidays</span></label>
         <div className="ws-chips">
           <Input aria-label="Date" type="date" min={today} value={date} onChange={e => setDate(e.target.value)} style={{ width: 160 }}/>
           <select aria-label="Time" className="native-select" style={{ width: "auto" }} value={hour} onChange={e => setHour(e.target.value)}><option value="">All day</option>{s.slot_hours.map(h => <option key={h} value={String(h)}>{String(h).padStart(2, "0")}:00 only</option>)}</select>
