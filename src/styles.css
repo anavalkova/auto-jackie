@@ -575,6 +575,8 @@
 button.vehicle-empty { width: 100%; cursor: pointer; font: inherit; color: inherit; text-align: left; transition: border-color .15s, color .15s; }
 button.vehicle-empty:hover, button.vehicle-empty:focus-visible { border-color: var(--primary); color: var(--primary); }
 .vehicle-empty-action { display: inline-flex; align-items: center; gap: 4px; font-weight: 500; }
+.vehicle-empty-go { margin-left: auto; width: 14px; height: 14px; color: var(--muted-foreground); opacity: .55; flex-shrink: 0; }
+button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary); }
 .field-tip { display: flex; align-items: center; gap: 6px; }
 .field-tip.history-note { padding: 4px 0; }
 .assistant-bottom strong { color: var(--foreground); font-weight: 600; }
