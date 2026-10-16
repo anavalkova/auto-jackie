@@ -14,7 +14,8 @@ import type { Vehicle } from "@/lib/vehicles";
 import { useT } from "@/lib/i18n";
 
 
-export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMessages, onTurnFinished, onReset, saving }: {
+export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMessages, onTurnFinished, onReset, saving, workshopId }: {
+  workshopId?: string | undefined;
   vehicle: Vehicle | null; pending: string | null; onPendingSent: () => void;
   chatId?: string | undefined; initialMessages?: UIMessage[] | undefined;
   onTurnFinished?: ((messages: UIMessage[]) => void) | undefined; onReset?: (() => void) | undefined; saving?: boolean | undefined;
@@ -23,7 +24,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
   const [input, setInput] = useState("");
   const [booking, setBooking] = useState<VisitCard | null>(null);
   const vehiclePayload = vehicle ? { confidential: vehicle.confidential, description: vehicle.confidential ? undefined : vehicle.description, mileageKm: vehicle.mileageKm } : null;
-  const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat", body: { vehicle: vehiclePayload, lang } }), [JSON.stringify(vehiclePayload), lang]);
+  const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat", body: { vehicle: vehiclePayload, lang, ...(workshopId ? { workshopId } : {}) } }), [JSON.stringify(vehiclePayload), lang, workshopId]);
   const { messages, sendMessage, status, stop, error, setMessages, clearError } = useChat({ transport, ...(chatId ? { id: chatId } : {}), ...(initialMessages ? { messages: initialMessages } : {}) });
   const busy = status === "submitted" || status === "streaming";
   const wasBusy = useRef(false);

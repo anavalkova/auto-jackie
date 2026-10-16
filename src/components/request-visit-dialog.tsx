@@ -17,7 +17,7 @@ export type VisitCard = { issue: string; urgency?: string | undefined; priceLowS
 type Shop = { id: string; name: string; city: string };
 
 /** Driver sends Jackie's "What's next" card to a workshop. Only the visible card and a non-confidential car label are shared. */
-export function RequestVisitDialog({ card, vehicleLabel, onClose }: { card: VisitCard | null; vehicleLabel: string; onClose: () => void }) {
+export function RequestVisitDialog({ card, vehicleLabel, onClose, workshopId }: { card: VisitCard | null; vehicleLabel: string; onClose: () => void; workshopId?: string | undefined }) {
   const { user, ready } = useSessionUser();
   const [shops, setShops] = useState<Shop[]>([]);
   const [shopId, setShopId] = useState("");
@@ -38,7 +38,7 @@ export function RequestVisitDialog({ card, vehicleLabel, onClose }: { card: Visi
     if (!card) return;
     setState("idle"); setPicks([]); setIssue("");
     if (user?.email) setEmail(e => e || user.email || "");
-    supabase.from("workshops").select("id,name,city").order("name").then(({ data }) => { setShops(data ?? []); if (data?.[0]) { const first = data[0].id; setShopId(s => s || first); }; });
+    supabase.from("workshops").select("id,name,city").order("name").then(({ data }) => { const list = (data ?? []).filter(w => !workshopId || w.id === workshopId); setShops(list); if (list[0]) { const first = list[0].id; setShopId(s => workshopId ?? (s || first)); }; });
   }, [card]);
 
   // Each workshop decides its own bookable days, times and notice
