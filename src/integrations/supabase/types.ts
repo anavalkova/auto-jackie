@@ -14,6 +14,18 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_emails: {
+        Row: {
+          email: string
+        }
+        Insert: {
+          email: string
+        }
+        Update: {
+          email?: string
+        }
+        Relationships: []
+      }
       chats: {
         Row: {
           created_at: string
@@ -121,6 +133,53 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      workshop_invites: {
+        Row: {
+          claimed_at: string | null
+          created_at: string
+          email: string
+          workshop_id: string
+        }
+        Insert: {
+          claimed_at?: string | null
+          created_at?: string
+          email: string
+          workshop_id: string
+        }
+        Update: {
+          claimed_at?: string | null
+          created_at?: string
+          email?: string
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workshop_invites_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: true
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workshop_members: {
         Row: {
           created_at: string
@@ -145,6 +204,44 @@ export type Database = {
             foreignKeyName: "workshop_members_workshop_id_fkey"
             columns: ["workshop_id"]
             isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workshop_settings: {
+        Row: {
+          address: string
+          hourly_rate_sek: number
+          opening_hours: string
+          phone: string
+          services: Json
+          updated_at: string
+          workshop_id: string
+        }
+        Insert: {
+          address?: string
+          hourly_rate_sek?: number
+          opening_hours?: string
+          phone?: string
+          services?: Json
+          updated_at?: string
+          workshop_id: string
+        }
+        Update: {
+          address?: string
+          hourly_rate_sek?: number
+          opening_hours?: string
+          phone?: string
+          services?: Json
+          updated_at?: string
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workshop_settings_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: true
             referencedRelation: "workshops"
             referencedColumns: ["id"]
           },
@@ -179,12 +276,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_onboard_workshop: {
+        Args: { _city?: string; _email: string; _name: string }
+        Returns: string
+      }
+      claim_my_access: { Args: never; Returns: Json }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       workshop_role_of: {
         Args: { _user: string; _workshop: string }
         Returns: Database["public"]["Enums"]["workshop_role"]
       }
     }
     Enums: {
+      app_role: "admin"
       inquiry_status: "new" | "contacted" | "quoted" | "booked" | "closed"
       workshop_role: "owner" | "staff"
     }
@@ -314,6 +424,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin"],
       inquiry_status: ["new", "contacted", "quoted", "booked", "closed"],
       workshop_role: ["owner", "staff"],
     },

@@ -15,6 +15,13 @@
       "when": 1792139535422,
       "tag": "0001_workshop_dashboard",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792140328640,
+      "tag": "0002_admin_onboarding",
+      "breakpoints": true
     }
   ]
 }
