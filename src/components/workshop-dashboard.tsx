@@ -72,15 +72,15 @@ export function WorkshopDashboard() {
 
   let body;
   if (!ready || (user && shop === undefined)) body = <p className="history-note" role="status">Loading…</p>;
-  else if (!user) body = <div className="ws-empty"><Wrench/><h1>Your workshop, with Jackie on the front desk.</h1><p>Drivers explain their trouble to Jackie. You get a clear summary, a rough price and their phone number — ready to call.</p><Button onClick={() => setSignIn(true)}>Sign in to open your workshop</Button></div>;
+  else if (!user) body = <div className="ws-empty"><Wrench/><h1>Your workshop, with Jackie on the front desk.</h1><p>Drivers explain their trouble to Jackie. You get a clear summary, a rough price and their phone number, ready to call.</p><Button onClick={() => setSignIn(true)}>Sign in to open your workshop</Button></div>;
   else if (!shop) body = <div className="ws-empty"><Wrench/><h1>Your workshop isn't set up yet</h1><p>AutoJackie's team sets up each workshop personally. If we've onboarded you, sign in with the email you gave us{user.email ? ` (you're signed in as ${user.email})` : ""}.</p>{isAdmin && <Button asChild><Link to="/admin">Go to operations</Link></Button>}</div>;
   else body = <>
     <div className="ws-title"><div><span className="eyebrow">WORKSHOP DASHBOARD</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div><div className="ws-filters"><Button variant={tab === "requests" ? "default" : "outline"} onClick={() => setTab("requests")}>Requests</Button><Button variant={tab === "settings" ? "default" : "outline"} onClick={() => setTab("settings")}>Settings</Button></div></div>
-    <WhyNote id="workshop" title="Every request here is a customer who would otherwise have hit a busy phone line — or given up." stats={[
-      { value: "~21%", text: "of calls to auto service businesses go unanswered, and even the best locations miss nearly 1 in 10.", source: { label: "Marchex", url: "https://www.marchex.com/up-to-21-percent-of-automotive-service-customer-calls-go-unanswered-creating-significant-revenue-leakage/" } },
-      { value: "68%", text: "of callers who can't reach a shop on the first try never call back — they book with whoever answers first.", source: { label: "Auto Service World / Marchex", url: "https://www.autoserviceworld.com/phone-fails-lead-to-missed-automotive-service-revenue-report/" } },
-      { value: "20–24%", text: "of booked service appointments end up as no-shows when nothing keeps the booking alive — a problem confirmation flows (our next step) are built to fix.", source: { label: "Solera via Dealership Guy", url: "https://news.dealershipguy.com/p/broken-service-scheduling-is-costing-dealers-big-time-here-s-how-some-are-closing-the-gaps" } },
-    ]} footer="Jackie answers instantly, in writing, with the diagnosis and a rough price already attached — so you call back warm leads instead of cold phone tag."/>
+    <WhyNote id="workshop" title="Every request here is a customer who would otherwise have hit a busy phone line, or given up." stats={[
+      { value: "~21%", text: "of calls to auto service businesses go unanswered. Even the best locations miss nearly 1 in 10.", source: { label: "Marchex", url: "https://www.marchex.com/up-to-21-percent-of-automotive-service-customer-calls-go-unanswered-creating-significant-revenue-leakage/" } },
+      { value: "68%", text: "of callers who can't reach a shop on the first try never call back. They book with whoever answers first.", source: { label: "Auto Service World / Marchex", url: "https://www.autoserviceworld.com/phone-fails-lead-to-missed-automotive-service-revenue-report/" } },
+      { value: "1 in 4", text: "of booked service appointments end up as no-shows when nothing keeps the booking alive. Confirmation flows, our next step, are built to fix that.", source: { label: "Solera via Dealership Guy", url: "https://news.dealershipguy.com/p/broken-service-scheduling-is-costing-dealers-big-time-here-s-how-some-are-closing-the-gaps" } },
+    ]} footer="Jackie answers instantly, in writing, with the diagnosis and a rough price already attached. So you call back warm leads instead of cold phone tag."/>
     {tab === "settings" ? <WorkshopSettings workshopId={shop.id} canEdit={shop.role === "owner"}/> : <>
     <div className="ws-kpis">
       <Kpi icon={<Inbox/>} label="New requests" value={String(kpis.fresh)}/>
@@ -97,7 +97,7 @@ export function WorkshopDashboard() {
         <span className={`ws-status s-${i.status}`}>{STATUSES.find(s => s.id === i.status)?.label}</span>
         <span className="ws-row-main"><strong>{i.issue}</strong><span>{i.contact_name}{i.vehicle_label ? ` · ${i.vehicle_label}` : ""}</span></span>
         <span className={`ws-urgency u-${i.urgency.replace(" ", "-")}`}>{i.urgency}</span>
-        <span className="ws-price">{i.price_low_sek != null && i.price_high_sek != null ? `${kr(i.price_low_sek)}–${kr(i.price_high_sek)}` : "—"}</span>
+        <span className="ws-price">{i.price_low_sek != null && i.price_high_sek != null ? `${kr(i.price_low_sek)} to ${kr(i.price_high_sek)}` : "No price"}</span>
         <time dateTime={i.created_at}>{when(i.created_at)}</time>
       </button></li>)}</ul>}
     </>}
@@ -112,7 +112,7 @@ export function WorkshopDashboard() {
         <div className="ws-detail">
           <section><span className="eyebrow">CUSTOMER</span><p><strong>{selected.contact_name}</strong></p><Button variant="outline" asChild><a href={`tel:${selected.contact_phone.replace(/\s/g, "")}`}><Phone/> {selected.contact_phone}</a></Button></section>
           {selected.vehicle_label && <section><span className="eyebrow">CAR</span><p>{selected.vehicle_label}</p></section>}
-          <section><span className="eyebrow">JACKIE'S ROUGH ESTIMATE</span><p>{selected.price_low_sek != null && selected.price_high_sek != null ? `${kr(selected.price_low_sek)}–${kr(selected.price_high_sek)} incl. VAT` : "No estimate"}</p>{selected.note && <p className="history-note">{selected.note}</p>}</section>
+          <section><span className="eyebrow">JACKIE'S ROUGH ESTIMATE</span><p>{selected.price_low_sek != null && selected.price_high_sek != null ? `${kr(selected.price_low_sek)} to ${kr(selected.price_high_sek)} incl. VAT` : "No estimate"}</p>{selected.note && <p className="history-note">{selected.note}</p>}</section>
           {selected.message && <section><span className="eyebrow">MESSAGE FROM THE DRIVER</span><p>{selected.message}</p></section>}
           <section><span className="eyebrow">STATUS</span><div className="ws-filters">{STATUSES.map(s => <Button key={s.id} size="sm" variant={selected.status === s.id ? "default" : "outline"} onClick={() => void setStatus(selected, s.id)}>{s.label}</Button>)}</div></section>
           <Button disabled title="Coming with the quoting engine">Draft a quote · coming soon</Button>
