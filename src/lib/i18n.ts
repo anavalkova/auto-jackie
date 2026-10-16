@@ -62,6 +62,25 @@ const dict = {
     toolSearch: "Searching Wikidata", toolCode: "Looking up fault code", toolTesla: "Reading Tesla service manual", toolItem: "Reading Wikidata record",
     checking: "Jackie is checking her sources…", genericError: "Something went wrong. Please try again.", quotaGuest: "You have used your 5 free questions this month. Sign in to keep talking to Jackie, with 50 questions a month.", quotaUser: "You have used your 50 questions this month. Jackie will be back for you next month.",
     quotaHintGuest: "%n of %m free questions left this month. Sign in for 50 a month.", quotaHintUser: "%n of %m questions left this month.",
+    pitch: {
+      eyebrow: "FOR WORKSHOPS",
+      title: "Your phone can keep ringing. Jackie already answered.",
+      sub: "Jackie chats with drivers around the clock, in plain words, in three languages. You wake up to booked jobs instead of missed calls.",
+      cta: "Sign in to your workshop", ctaNote: "Invite only. We set you up personally.",
+      jackieCaption: "Jackie. Never sleeps, never judges.",
+      steps: [
+        { t: "A driver vents", d: "2 a.m., strange noise, mild panic." },
+        { t: "Jackie sorts it", d: "Likely cause, urgency, a rough price from your own list." },
+        { t: "It lands in your inbox", d: "Car, summary, phone number. No phone tag." },
+        { t: "You call, they book", d: "They already know the price. You just fix the car." },
+      ],
+      gains: ["Fewer phone interruptions", "Leads caught at 2 a.m.", "Quotes in your own prices", "English, Swedish and German"],
+      stats: [
+        { value: "21%", text: "of calls to workshops go unanswered.", src: { label: "Marchex", url: "https://www.marchex.com/up-to-21-percent-of-automotive-service-customer-calls-go-unanswered-creating-significant-revenue-leakage/" } },
+        { value: "68%", text: "of missed callers never call back.", src: { label: "Auto Service World", url: "https://www.autoserviceworld.com/phone-fails-lead-to-missed-automotive-service-revenue-report/" } },
+        { value: "36%", text: "of Swedish private cars belong to women. Few shops speak to them.", src: { label: "Trafikanalys", url: "https://www.trafa.se/vagtrafik/fordon/" } },
+      ],
+    },
   },
   sv: {
     forWorkshops: "För verkstäder", account: "Ditt konto", signOut: "Logga ut", signInToSave: "Logga in för att spara",
@@ -95,6 +114,25 @@ const dict = {
     toolSearch: "Söker i Wikidata", toolCode: "Slår upp felkod", toolTesla: "Läser Teslas servicemanual", toolItem: "Läser Wikidata-post",
     checking: "Jackie kollar sina källor…", genericError: "Något gick fel. Försök igen.", quotaGuest: "Du har använt dina 5 gratisfrågor den här månaden. Logga in för att fortsätta prata med Jackie, med 50 frågor i månaden.", quotaUser: "Du har använt dina 50 frågor den här månaden. Jackie finns här igen nästa månad.",
     quotaHintGuest: "%n av %m gratisfrågor kvar den här månaden. Logga in för 50 i månaden.", quotaHintUser: "%n av %m frågor kvar den här månaden.",
+    pitch: {
+      eyebrow: "FÖR VERKSTÄDER",
+      title: "Din telefon får gärna ringa. Jackie har redan svarat.",
+      sub: "Jackie pratar med förare dygnet runt, med enkla ord, på tre språk. Du vaknar till bokade jobb istället för missade samtal.",
+      cta: "Logga in på din verkstad", ctaNote: "Endast inbjudan. Vi sätter upp dig personligen.",
+      jackieCaption: "Jackie. Sover aldrig, dömer aldrig.",
+      steps: [
+        { t: "En förare bikt sig", d: "Klockan två på natten, konstigt ljud, lätt panik." },
+        { t: "Jackie redor ut det", d: "Trolig orsak, hur bråttom det är och ett ungefärligt pris från din egen lista." },
+        { t: "Det landar i din inkorg", d: "Bil, sammanfattning, telefonnummer. Ingen telefonjakt." },
+        { t: "Du ringer, de bokar", d: "De känner redan till priset. Du lagar bara bilen." },
+      ],
+      gains: ["Färre telefonavbrott", "Leads fångade klockan två på natten", "Offerter med dina egna priser", "Engelska, svenska och tyska"],
+      stats: [
+        { value: "21%", text: "av samtalen till verkstäder besvaras aldrig.", src: { label: "Marchex", url: "https://www.marchex.com/up-to-21-percent-of-automotive-service-customer-calls-go-unanswered-creating-significant-revenue-leakage/" } },
+        { value: "68%", text: "av missade samtal ringer aldrig tillbaka.", src: { label: "Auto Service World", url: "https://www.autoserviceworld.com/phone-fails-lead-to-missed-automotive-service-revenue-report/" } },
+        { value: "36%", text: "av svenska privatbilar ägs av kvinnor. Få verkstäder pratar med dem.", src: { label: "Trafikanalys", url: "https://www.trafa.se/vagtrafik/fordon/" } },
+      ],
+    },
   },
   de: {
     forWorkshops: "Für Werkstätten", account: "Dein Konto", signOut: "Abmelden", signInToSave: "Anmelden zum Speichern",
@@ -128,6 +166,25 @@ const dict = {
     toolSearch: "Suche in Wikidata", toolCode: "Fehlercode wird nachgeschlagen", toolTesla: "Lese Tesla-Servicehandbuch", toolItem: "Lese Wikidata-Eintrag",
     checking: "Jackie prüft ihre Quellen…", genericError: "Etwas ist schiefgelaufen. Bitte versuch es erneut.", quotaGuest: "Du hast deine 5 kostenlosen Fragen diesen Monat genutzt. Melde dich an, um mit Jackie weiterzusprechen, mit 50 Fragen pro Monat.", quotaUser: "Du hast deine 50 Fragen diesen Monat genutzt. Jackie ist nächsten Monat wieder für dich da.",
     quotaHintGuest: "%n von %m kostenlosen Fragen diesen Monat übrig. Melde dich an für 50 pro Monat.", quotaHintUser: "%n von %m Fragen diesen Monat übrig.",
+    pitch: {
+      eyebrow: "FÜR WERKSTÄTTEN",
+      title: "Dein Telefon darf weiter klingeln. Jackie hat schon abgenommen.",
+      sub: "Jackie spricht rund um die Uhr mit Fahrern, in einfachen Worten, in drei Sprachen. Du wachst mit gebuchten Aufträgen auf statt mit verpassten Anrufen.",
+      cta: "In deine Werkstatt einloggen", ctaNote: "Nur auf Einladung. Wir richten alles persönlich ein.",
+      jackieCaption: "Jackie. Schläft nie, urteilt nie.",
+      steps: [
+        { t: "Ein Fahrer beichtet", d: "2 Uhr nachts, komisches Geräusch, leichte Panik." },
+        { t: "Jackie sortiert es", d: "Wahrscheinliche Ursache, Dringlichkeit, grober Preis aus deiner eigenen Liste." },
+        { t: "Es landet in deinem Posteingang", d: "Auto, Zusammenfassung, Telefonnummer. Kein Telefon-Ping-Pong." },
+        { t: "Du rufst an, sie buchen", d: "Sie kennen den Preis schon. Du reparierst nur das Auto." },
+      ],
+      gains: ["Weniger Telefonunterbrechungen", "Leads um 2 Uhr nachts gefangen", "Angebote mit deinen eigenen Preisen", "Englisch, Schwedisch und Deutsch"],
+      stats: [
+        { value: "21%", text: "der Anrufe bei Werkstätten bleiben unbeantwortet.", src: { label: "Marchex", url: "https://www.marchex.com/up-to-21-percent-of-automotive-service-customer-calls-go-unanswered-creating-significant-revenue-leakage/" } },
+        { value: "68%", text: "der verpassten Anrufer rufen nie zurück.", src: { label: "Auto Service World", url: "https://www.autoserviceworld.com/phone-fails-lead-to-missed-automotive-service-revenue-report/" } },
+        { value: "36%", text: "der schwedischen Privatautos gehören Frauen. Wenige Werkstätten sprechen sie an.", src: { label: "Trafikanalys", url: "https://www.trafa.se/vagtrafik/fordon/" } },
+      ],
+    },
   },
 };
 
