@@ -89,8 +89,6 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId }: { card
         <ol className="booking-steps">{steps.map((s, i) => <li key={s} className={i + 1 === step ? "is-on" : i + 1 < step ? "is-done" : ""}><button type="button" disabled={i + 1 > step} onClick={() => setStep(i + 1)}><span>{i + 1 < step ? <Check/> : i + 1}</span>{s}</button></li>)}</ol>
 
         {step === 1 && <div className="visit-form">
-          {false && <div><Label htmlFor="v-shop">{b.workshop}</Label>
-            <select id="v-shop" className="native-select" value={shopId} onChange={e => setShopId(e.target.value)}>{shops.map(s => <option key={s.id} value={s.id}>{s.name}{s.city ? ` · ${s.city}` : ""}</option>)}</select></div>}
           {direct ? <>
             <p className="eyebrow">{b.workshop}: {shops.find(x => x.id === shopId)?.name}</p>
             <div><Label htmlFor="v-service">{b.job}</Label>
