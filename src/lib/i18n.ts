@@ -60,7 +60,7 @@ const dict = {
     savedToChats: "Saved to My chats", whatsNext: "WHAT'S NEXT", getLooked: "Get it looked at:", about_: "About", to: "to",
     vatNote: "incl. VAT · rough estimate, not a quote", requestVisit: "Request a workshop visit",
     toolSearch: "Searching Wikidata", toolCode: "Looking up fault code", toolTesla: "Reading Tesla service manual", toolItem: "Reading Wikidata record",
-    checking: "Jackie is checking her sources…", genericError: "Something went wrong. Please try again.",
+    checking: "Jackie is checking her sources…", genericError: "Something went wrong. Please try again.", quotaGuest: "You have used your 5 free questions this month. Sign in to keep talking to Jackie, with 50 questions a month.", quotaUser: "You have used your 50 questions this month. Jackie will be back for you next month.",
   },
   sv: {
     forWorkshops: "För verkstäder", account: "Ditt konto", signOut: "Logga ut", signInToSave: "Logga in för att spara",
@@ -92,7 +92,7 @@ const dict = {
     savedToChats: "Sparad i Mina chattar", whatsNext: "NÄSTA STEG", getLooked: "Låt kolla det:", about_: "Cirka", to: "till",
     vatNote: "inkl. moms · grov uppskattning, ingen offert", requestVisit: "Begär verkstadsbesök",
     toolSearch: "Söker i Wikidata", toolCode: "Slår upp felkod", toolTesla: "Läser Teslas servicemanual", toolItem: "Läser Wikidata-post",
-    checking: "Jackie kollar sina källor…", genericError: "Något gick fel. Försök igen.",
+    checking: "Jackie kollar sina källor…", genericError: "Något gick fel. Försök igen.", quotaGuest: "Du har använt dina 5 gratisfrågor den här månaden. Logga in för att fortsätta prata med Jackie, med 50 frågor i månaden.", quotaUser: "Du har använt dina 50 frågor den här månaden. Jackie finns här igen nästa månad.",
   },
   de: {
     forWorkshops: "Für Werkstätten", account: "Dein Konto", signOut: "Abmelden", signInToSave: "Anmelden zum Speichern",
@@ -124,7 +124,7 @@ const dict = {
     savedToChats: "In Meine Chats gespeichert", whatsNext: "WIE ES WEITERGEHT", getLooked: "Prüfen lassen:", about_: "Etwa", to: "bis",
     vatNote: "inkl. MwSt. · grobe Schätzung, kein Angebot", requestVisit: "Werkstatttermin anfragen",
     toolSearch: "Suche in Wikidata", toolCode: "Fehlercode wird nachgeschlagen", toolTesla: "Lese Tesla-Servicehandbuch", toolItem: "Lese Wikidata-Eintrag",
-    checking: "Jackie prüft ihre Quellen…", genericError: "Etwas ist schiefgelaufen. Bitte versuch es erneut.",
+    checking: "Jackie prüft ihre Quellen…", genericError: "Etwas ist schiefgelaufen. Bitte versuch es erneut.", quotaGuest: "Du hast deine 5 kostenlosen Fragen diesen Monat genutzt. Melde dich an, um mit Jackie weiterzusprechen, mit 50 Fragen pro Monat.", quotaUser: "Du hast deine 50 Fragen diesen Monat genutzt. Jackie ist nächsten Monat wieder für dich da.",
   },
 };
 

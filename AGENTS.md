@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 - AI chat streams from the /api/chat server route with Wikidata tools in src/lib/ai; keep model calls and keys server-side so grounding rules can't be bypassed.
+- /api/chat enforces monthly question limits server-side (consume_chat_quota RPC via admin client; signed-in by verified user id, guests by hashed IP); limits live in src/lib/chat-quota.ts so the browser cannot bypass them.
 - German HSN/TSN lookups use the bundled official KBA SV 4.2 register (src/lib/vehicles-data, server-only via /api/vehicles/lookup); Swedish plates resolve live via RegCheck /CheckSweden (REGCHECK_USERNAME secret, server-only); details go to the model only, never shown to the driver.
 - Accounts are optional (Google / Lovable sign-in). Guests: car and chat live only in React state, nothing persisted. Signed-in: car in saved_vehicles, chats in chats (UIMessage[] jsonb) via the browser client under owner-only RLS; saved chats open at /c/$chatId.
 - Define AutoJackie visual styling in src/styles.css and use shared design-system controls so future screens inherit the same brand.
