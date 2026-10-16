@@ -243,7 +243,7 @@ function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
   const prices = s.price_list as PriceItem[];
   const setP = (p: PriceItem[]) => setS({ ...s, price_list: p });
   const services = (s.services as string[]).join("\n");
-  return <form className="ws-section" onSubmit={e => { e.preventDefault(); void save({ hourly_rate_sek: s.hourly_rate_sek, price_list: prices.filter(p => p.task.trim()), services: s.services, specialties: s.specialties, jackie_context: s.jackie_context }); }}>
+  return <form className="ws-section" onSubmit={e => { e.preventDefault(); void save({ hourly_rate_sek: s.hourly_rate_sek, price_list: prices.filter(p => p.task.trim()), services: (s.services as string[]).map(x => x.trim()).filter(Boolean), specialties: s.specialties, jackie_context: s.jackie_context }); }}>
     <p className="ws-section-intro">This is what makes Jackie sound like your workshop. Your prices, your strengths, the way you like to work.</p>
     <fieldset disabled={!canEdit} className="ws-grid2" style={{ border: 0, padding: 0, margin: 0 }}>
       <section className="ws-card"><h2>Your prices (incl. VAT)</h2>
