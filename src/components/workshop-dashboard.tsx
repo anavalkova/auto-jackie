@@ -76,7 +76,8 @@ export function WorkshopDashboard() {
   else if (!user) body = <WorkshopPitch onSignIn={() => setSignIn(true)}/>;
   else if (!shop) body = <div className="ws-empty"><Wrench/><h1>Your workshop isn't set up yet</h1><p>AutoJackie's team sets up each workshop personally. If we've onboarded you, sign in with the email you gave us{user.email ? ` (you're signed in as ${user.email})` : ""}.</p>{isAdmin && <Button asChild><Link to="/admin">Go to operations</Link></Button>}</div>;
   else body = <>
-    <div className="ws-title"><div><span className="eyebrow">WORKSHOP DASHBOARD</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div><div className="ws-filters"><Button variant={tab === "requests" ? "default" : "outline"} onClick={() => setTab("requests")}>Requests</Button><Button variant={tab === "settings" ? "default" : "outline"} onClick={() => setTab("settings")}>Settings</Button></div></div>
+    <div className="ws-title"><div><span className="eyebrow">WORKSHOP DASHBOARD</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div></div>
+    <div className="ws-overview">
     {tab === "settings" ? <WhyNote id="workshop-settings" title="71% of Swedish drivers choose on expertise, not price. Show them yours." summary="71% pick expertise over price. Your settings make that visible." stats={[
       { value: "3 800", text: "workshops in Sweden compete for the same customers.", source: { label: "Mekonomen", url: "https://www.mynewsdesk.com/se/mekonomen/pressreleases/var-tredje-bilaegare-har-kaent-sig-lurad-av-verkstaden-oekad-kunskap-om-godkaend-bilverkstad-kan-vara-en-loesning-3359302" } },
       { value: "71%", text: "of Swedish drivers pick a workshop for skilled staff, not low price.", source: { label: "OKQ8", url: "https://www.mynewsdesk.com/se/okq8/pressreleases/7-av-10-bilister-efterfraagar-kunnig-verkstadspersonal-visar-ny-undersoekning-922496" } },
@@ -87,13 +88,15 @@ export function WorkshopDashboard() {
       { value: "72%", text: "feel anxious about repair costs. Drivers who used Jackie already have a number in mind.", source: { label: "RepairPal / Harris", url: "https://repairpal.com/consumer-survey-march-2013" } },
       { value: "1 in 4", text: "bookings end as no-shows. SMS confirmation, coming next, cuts that down.", source: { label: "Solera via Dealership Guy", url: "https://news.dealershipguy.com/p/broken-service-scheduling-is-costing-dealers-big-time-here-s-how-some-are-closing-the-gaps" } },
     ]} footer="Less convincing to do. Shorter calls. Higher close rate."/>}
-    {tab === "settings" ? <WorkshopSettings workshopId={shop.id} canEdit={shop.role === "owner"}/> : <>
     <div className="ws-kpis">
       <Kpi icon={<Inbox/>} label="New requests" value={String(kpis.fresh)}/>
       <Kpi icon={<CalendarClock/>} label="Need you this week" value={String(kpis.urgent)}/>
       <Kpi icon={<TrendingUp/>} label="Open pipeline (est.)" value={kr(kpis.pipeline)} hint="Midpoint of Jackie's rough ranges, incl. VAT"/>
       <Kpi icon={<Car/>} label="Booked" value={String(kpis.booked)}/>
     </div>
+    </div>
+    <div className="ws-tabs" role="tablist" aria-label="Dashboard sections"><Button variant={tab === "requests" ? "default" : "outline"} role="tab" aria-selected={tab === "requests"} onClick={() => setTab("requests")}>Requests</Button><Button variant={tab === "settings" ? "default" : "outline"} role="tab" aria-selected={tab === "settings"} onClick={() => setTab("settings")}>Settings</Button></div>
+    {tab === "settings" ? <WorkshopSettings workshopId={shop.id} canEdit={shop.role === "owner"}/> : <>
     <div className="ws-filters" role="tablist" aria-label="Filter requests">
       {([{ id: "open", label: "All open" }, ...STATUSES] as { id: Status | "open"; label: string }[]).map(s => <Button key={s.id} size="sm" variant={filter === s.id ? "default" : "outline"} role="tab" aria-selected={filter === s.id} onClick={() => setFilter(s.id)}>{s.label}</Button>)}
     </div>
