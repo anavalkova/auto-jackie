@@ -10,7 +10,7 @@ export function stockholmTime(y: number, m: number, d: number, h: number): Date 
   return new Date(guess.getTime() - (shown.getTime() - asUtc.getTime()));
 }
 
-export type BookingRules = { weekdays?: number[]; hours?: number[]; noticeDays?: number };
+export type BookingRules = { weekdays?: number[] | undefined; hours?: number[] | undefined; noticeDays?: number | undefined };
 
 /** weekdays use 0=Sun..6=Sat; noticeDays is at least 1 (never same day). */
 export function upcomingDays(from: Date, count = 7, rules: BookingRules = {}): { key: string; slots: Date[] }[] {
