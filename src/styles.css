@@ -245,9 +245,9 @@
 .ws-title { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
 .ws-title h1 { font-size: 28px; margin: 4px 0 0; }
 .ws-kpis { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-bottom: 24px; }
-.ws-kpi { display: grid; gap: 6px; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: var(--secondary); }
+.ws-kpi { display: grid; gap: 4px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--secondary); }
 .ws-kpi > svg { color: var(--primary); width: 18px; height: 18px; }
-.ws-kpi strong { font-family: var(--font-heading); font-size: 26px; }
+.ws-kpi strong { font-family: var(--font-heading); font-size: 22px; }
 .ws-kpi small { color: var(--muted-foreground); font-size: 11px; }
 .ws-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
 .ws-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
@@ -286,13 +286,13 @@
 @media (max-width: 900px) { .admin-form, .admin-row { grid-template-columns: 1fr; } }
 .signin-divider { text-align: center; font-size: 12px; color: var(--muted-foreground); margin: 6px 0 0; }
 .why-note { --why-line: color-mix(in oklab, var(--primary) 15%, var(--border)); position: relative; display: grid; gap: 8px; padding: 16px 18px; border: 1px solid color-mix(in oklab, var(--primary) 35%, var(--border)); border-left: 3px solid var(--primary); border-radius: 8px; background: color-mix(in oklab, var(--primary) 6%, var(--card)); margin: 14px 0; text-align: left; }
-.why-toggle { display: flex; align-items: center; gap: 10px; width: 100%; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; }
-.why-toggle .why-title { flex: 1; }
-.why-toggle .eyebrow { white-space: nowrap; }
+.why-toggle { display: flex; align-items: center; gap: 12px; width: 100%; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; }
+.why-toggle-label { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.why-toggle-label .eyebrow { white-space: nowrap; }
 .why-chevron { width: 16px; height: 16px; flex: 0 0 auto; color: var(--muted-foreground); transition: transform 0.15s ease; }
 .why-chevron.is-collapsed { transform: rotate(-90deg); }
 .why-toggle:hover .why-chevron { color: var(--foreground); }
-.why-title { font-size: 14px; }
+.why-title { font-size: 14px; line-height: 1.35; }
 .why-stats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: max-content 1fr; grid-auto-rows: 1fr; gap: 0; }
 .why-stats li { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(72px, auto) 1fr; grid-template-columns: subgrid; align-items: stretch; border-top: 1px solid var(--why-line); }
 .why-stats li:first-child { border-top: 0; }
@@ -356,4 +356,4 @@
   .pitch-flow, .pitch-gains ul { grid-template-columns: 1fr 1fr; } .pitch-flow li::after { display: none; }
   .pitch-stats { grid-template-columns: 1fr; } .pitch-stats > div + div { border-left: 0; border-top: 1px solid var(--border); }
 }
-.ws-main .why-note { max-width: 720px; }
+/* why-note width is unrestricted inside ws-main; it matches the KPI grid naturally */
