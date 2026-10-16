@@ -82,8 +82,14 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
                 </div>;
               }
               if (isToolUIPart(part)) {
-                const name = getToolName(part) === "searchWikidata" ? t.toolSearch : getToolName(part) === "lookupFaultCode" ? t.toolCode : getToolName(part).includes("Tesla") ? t.toolTesla : t.toolItem;
-                return <Tool key={i} defaultOpen={false}><ToolHeader type={part.type as `tool-${string}`} state={part.state} title={name}/><ToolContent><ToolInput input={part.input}/><ToolOutput output={part.output} errorText={part.errorText}/></ToolContent></Tool>;
+                const tools = m.parts.filter(p => isToolUIPart(p) && getToolName(p) !== "suggestWorkshopVisit");
+                if (tools[0] !== part) return null;
+                const running = tools.some(p => isToolUIPart(p) && (p.state === "input-streaming" || p.state === "input-available"));
+                const label = (n: string) => n === "searchWikidata" ? t.toolSearch : n === "lookupFaultCode" ? t.toolCode : n.includes("Tesla") ? t.toolTesla : t.toolItem;
+                return <details key={i} className="sources-used">
+                  <summary>{running ? t.sourcesUsing : t.sourcesUsed.replace("%n", String(tools.length))}</summary>
+                  {tools.map((p, j) => isToolUIPart(p) && <Tool key={j} defaultOpen={false}><ToolHeader type={p.type as `tool-${string}`} state={p.state} title={label(getToolName(p))}/><ToolContent><ToolInput input={p.input}/><ToolOutput output={p.output} errorText={p.errorText}/></ToolContent></Tool>)}
+                </details>;
               }
               return null;
             })}
@@ -101,7 +107,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
     <PromptInput className="chat-composer" onSubmit={({ text }) => send(text)}>
       <PromptInputTextarea value={input} onChange={e => setInput(e.target.value)} placeholder={t.placeholder}/>
       <PromptInputFooter>
-        <span className="composer-hint">{saving ? t.savedToChats : quotaHint}</span>
+        <span className="composer-hint">{quotaHint}{saving ? ` · ${t.savedToChats}` : ""}</span>
         {!quota?.signedIn && quota != null && quota.remaining <= 2 && onSignIn && <Button variant="ghost" size="sm" type="button" onClick={onSignIn}>{t.signIn}</Button>}
         <div className="composer-actions">
           {messages.length > 0 && !busy && <Button variant="ghost" size="sm" type="button" onClick={() => { setMessages([]); clearError(); onReset?.(); }}><RotateCcw/> New chat</Button>}

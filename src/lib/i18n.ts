@@ -61,7 +61,7 @@ const dict = {
     tryLabel: "Try:", placeholder: "Describe the noise, light or part you're wondering about…",
     savedToChats: "Saved to My chats", whatsNext: "WHAT'S NEXT", getLooked: "Get it looked at:", about_: "About", to: "to",
     vatNote: "incl. VAT · rough estimate, not a quote", requestVisit: "Request a workshop visit",
-    toolSearch: "Searching Wikidata", toolCode: "Looking up fault code", toolTesla: "Reading Tesla service manual", toolItem: "Reading Wikidata record",
+    toolSearch: "Searching Wikidata", toolCode: "Looking up fault code", toolTesla: "Reading Tesla service manual", toolItem: "Reading Wikidata record", sourcesUsed: "Checked %n sources", sourcesUsing: "Checking sources…",
     checking: "Jackie is checking her sources…", genericError: "Something went wrong. Please try again.", quotaGuest: "You have used your 5 free questions this month. Sign in to keep talking to Jackie, with 50 questions a month.", quotaUser: "You have used your 50 questions this month. Jackie will be back for you next month.",
     quotaHintGuest: "%n of %m free questions left this month. Sign in for 50 a month.", quotaHintUser: "%n of %m questions left this month.",
     pitch: {
@@ -115,7 +115,7 @@ const dict = {
     tryLabel: "Testa:", placeholder: "Beskriv ljudet, lampan eller delen du undrar över…",
     savedToChats: "Sparad i Mina chattar", whatsNext: "NÄSTA STEG", getLooked: "Låt kolla det:", about_: "Cirka", to: "till",
     vatNote: "inkl. moms · grov uppskattning, ingen offert", requestVisit: "Begär verkstadsbesök",
-    toolSearch: "Söker i Wikidata", toolCode: "Slår upp felkod", toolTesla: "Läser Teslas servicemanual", toolItem: "Läser Wikidata-post",
+    toolSearch: "Söker i Wikidata", toolCode: "Slår upp felkod", toolTesla: "Läser Teslas servicemanual", toolItem: "Läser Wikidata-post", sourcesUsed: "Kollade %n källor", sourcesUsing: "Kollar källor…",
     checking: "Jackie kollar sina källor…", genericError: "Något gick fel. Försök igen.", quotaGuest: "Du har använt dina 5 gratisfrågor den här månaden. Logga in för att fortsätta prata med Jackie, med 50 frågor i månaden.", quotaUser: "Du har använt dina 50 frågor den här månaden. Jackie finns här igen nästa månad.",
     quotaHintGuest: "%n av %m gratisfrågor kvar den här månaden. Logga in för 50 i månaden.", quotaHintUser: "%n av %m frågor kvar den här månaden.",
     pitch: {
@@ -169,7 +169,7 @@ const dict = {
     tryLabel: "Probier:", placeholder: "Beschreib das Geräusch, die Leuchte oder das Teil…",
     savedToChats: "In Meine Chats gespeichert", whatsNext: "WIE ES WEITERGEHT", getLooked: "Prüfen lassen:", about_: "Etwa", to: "bis",
     vatNote: "inkl. MwSt. · grobe Schätzung, kein Angebot", requestVisit: "Werkstatttermin anfragen",
-    toolSearch: "Suche in Wikidata", toolCode: "Fehlercode wird nachgeschlagen", toolTesla: "Lese Tesla-Servicehandbuch", toolItem: "Lese Wikidata-Eintrag",
+    toolSearch: "Suche in Wikidata", toolCode: "Fehlercode wird nachgeschlagen", toolTesla: "Lese Tesla-Servicehandbuch", toolItem: "Lese Wikidata-Eintrag", sourcesUsed: "%n Quellen geprüft", sourcesUsing: "Prüfe Quellen…",
     checking: "Jackie prüft ihre Quellen…", genericError: "Etwas ist schiefgelaufen. Bitte versuch es erneut.", quotaGuest: "Du hast deine 5 kostenlosen Fragen diesen Monat genutzt. Melde dich an, um mit Jackie weiterzusprechen, mit 50 Fragen pro Monat.", quotaUser: "Du hast deine 50 Fragen diesen Monat genutzt. Jackie ist nächsten Monat wieder für dich da.",
     quotaHintGuest: "%n von %m kostenlosen Fragen diesen Monat übrig. Melde dich an für 50 pro Monat.", quotaHintUser: "%n von %m Fragen diesen Monat übrig.",
     pitch: {

@@ -532,3 +532,8 @@
   .site-header nav { flex-wrap: wrap; justify-content: flex-end; gap: 6px 8px; min-width: 0; }
   .site-header nav .workshop-link { padding: 0 4px; }
 }
+.sources-used { margin: 2px 0 6px; font-size: 12px; color: var(--muted-foreground); }
+.sources-used > summary { cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); }
+.sources-used > summary::before { content: "▸"; font-size: 10px; }
+.sources-used[open] > summary::before { content: "▾"; }
+.sources-used[open] > summary { margin-bottom: 6px; }
