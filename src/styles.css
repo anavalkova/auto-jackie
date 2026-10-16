@@ -84,6 +84,9 @@
 .assistant-top { display: flex; justify-content: space-between; align-items: center; padding: 27px 32px; }
 .assistant-top > span:first-child { font-size: 9px; font-weight: 600; display: flex; align-items: center; gap: 7px; color: var(--muted-foreground); }
 .preview-badge { font-size: 10px; padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; color: var(--muted-foreground); }
+.assistant-top-right { display: flex; align-items: center; gap: 10px; }
+.assistant-top .why-overlay { margin-left: 0; }
+.assistant-top .why-chip { font-size: 10px; padding: 4px 10px; }
 .assistant-content { width: 100%; max-width: 650px; margin: auto; padding: 25px 48px 34px; }
 .greeting-icon { position: relative; display: grid; place-items: center; width: 48px; height: 48px; color: var(--primary); background: var(--accent); border-radius: 12px; margin-bottom: 23px; }
 .greeting-icon > svg { width: 27px; height: 27px; }

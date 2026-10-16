@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { GarageDialog } from "@/components/garage-dialog";
 import { JackieChat } from "@/components/jackie-chat";
 import { RequestVisitDialog, type VisitCard } from "@/components/request-visit-dialog";
+import { WhyNote } from "@/components/why-note";
 import { SignInDialog } from "@/components/sign-in-dialog";
 import { useSessionUser } from "@/hooks/use-session-user";
 import { supabase } from "@/integrations/supabase/client";
@@ -194,7 +195,10 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
       </aside>
 
       <section className="assistant-area" aria-label="Chat with Jackie">
-        <div className="assistant-top">{workshop?.greeting ? <span className="shop-greeting">{workshop.greeting}</span> : <span/>}<span className="preview-badge">{user ? t.chatsSaved : t.privateChat}</span></div>
+        <div className="assistant-top">{workshop?.greeting ? <span className="shop-greeting">{workshop.greeting}</span> : <span/>}<div className="assistant-top-right"><span className="preview-badge">{user ? t.chatsSaved : t.privateChat}</span><WhyNote id="driver" overlay title={t.whyTitle} pitch={t.whyPitch} stats={[
+          { value: "36%", text: t.why1, source: { label: "Trafikanalys, 2022", url: "https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" } },
+          { value: "P0301?", text: t.why2 },
+        ]}/></div></div>
         {missing ? <div className="chat-empty"><h1>{t.missingTitle}</h1><p>{user ? t.missingDeleted : t.missingSignIn}</p><div className="starter-grid">{!user && <Button onClick={() => setSignInOpen(true)}>{t.signIn}</Button>}<Button variant="outline" asChild><Link to="/">{t.startNew}</Link></Button></div></div>
           : initial === null ? <div className="chat-empty"><p>{t.opening}</p></div>
           : <JackieChat key={chatId ?? `new-${newChatKey}`} chatId={chatId} initialMessages={initial} vehicle={vehicle} pending={null} onPendingSent={() => {}} onTurnFinished={onTurnFinished} onReset={onReset} saving={!!user && !!chatId} workshopId={workshop?.id} onSignIn={() => setSignInOpen(true)}/>}

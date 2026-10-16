@@ -9,7 +9,6 @@ import { PromptInput, PromptInputFooter, PromptInputSubmit, PromptInputTextarea 
 import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from "@/components/ai-elements/tool";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
-import { WhyNote } from "@/components/why-note";
 import type { Vehicle } from "@/lib/vehicles";
 import { useT } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,10 +63,6 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
     {messages.length === 0 ? <div className="chat-empty">
       <h1>{t.heroTitle}</h1>
       <p>{t.heroSub}</p>
-      <WhyNote id="driver" title={t.whyTitle} stats={[
-        { value: "36%", text: t.why1, source: { label: "Trafikanalys, 2022", url: "https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" } },
-        { value: "P0301?", text: t.why2 },
-      ]}/>
     </div> : <Conversation className="chat-log">
       <ConversationContent>
         {messages.map(m => <Message from={m.role} key={m.id}>
