@@ -51,7 +51,7 @@ const dict = {
     privacyBody: "Without signing in, nothing is saved: your car and chat disappear when you start over or close the tab. If you sign in, your car and chats are stored in your account, visible only to you, and you can delete them any time. Registry details from a plate are never shown on screen.",
     aboutTitle: "Nice to meet you. I'm Jackie.",
     aboutBody: "I explain car problems in plain words and link every source. I use Wikidata, the official OBD-II fault code list, Tesla's Model 3 service manual, the German KBA register for HSN/TSN and live Swedish plate lookups. I speak English, Swedish and German.",
-    heroTitle: "Confess your car's sins.", heroSub: "Jackie listens without judging, then explains it in plain words, with urgency and a rough price.",
+    heroTitle: "Confess your car's sins.", heroSub: "Jackie listens without judging, explains in plain words and gives an indicative quote for your booking.",
     whyTitle: "Car talk assumes everyone speaks 'mechanic'. Most drivers don't, and shouldn't have to.",
     whyPitch: "Jackie listens first, then explains the problem in plain words, with a rough price and what to do next. No jargon, no judgment. In English, Swedish and German.",
     whyChip: "Why this exists",
