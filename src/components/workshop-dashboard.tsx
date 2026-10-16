@@ -459,9 +459,12 @@ const PREDEFINED_SERVICES: { task: string; price_sek: number; minutes: number }[
 
 function PricingView({ workshopId, canEdit }: { workshopId: string; canEdit: boolean }) {
   const { s, setS, save, state } = useSettings(workshopId);
+  const [pp, setPp] = useState(0);
   if (!s) return <p className="history-note" role="status">Loading…</p>;
   const durations = s.job_durations as Duration[];
   const prices = ensureOther(s.price_list as PriceItem[]).map(p => ({ ...p, minutes: p.minutes ?? durations.find(d => d.job === p.task)?.minutes ?? 60 }));
+  const pPages = Math.max(1, Math.ceil(prices.length / PAGE));
+  const pPg = Math.min(pp, pPages - 1);
   const setP = (p: PriceItem[]) => setS({ ...s, price_list: p });
   const available = PREDEFINED_SERVICES.filter(x => !prices.some(p => p.task === x.task));
   const submit = () => {
