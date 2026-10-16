@@ -191,7 +191,7 @@
 @media (max-width: 760px) {
   .workspace { height: auto; }
   .jackie-panel { display: flex; border-right: 0; border-bottom: 1px solid var(--border); overflow: visible; }
-  .portrait-wrap.compact { display: block; height: 180px; }
+  .portrait-wrap.compact { display: block; height: 215px; }
   .portrait-label { bottom: 12px; left: 14px; padding: 6px 10px; }
   .chat-shell { padding: 0 16px 16px; min-height: 560px; }
   .chat-empty h1 { font-size: 32px; }
