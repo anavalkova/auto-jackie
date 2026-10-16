@@ -172,7 +172,7 @@ function Kpi({ icon, label, value, hint }: { icon: React.ReactNode; label: strin
 
 type Settings = Database["public"]["Tables"]["workshop_settings"]["Row"];
 type Duration = { job: string; minutes: number };
-type PriceItem = { task: string; price_sek: number };
+type PriceItem = { task: string; price_sek: number; minutes?: number };
 
 function useSettings(workshopId: string) {
   const [s, setS] = useState<Settings | null>(null);
@@ -214,18 +214,13 @@ function InsightsView({ items }: { items: Inquiry[] }) {
 
 const WEEKDAYS = [{ d: 1, l: "Mon" }, { d: 2, l: "Tue" }, { d: 3, l: "Wed" }, { d: 4, l: "Thu" }, { d: 5, l: "Fri" }, { d: 6, l: "Sat" }, { d: 0, l: "Sun" }];
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 7);
-const TYPICAL: Duration[] = [
-  { job: "Annual service", minutes: 120 }, { job: "Brake pads & discs", minutes: 90 }, { job: "Tyre change", minutes: 30 },
-  { job: "Diagnostics (engine light)", minutes: 60 }, { job: "Timing belt", minutes: 300 }, { job: "Battery replacement", minutes: 30 }, { job: "AC service", minutes: 60 },
-];
 
 function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit: boolean }) {
   const { s, setS, save, state } = useSettings(workshopId);
   if (!s) return <p className="history-note" role="status">Loading…</p>;
   const durations = s.job_durations as Duration[];
-  const setDur = (d: Duration[]) => setS({ ...s, job_durations: d });
   const flip = (arr: number[], v: number) => arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v].sort((a, b) => a - b);
-  return <form className="ws-section" onSubmit={e => { e.preventDefault(); void save({ booking_days: s.booking_days, slot_hours: s.slot_hours, min_notice_days: s.min_notice_days, job_durations: durations.filter(d => d.job.trim()) }); }}>
+  return <form className="ws-section" onSubmit={e => { e.preventDefault(); void save({ booking_days: s.booking_days, slot_hours: s.slot_hours, min_notice_days: s.min_notice_days }); }}>
     <p className="ws-section-intro">Decide when drivers can book you and how long each job takes. Drivers only see the times you open here.</p>
     <fieldset disabled={!canEdit} className="ws-grid2" style={{ border: 0, padding: 0, margin: 0 }}>
       <section className="ws-card"><h2>When drivers can book</h2>
@@ -235,10 +230,8 @@ function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
         <select id="b-notice" className="native-select" value={s.min_notice_days} onChange={e => setS({ ...s, min_notice_days: Number(e.target.value) })}>{[1, 2, 3, 5, 7].map(d => <option key={d} value={d}>{d === 1 ? "Next day" : `${d} days ahead`}</option>)}</select>
       </section>
       <section className="ws-card"><h2>How long jobs take</h2>
-        <table className="ws-table"><thead><tr><th>Job</th><th>Minutes</th><th/></tr></thead><tbody>
-          {durations.map((d, i) => <tr key={i}><td><Input aria-label="Job" maxLength={80} value={d.job} onChange={e => setDur(durations.map((x, j) => j === i ? { ...x, job: e.target.value } : x))}/></td><td><Input aria-label="Minutes" type="number" min={5} max={2880} step={5} value={d.minutes} onChange={e => setDur(durations.map((x, j) => j === i ? { ...x, minutes: Number(e.target.value) } : x))}/></td><td><Button type="button" size="sm" variant="ghost" aria-label="Remove" onClick={() => setDur(durations.filter((_, j) => j !== i))}>×</Button></td></tr>)}
-        </tbody></table>
-        <div className="ws-chips"><Button type="button" size="sm" variant="outline" onClick={() => setDur([...durations, { job: "", minutes: 60 }])}>Add job</Button><Button type="button" size="sm" variant="outline" onClick={() => setDur(TYPICAL)}>Not sure? Use typical times</Button></div>
+        <table className="ws-table"><tbody>{durations.map((d, i) => <tr key={i}><td>{d.job}</td><td><strong>{d.minutes} min</strong></td></tr>)}</tbody></table>
+        <p className="history-note">Job times are set per service in the Pricing engine tab.</p>
       </section>
     </fieldset>
     <SaveRow canEdit={canEdit} state={state}/>
@@ -249,11 +242,19 @@ const CONTEXT_STEPS = [
   { title: "Your strengths", sees: "Drivers on your Jackie page hear why your workshop fits their problem." },
   { title: "How you work", sees: "Jackie explains what you would do, in your order and with your parts." },
   { title: "Jackie's brain", sees: "Nothing visible. It controls answer quality, speed and running cost." },
-  { title: "Review", sees: "Check everything, then save. Changes apply to the next conversation." },
+];
+
+const PROFILE_STEPS = [
+  { title: "Contact details", sees: "How to reach and find you, mostly after they book." },
+  { title: "Your brand", sees: "Your page link, colors, logo and greeting on your Jackie page." },
 ];
 
 function Stepper({ steps, step, setStep }: { steps: { title: string }[]; step: number; setStep: (n: number) => void }) {
   return <ol className="ws-stepper">{steps.map((st, i) => <li key={st.title}><button type="button" aria-current={i === step ? "step" : undefined} data-done={i < step || undefined} onClick={() => setStep(i)}><span className="ws-step-num">{i + 1}</span>{st.title}</button></li>)}</ol>;
+}
+
+function WizardActions({ canEdit, last, next }: { canEdit: boolean; last: boolean; next: () => void }) {
+  return <div className="ws-chips">{canEdit ? <Button type="submit" variant={last ? "default" : "outline"}>Save this step</Button> : <span className="history-note">Only the workshop owner can change these.</span>}{!last && <Button type="button" onClick={next}>Next</Button>}</div>;
 }
 
 function Hint({ controls, shows }: { controls: string; shows: string }) {
@@ -267,7 +268,7 @@ function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
   const services = (s.services as string[]).join("\n");
   const last = step === CONTEXT_STEPS.length - 1;
   const cur = CONTEXT_STEPS[step]!;
-  return <form className="ws-section ws-wizard" onSubmit={e => { e.preventDefault(); if (!last) { setStep(step + 1); return; } void save({ ai_chat_tier: s.ai_chat_tier, ai_quote_tier: s.ai_quote_tier, services: (s.services as string[]).map(x => x.trim()).filter(Boolean), specialties: s.specialties, jackie_context: s.jackie_context }); }}>
+  return <form className="ws-section ws-wizard" onSubmit={e => { e.preventDefault(); void save({ ai_chat_tier: s.ai_chat_tier, ai_quote_tier: s.ai_quote_tier, services: (s.services as string[]).map(x => x.trim()).filter(Boolean), specialties: s.specialties, jackie_context: s.jackie_context }); }}>
     <Stepper steps={CONTEXT_STEPS} step={step} setStep={setStep}/>
     <section className="ws-card">
       <div className="ws-step-head"><h2>{step + 1}. {cur.title}</h2><p className="ws-hint"><span><b>Drivers see:</b> {cur.sees}</span></p></div>
@@ -288,17 +289,10 @@ function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
           </div>
           <div><Button type="button" size="sm" variant="outline" onClick={() => setS({ ...s, ai_chat_tier: DEFAULT_TIERS.chat, ai_quote_tier: DEFAULT_TIERS.quote })}>Reset to recommended</Button></div>
         </>}
-        {step === 3 && <table className="ws-table"><tbody>
-          <tr><td>Services</td><td>{(s.services as string[]).filter(x => x.trim()).length || "None"} listed</td></tr>
-          <tr><td>Specialties</td><td>{s.specialties || "Not set"}</td></tr>
-          <tr><td>How you work</td><td>{s.jackie_context ? `${s.jackie_context.slice(0, 90)}${s.jackie_context.length > 90 ? "…" : ""}` : "Not set"}</td></tr>
-          <tr><td>Everyday chat</td><td>{TIER_INFO[s.ai_chat_tier as Tier].label} ({TIER_INFO[s.ai_chat_tier as Tier].cost})</td></tr>
-          <tr><td>Rough quotes</td><td>{TIER_INFO[s.ai_quote_tier as Tier].label} ({TIER_INFO[s.ai_quote_tier as Tier].cost})</td></tr>
-        </tbody></table>}
       </fieldset>
       <div className="ws-wizard-nav">
         <Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>Back</Button>
-        {last ? (canEdit ? <Button type="submit">Save</Button> : <span className="history-note">Only the workshop owner can change these.</span>) : <Button type="submit">Next</Button>}
+        <WizardActions canEdit={canEdit} last={last} next={() => setStep(step + 1)}/>
       </div>
       {state && <p className="history-note" role="status">{state}</p>}
     </section>
@@ -317,21 +311,43 @@ function TierRow({ title, hint, value, recommended, onChange }: { title: string;
   </div>;
 }
 
+const PREDEFINED_SERVICES: { task: string; price_sek: number; minutes: number }[] = [
+  { task: "Annual service", price_sek: 2900, minutes: 120 }, { task: "Small service (oil & filter)", price_sek: 1500, minutes: 60 },
+  { task: "Brake pads, front", price_sek: 1900, minutes: 60 }, { task: "Brake pads & discs, front", price_sek: 3900, minutes: 90 },
+  { task: "Tyre change", price_sek: 500, minutes: 30 }, { task: "Tyre hotel (per season)", price_sek: 900, minutes: 15 },
+  { task: "Wheel alignment", price_sek: 1000, minutes: 45 }, { task: "Diagnostics (engine light)", price_sek: 750, minutes: 60 },
+  { task: "Battery replacement", price_sek: 1800, minutes: 30 }, { task: "AC service", price_sek: 1200, minutes: 60 },
+  { task: "Timing belt", price_sek: 6500, minutes: 300 }, { task: "Clutch replacement", price_sek: 9000, minutes: 360 },
+  { task: "Inspection prep (besiktning)", price_sek: 800, minutes: 45 }, { task: "Wiper blades", price_sek: 400, minutes: 15 },
+];
+
 function PricingView({ workshopId, canEdit }: { workshopId: string; canEdit: boolean }) {
   const { s, setS, save, state } = useSettings(workshopId);
   if (!s) return <p className="history-note" role="status">Loading…</p>;
-  const prices = s.price_list as PriceItem[];
+  const durations = s.job_durations as Duration[];
+  const prices = (s.price_list as PriceItem[]).map(p => ({ ...p, minutes: p.minutes ?? durations.find(d => d.job === p.task)?.minutes ?? 60 }));
   const setP = (p: PriceItem[]) => setS({ ...s, price_list: p });
-  return <form className="ws-section" onSubmit={e => { e.preventDefault(); void save({ hourly_rate_sek: s.hourly_rate_sek, price_list: prices.filter(p => p.task.trim()) }); }}>
-    <p className="ws-section-intro">Your prices drive every rough quote Jackie gives on your page.</p>
+  const available = PREDEFINED_SERVICES.filter(x => !prices.some(p => p.task === x.task));
+  const submit = () => {
+    const clean = prices.filter(p => p.task.trim());
+    void save({ hourly_rate_sek: s.hourly_rate_sek, price_list: clean, job_durations: clean.map(p => ({ job: p.task, minutes: p.minutes ?? 60 })) });
+  };
+  return <form className="ws-section" onSubmit={e => { e.preventDefault(); submit(); }}>
+    <p className="ws-section-intro">Your services, prices and job times drive every rough quote Jackie gives and how long a booking blocks your calendar.</p>
     <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0 }}>
-      <section className="ws-card"><h2>Base prices (incl. VAT)</h2>
-        <Hint controls="the price range in Jackie's “What's next” card." shows="to drivers on your Jackie page, labelled as an estimate."/>
+      <section className="ws-card"><h2>Services, prices and times (incl. VAT)</h2>
+        <Hint controls="the price range in Jackie's “What's next” card and how long each booking takes." shows="prices to drivers on your Jackie page, labelled as an estimate. Times only to you."/>
         <Label htmlFor="c-rate">Hourly labour rate (kr)</Label><Input id="c-rate" type="number" min={0} max={10000} value={s.hourly_rate_sek} onChange={e => setS({ ...s, hourly_rate_sek: Number(e.target.value) })}/>
-        <table className="ws-table"><thead><tr><th>Standard job</th><th>Price (kr)</th><th/></tr></thead><tbody>
-          {prices.map((p, i) => <tr key={i}><td><Input aria-label="Job" maxLength={80} value={p.task} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, task: e.target.value } : x))}/></td><td><Input aria-label="Price" type="number" min={0} max={200000} value={p.price_sek} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></td><td><Button type="button" size="sm" variant="ghost" aria-label="Remove" onClick={() => setP(prices.filter((_, j) => j !== i))}>×</Button></td></tr>)}
+        <table className="ws-table"><thead><tr><th>Service</th><th>Price (kr)</th><th>Time (min)</th><th/></tr></thead><tbody>
+          {prices.map((p, i) => <tr key={i}><td><Input aria-label="Service" maxLength={80} value={p.task} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, task: e.target.value } : x))}/></td><td><Input aria-label="Price" type="number" min={0} max={200000} value={p.price_sek} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></td><td><Input aria-label="Minutes" type="number" min={5} max={2880} step={5} value={p.minutes} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, minutes: Number(e.target.value) } : x))}/></td><td><Button type="button" size="sm" variant="ghost" aria-label="Remove" onClick={() => setP(prices.filter((_, j) => j !== i))}>×</Button></td></tr>)}
         </tbody></table>
-        <div><Button type="button" size="sm" variant="outline" onClick={() => setP([...prices, { task: "", price_sek: 0 }])}>Add price</Button></div>
+        <div className="ws-chips">
+          <select aria-label="Add a service" className="native-select" value="" onChange={e => { const v = e.target.value; if (v === "__custom") setP([...prices, { task: "", price_sek: 0, minutes: 60 }]); else { const x = PREDEFINED_SERVICES.find(o => o.task === v); if (x) setP([...prices, { ...x }]); } }}>
+            <option value="">Add a service…</option>
+            {available.map(o => <option key={o.task} value={o.task}>{o.task}</option>)}
+            <option value="__custom">Custom service…</option>
+          </select>
+        </div>
       </section>
     </fieldset>
     <SaveRow canEdit={canEdit} state={state}/>
@@ -341,6 +357,7 @@ function PricingView({ workshopId, canEdit }: { workshopId: string; canEdit: boo
 function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean; onSaved: () => void }) {
   const { s, setS, save, state } = useSettings(shop.id);
   const [city, setCity] = useState(shop.city);
+  const [step, setStep] = useState(0);
   if (!s) return <p className="history-note" role="status">Loading…</p>;
   const link = shop.slug && typeof window !== "undefined" ? `${window.location.origin}/w/${shop.slug}` : "";
   const submit = async () => {
@@ -349,9 +366,11 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
       brand_accent: /^#[0-9a-fA-F]{6}$/.test(s.brand_accent) ? s.brand_accent : "", brand_logo_url: /^https:\/\//.test(s.brand_logo_url) ? s.brand_logo_url : "", brand_greeting: s.brand_greeting });
   };
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); void submit(); }}>
-    <p className="ws-section-intro">How drivers find, reach and recognise you. Set up by AutoJackie at onboarding. Keep it up to date.</p>
-    <fieldset disabled={!canEdit} className="ws-grid2" style={{ border: 0, padding: 0, margin: 0 }}>
-      <section className="ws-card ws-form-card"><h2>Contact details</h2>
+    <Stepper steps={PROFILE_STEPS} step={step} setStep={setStep}/>
+    <section className="ws-card">
+    <div className="ws-step-head"><h2>{step + 1}. {PROFILE_STEPS[step]!.title}</h2><p className="ws-hint"><span><b>Drivers see:</b> {PROFILE_STEPS[step]!.sees}</span></p></div>
+    <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0 }}>
+      {step === 0 && <div className="ws-form-card ws-grid2">
         <div><Label>Company name</Label><div className="ws-readonly">{shop.name}</div><Hint controls="your name in the booking list and on your Jackie page." shows="to drivers. Managed by AutoJackie."/></div>
         <div><Label>VAT number</Label><div className="ws-readonly">{shop.vat_number || "Not set"}</div><Hint controls="invoicing between you and AutoJackie." shows="nowhere to drivers. Managed by AutoJackie."/></div>
         <div><Label htmlFor="p-phone">Phone</Label><Input id="p-phone" maxLength={30} value={s.phone} onChange={e => setS({ ...s, phone: e.target.value })}/><Hint controls="how drivers can call you." shows="to drivers after they book."/></div>
@@ -360,15 +379,17 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
         <div><Label htmlFor="p-city">City</Label><Input id="p-city" maxLength={60} value={city} onChange={e => setCity(e.target.value)}/><Hint controls="which drivers see you when picking a workshop." shows="in the workshop list when booking."/></div>
         <div><Label htmlFor="p-hours">Opening hours</Label><Input id="p-hours" maxLength={200} value={s.opening_hours} onChange={e => setS({ ...s, opening_hours: e.target.value })}/><Hint controls="what Jackie says when drivers ask when you're open." shows="in Jackie's answers on your page."/></div>
         <div><Label htmlFor="p-web">Website</Label><Input id="p-web" maxLength={200} value={s.website} onChange={e => setS({ ...s, website: e.target.value })}/><Hint controls="a link back to your own site." shows="to drivers after they book."/></div>
-      </section>
-      <section className="ws-card ws-form-card"><h2>Your brand</h2>
+      </div>}
+      {step === 1 && <div className="ws-form-card">
         <div><Label>Your Jackie page</Label>{link && <div className="ws-chips"><a href={link} target="_blank" rel="noreferrer" className="text-link">{link}</a><Button type="button" size="sm" variant="outline" onClick={() => void navigator.clipboard?.writeText(link)}>Copy</Button></div>}<Hint controls="the page where drivers chat with Jackie as your workshop." shows="wherever you share it: website, Google profile, SMS."/></div>
         <div><Label htmlFor="b-accent">Accent color</Label><div className="ws-chips"><input id="b-accent" type="color" value={s.brand_accent || "#f2711c"} onChange={e => setS({ ...s, brand_accent: e.target.value })}/>{s.brand_accent && <Button type="button" size="sm" variant="ghost" onClick={() => setS({ ...s, brand_accent: "" })}>Use AutoJackie orange</Button>}</div><Hint controls="buttons, highlights and links." shows="on your Jackie page."/></div>
         <div><Label htmlFor="b-logo">Logo link (https)</Label><Input id="b-logo" maxLength={500} placeholder="https://yourworkshop.se/logo.png" value={s.brand_logo_url} onChange={e => setS({ ...s, brand_logo_url: e.target.value })}/><Hint controls="the small logo next to your name." shows="in the top bar of your Jackie page."/></div>
         <div><Label htmlFor="b-greet">Greeting line</Label><Input id="b-greet" maxLength={160} placeholder="Welcome to Demo Verkstad. Tell Jackie what's up." value={s.brand_greeting} onChange={e => setS({ ...s, brand_greeting: e.target.value })}/><Hint controls="the welcome line above the chat." shows="on your Jackie page, before drivers type."/></div>
-      </section>
+      </div>}
     </fieldset>
-    <SaveRow canEdit={canEdit} state={state}/>
+    <div className="ws-wizard-nav"><Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>Back</Button><WizardActions canEdit={canEdit} last={step === PROFILE_STEPS.length - 1} next={() => setStep(step + 1)}/></div>
+    {state && <p className="history-note" role="status">{state}</p>}
+    </section>
   </form>;
 }
 
