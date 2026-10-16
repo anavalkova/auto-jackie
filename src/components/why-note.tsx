@@ -13,7 +13,8 @@ export function WhyNote({ id, title, stats, footer, summary }: { id: string; tit
     try { localStorage.setItem(key, next ? "0" : "1"); } catch { /* ignore */ }
   };
   // Collapsed summary: use explicit prop or derive from first stat
-  const collapsedLine = summary ?? (stats[0] ? `${stats[0].value} ${stats[0].text.split(".")[0].toLowerCase()}` : title);
+  const first = stats[0];
+  const collapsedLine = summary ?? (first ? `${first.value} ${(first.text.split(".")[0] ?? "").toLowerCase()}` : title);
   return (
     <aside className="why-note" aria-label="Why this exists">
       <button type="button" className="why-toggle" aria-expanded={!collapsed} onClick={toggle}>
