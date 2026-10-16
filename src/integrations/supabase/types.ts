@@ -69,6 +69,8 @@ export type Database = {
           preferred_slots: string[]
           price_high_sek: number | null
           price_low_sek: number | null
+          quote_high_sek: number | null
+          quote_low_sek: number | null
           service: string | null
           status: Database["public"]["Enums"]["inquiry_status"]
           updated_at: string
@@ -91,6 +93,8 @@ export type Database = {
           preferred_slots?: string[]
           price_high_sek?: number | null
           price_low_sek?: number | null
+          quote_high_sek?: number | null
+          quote_low_sek?: number | null
           service?: string | null
           status?: Database["public"]["Enums"]["inquiry_status"]
           updated_at?: string
@@ -113,6 +117,8 @@ export type Database = {
           preferred_slots?: string[]
           price_high_sek?: number | null
           price_low_sek?: number | null
+          quote_high_sek?: number | null
+          quote_low_sek?: number | null
           service?: string | null
           status?: Database["public"]["Enums"]["inquiry_status"]
           updated_at?: string
