@@ -418,3 +418,16 @@
 .ws-big > div .eyebrow { font-size: 10px; }
 .ws-big strong { font-family: var(--font-heading); font-size: 18px; line-height: 1; }
 .ws-h2 { font-size: 16px; margin: 24px 0 10px; }
+/* Why-this-exists overlay */
+.ws-tabs { position: relative; align-items: center; }
+.why-overlay { margin-left: auto; position: relative; }
+.why-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--primary); color: var(--primary); background: var(--card); cursor: pointer; }
+.why-chip svg { width: 14px; height: 14px; }
+.why-pop { position: absolute; right: 0; top: calc(100% + 8px); width: min(420px, 90vw); z-index: 40; margin: 0; box-shadow: 0 12px 32px -8px color-mix(in oklab, var(--foreground) 25%, transparent); }
+.why-pop-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.why-close { background: none; border: 0; cursor: pointer; color: var(--muted-foreground); padding: 2px; }
+.why-close svg { width: 16px; height: 16px; }
+.why-pitch { font-size: 13px; margin: 8px 0 4px; line-height: 1.5; }
+.why-points { margin: 6px 0 0; padding-left: 18px; font-size: 13px; display: grid; gap: 4px; }
+.ws-soon-head { display: flex; justify-content: space-between; align-items: center; }
+.ws-soon { border-style: dashed; }
