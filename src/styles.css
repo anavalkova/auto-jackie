@@ -509,3 +509,6 @@
 .ws-quote { display: grid; gap: 4px; margin-top: 8px; padding: 12px 14px; border-radius: var(--radius); background: var(--muted); }
 .ws-quote-price { font-size: 18px; }
 .ws-quote-note { margin: 6px 0 0; font-size: 14px; line-height: 1.5; white-space: pre-wrap; border-left: 2px solid var(--primary); padding-left: 10px; }
+.ws-closed { display: inline-flex; align-items: center; gap: 6px; padding: 3px 4px 3px 10px; border-radius: 999px; background: var(--muted); font-size: 13px; }
+.ws-closed button { border: 0; background: none; color: var(--muted-foreground); cursor: pointer; font-size: 15px; line-height: 1; padding: 0 4px; }
+.ws-closed button:hover { color: var(--destructive); }

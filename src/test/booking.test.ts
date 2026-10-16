@@ -23,3 +23,24 @@ describe("workshop booking rules", () => {
     expect(upcomingDays(new Date("2026-10-16T10:00:00Z"), 1, { hours: [9] })[0]!.slots).toHaveLength(1);
   });
 });
+
+import { swedishHolidays } from "@/lib/booking";
+describe("closures", () => {
+  it("knows Swedish holidays for 2026", () => {
+    const h = swedishHolidays(2026);
+    expect(h.get("2026-04-03")).toBe("Good Friday");
+    expect(h.get("2026-06-19")).toBe("Midsummer Eve");
+    expect(h.get("2026-10-31")).toBe("All Saints' Day");
+  });
+  it("skips holidays when asked", () => {
+    expect(upcomingDays(new Date("2026-12-23T10:00:00Z"), 1, { closeHolidays: true })[0]!.key).toBe("2026-12-28");
+  });
+  it("skips a closed day and a closed slot", () => {
+    const d = upcomingDays(new Date("2026-10-16T10:00:00Z"), 2, { closed: ["2026-10-19", "2026-10-20T08"] });
+    expect(d[0]!.key).toBe("2026-10-20");
+    expect(d[0]!.slots).toHaveLength(3);
+  });
+  it("stops at the booking horizon", () => {
+    expect(upcomingDays(new Date("2026-10-16T10:00:00Z"), 30, { maxAheadDays: 7 })).toHaveLength(5);
+  });
+});

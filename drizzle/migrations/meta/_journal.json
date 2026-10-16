@@ -71,6 +71,13 @@
       "when": 1792167695000,
       "tag": "0009_restrict_workshops_read",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792168574367,
+      "tag": "0010_booking_closures_horizon",
+      "breakpoints": true
     }
   ]
 }

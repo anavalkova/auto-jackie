@@ -49,8 +49,8 @@ export function RequestVisitDialog({ card, vehicleLabel, onClose, workshopId }: 
     if (!shopId) return;
     setPicks([]);
     supabase.rpc("workshop_booking_rules", { _workshop: shopId }).then(({ data }) => {
-      const r = data as { days?: number[]; hours?: number[]; notice?: number } | null;
-      setDays(upcomingDays(new Date(), 6, r ? { weekdays: r.days, hours: r.hours, noticeDays: r.notice } : undefined));
+      const r = data as { days?: number[]; hours?: number[]; notice?: number; maxAhead?: number; holidays?: boolean; closed?: string[] } | null;
+      setDays(upcomingDays(new Date(), 6, r ? { weekdays: r.days, hours: r.hours, noticeDays: r.notice, maxAheadDays: r.maxAhead, closeHolidays: r.holidays, closed: r.closed } : { closeHolidays: true }));
     });
     supabase.rpc("workshop_jackie_profile", { _workshop: shopId }).then(({ data }) => {
       const list = ensureOther(((data as { price_list?: ServiceItem[] } | null)?.price_list ?? []));
