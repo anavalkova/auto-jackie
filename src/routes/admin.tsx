@@ -92,6 +92,7 @@ function AdminPage() {
           {demo && <div className="offer-card"><span className="eyebrow">DEMO LOGIN · COPY IT NOW</span><p>Email: <strong>{demo.email}</strong></p><p>Password: <strong>{demo.password}</strong></p></div>}
 
           <h2 className="admin-h2">Workshops ({rows.length})</h2>
+          <p className="history-note"><span className="preview-badge">Coming soon</span> Multiple branches per owner: one account running several workshop locations, each with its own Jackie, prices and booking calendar.</p>
           <ul className="ws-list">{rows.map(r => <li key={r.id} className="admin-row"><strong>{r.name}</strong><span>{r.city}</span><span>{r.email}</span><span className={`ws-status ${r.claimed ? "s-booked" : ""}`}>{r.claimed ? "Signed in" : "Invited"}</span></li>)}</ul>
         </>}
     </main>
