@@ -125,7 +125,7 @@ export function JackieHome({ chatId }: { chatId?: string }) {
 
     <main className="workspace">
       <aside className="jackie-panel">
-        <div className="portrait-wrap compact"><img src={jackie} alt="Jackie, a mechanic in an orange work jacket" width={1024} height={1024}/><span className="portrait-label"><span className="status-dot"/> Jackie is here — tell her anything</span></div>
+        <div className="portrait-wrap compact"><img src={jackie} alt="Jackie, a mechanic in an orange work jacket" width={1024} height={1024}/><span className="portrait-label">Jackie is new — go easy on her</span></div>
 
         <section className="vehicle-card" aria-label="Your car">
           <div className="vehicle-head"><span className="eyebrow">{user ? "YOUR SAVED CAR" : "CAR FOR THIS CHAT"}</span>{vehicle && <Button variant="ghost" size="sm" onClick={() => setGarageOpen(true)}><Pencil/> Change</Button>}</div>
@@ -162,7 +162,7 @@ export function JackieHome({ chatId }: { chatId?: string }) {
       </section>
     </main>
 
-    <footer className="site-footer"><span>© {new Date().getFullYear()} AutoJackie</span><span className="footer-tagline">Jackie is new — go easy on her.</span><div><Button variant="link" onClick={() => setInfo("privacy")}>Privacy</Button><Button variant="link" onClick={() => setInfo("about")}>About Jackie <ArrowUpRight/></Button></div></footer>
+    <footer className="site-footer"><span>© {new Date().getFullYear()} AutoJackie</span><div><Button variant="link" onClick={() => setInfo("privacy")}>Privacy</Button><Button variant="link" onClick={() => setInfo("about")}>About Jackie <ArrowUpRight/></Button></div></footer>
 
     <GarageDialog key={garageOpen ? "open" : "closed"} open={garageOpen} onOpenChange={setGarageOpen} vehicle={vehicle} onSave={saveVehicle} signedIn={!!user}/>
     <SignInDialog open={signInOpen} onOpenChange={setSignInOpen}/>

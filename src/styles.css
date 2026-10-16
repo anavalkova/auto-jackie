@@ -322,3 +322,4 @@
 .chat-shell .why-stats li { display: grid; grid-template-columns: 76px 1fr; gap: 12px; align-items: start; padding: 7px 0; border-top: 1px solid color-mix(in oklab, var(--primary) 15%, var(--border)); }
 .chat-shell .why-stats li:first-child { border-top: 0; padding-top: 2px; }
 .chat-shell .why-stats li:last-child { padding-bottom: 2px; }
+.chat-shell .why-stats .why-text { border-left: 1px solid color-mix(in oklab, var(--primary) 15%, var(--border)); padding-left: 12px; }
