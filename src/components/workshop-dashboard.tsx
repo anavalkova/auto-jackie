@@ -61,7 +61,7 @@ const when = (d: string) => new Date(d).toLocaleString("en-GB", { timeZone: "Eur
 const mid = (i: Inquiry) => i.price_low_sek != null && i.price_high_sek != null ? (i.price_low_sek + i.price_high_sek) / 2 : 0;
 
 export function WorkshopDashboard() {
-  const { lang } = useT();
+  const { lang, t } = useT();
   const { user, ready, isAdmin } = useAccess();
   const [tab, setTab] = useState<Tab>("overview");
   const [shop, setShop] = useState<Shop | null | undefined>(undefined);
