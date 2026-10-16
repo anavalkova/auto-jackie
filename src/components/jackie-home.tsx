@@ -1,7 +1,7 @@
 import { useNavigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { UIMessage } from "ai";
-import { ArrowUpRight, CalendarPlus, Car, ChevronDown, Gauge, Globe2, HelpCircle, LockKeyhole, LogOut, MessageSquare, Pencil, Plus, Trash2, UserRound } from "lucide-react";
+import { ArrowUpRight, CalendarPlus, Car, ChevronDown, ChevronRight, Gauge, Globe2, HelpCircle, LockKeyhole, LogOut, MessageSquare, Pencil, Plus, Trash2, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -172,7 +172,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
         <section className="vehicle-card" aria-label="Your car">
           <div className="vehicle-head"><span className="eyebrow">{user ? t.yourSavedCar : t.carForChat}</span>{vehicle && <Button variant="ghost" size="sm" onClick={() => setGarageOpen(true)}><Pencil/> {t.change}</Button>}</div>
           {!vehicle ? <button type="button" className="vehicle-empty" title={user ? t.noCarSaved : t.noCarGuest} onClick={() => setGarageOpen(true)}><Car/>
-            <span className="vehicle-empty-action">{user ? t.addCar : t.tellCar}</span>
+            <span className="vehicle-empty-action">{user ? t.addCar : t.tellCar}</span><ChevronRight className="vehicle-empty-go"/>
           </button> : <>
             <h2 className="vehicle-name">{vehicle.confidential ? <span className="plate-chip"><span className="plate-eu">S</span>{vehicle.label}</span> : vehicle.label}</h2>
             <p className="vehicle-spec">{vehicle.confidential ? <><LockKeyhole/> {t.privateDetails}</> : vehicle.description}</p>
