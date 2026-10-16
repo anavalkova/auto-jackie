@@ -22,7 +22,7 @@ export function createSuggestWorkshopVisit(quoteModel: LanguageModel) {
         instructions: "You estimate typical Swedish independent-workshop prices. Give a realistic SEK range including 25% VAT (parts + labour) for the job. Never mention confidential vehicle details. The note is one plain, friendly sentence on what the price usually covers.",
         prompt: `Job: ${issue}\nContext: ${context}`,
         output: Output.object({ schema: quoteSchema }),
-        abortSignal,
+        ...(abortSignal ? { abortSignal } : {}),
         providerOptions: { openai: { forceReasoning: true, reasoningEffort: "low", store: false } },
       });
       const q = await result.output;
