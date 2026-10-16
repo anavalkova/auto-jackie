@@ -9,7 +9,6 @@ import { PromptInput, PromptInputFooter, PromptInputSubmit, PromptInputTextarea 
 import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from "@/components/ai-elements/tool";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
-import { WhyNote } from "@/components/why-note";
 import type { Vehicle } from "@/lib/vehicles";
 
 const starters = ["My brakes squeal and I've been ignoring it for weeks", "An orange light came on and I panicked", "My code reader says P0301 — is it bad?", "Someone told me my timing belt is due. Are they upselling?", "There's a noise I can't describe", "My Tesla Model 3 brakes squeak"];
@@ -75,7 +74,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
     <PromptInput className="chat-composer" onSubmit={({ text }) => send(text)}>
       <PromptInputTextarea value={input} onChange={e => setInput(e.target.value)} placeholder="Describe the noise, light or part you're wondering about…"/>
       <PromptInputFooter>
-        <span className="composer-hint">{saving ? "Saved to My chats" : vehicle ? `Using: ${vehicle.label}` : "Tip: tell Jackie about your car for more specific answers."}</span>
+        <span className="composer-hint">{saving ? "Saved to My chats" : ""}</span>
         <div className="composer-actions">
           {messages.length > 0 && !busy && <Button variant="ghost" size="sm" type="button" onClick={() => { setMessages([]); clearError(); onReset?.(); }}><RotateCcw/> New chat</Button>}
           <PromptInputSubmit status={status} onStop={stop} disabled={!busy && !input.trim()}/>
