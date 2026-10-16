@@ -74,7 +74,7 @@ const dict = {
         { t: "It lands in your inbox", d: "Car, summary, phone number. You both know what to expect." },
         { t: "The booking comes", d: " You just fix the car." },
       ],
-      gains: ["Fewer phone interruptions", "Leads caught at 2 a.m.", "Quotes in your own prices", "English, Swedish and German"],
+      gains: ["Drivers don't speak car. Jackie explains it, using your know-how.", "Instant answers and easy booking, like drivers now expect.", "Rough quotes from your own price list, so no sticker shock.", "Your parts, methods and strengths shape every answer.", "Every request, booking and value in one place.", "Your brand, in English, Swedish and German."],
       stats: [
         { value: "21%", text: "of calls to workshops go unanswered.", src: { label: "Marchex", url: "https://www.marchex.com/up-to-21-percent-of-automotive-service-customer-calls-go-unanswered-creating-significant-revenue-leakage/" } },
         { value: "68%", text: "of missed callers never call back.", src: { label: "Auto Service World", url: "https://www.autoserviceworld.com/phone-fails-lead-to-missed-automotive-service-revenue-report/" } },
@@ -126,7 +126,7 @@ const dict = {
         { t: "Det landar i din inkorg", d: "Bil, sammanfattning, telefonnummer. Ingen telefonjakt." },
         { t: "Du ringer, de bokar", d: "De känner redan till priset. Du lagar bara bilen." },
       ],
-      gains: ["Färre telefonavbrott", "Leads fångade klockan två på natten", "Offerter med dina egna priser", "Engelska, svenska och tyska"],
+      gains: ["Bilister kan inte bilspråk. Jackie förklarar, med din kunskap.", "Direkta svar och enkel bokning, som bilister förväntar sig idag.", "Ungefärliga priser från din egen prislista, inga chockbesked.", "Dina delar, metoder och styrkor formar varje svar.", "Alla förfrågningar, bokningar och värden på ett ställe.", "Ditt varumärke, på engelska, svenska och tyska."],
       stats: [
         { value: "21%", text: "av samtalen till verkstäder besvaras aldrig.", src: { label: "Marchex", url: "https://www.marchex.com/up-to-21-percent-of-automotive-service-customer-calls-go-unanswered-creating-significant-revenue-leakage/" } },
         { value: "68%", text: "av missade samtal ringer aldrig tillbaka.", src: { label: "Auto Service World", url: "https://www.autoserviceworld.com/phone-fails-lead-to-missed-automotive-service-revenue-report/" } },
@@ -178,7 +178,7 @@ const dict = {
         { t: "Es landet in deinem Posteingang", d: "Auto, Zusammenfassung, Telefonnummer. Kein Telefon-Ping-Pong." },
         { t: "Du rufst an, sie buchen", d: "Sie kennen den Preis schon. Du reparierst nur das Auto." },
       ],
-      gains: ["Weniger Telefonunterbrechungen", "Leads um 2 Uhr nachts gefangen", "Angebote mit deinen eigenen Preisen", "Englisch, Schwedisch und Deutsch"],
+      gains: ["Fahrer sprechen kein Auto. Jackie erklärt es, mit deinem Know-how.", "Sofortige Antworten und einfache Buchung, wie Fahrer es heute erwarten.", "Grobe Preise aus deiner eigenen Preisliste, keine bösen Überraschungen.", "Deine Teile, Methoden und Stärken prägen jede Antwort.", "Alle Anfragen, Buchungen und Werte an einem Ort.", "Deine Marke, auf Englisch, Schwedisch und Deutsch."],
       stats: [
         { value: "21%", text: "der Anrufe bei Werkstätten bleiben unbeantwortet.", src: { label: "Marchex", url: "https://www.marchex.com/up-to-21-percent-of-automotive-service-customer-calls-go-unanswered-creating-significant-revenue-leakage/" } },
         { value: "68%", text: "der verpassten Anrufer rufen nie zurück.", src: { label: "Auto Service World", url: "https://www.autoserviceworld.com/phone-fails-lead-to-missed-automotive-service-revenue-report/" } },
