@@ -16,3 +16,5 @@
 - [x] Your brand: accent color, logo link, greeting.
 - [ ] Logo upload (blocked: public file storage disabled in workspace settings).
 - [x] Map requests to Pricing engine services (+ always-present "Other"); Overview shows Your services + "Not offered yet" with Add button.
+- [x] Driver page: "Why this exists" as a corner chip in English, Swedish and German, like the workshop tabs.
+- [x] Jackie's portrait: show more of her on desktop, keep her visible on phone view.

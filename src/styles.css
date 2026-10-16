@@ -84,6 +84,10 @@
 .assistant-top { display: flex; justify-content: space-between; align-items: center; padding: 27px 32px; }
 .assistant-top > span:first-child { font-size: 9px; font-weight: 600; display: flex; align-items: center; gap: 7px; color: var(--muted-foreground); }
 .preview-badge { font-size: 10px; padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; color: var(--muted-foreground); }
+.assistant-top-right { display: flex; align-items: center; gap: 10px; }
+.assistant-top .why-pop { width: min(360px, 88vw); }
+.assistant-top .why-overlay { margin-left: 0; }
+.assistant-top .why-chip { font-size: 10px; padding: 4px 10px; }
 .assistant-content { width: 100%; max-width: 650px; margin: auto; padding: 25px 48px 34px; }
 .greeting-icon { position: relative; display: grid; place-items: center; width: 48px; height: 48px; color: var(--primary); background: var(--accent); border-radius: 12px; margin-bottom: 23px; }
 .greeting-icon > svg { width: 27px; height: 27px; }
@@ -128,7 +132,7 @@
 /* Phase 1: garage + chat */
 .workspace { height: 780px; }
 .jackie-panel { min-height: 0; overflow-y: auto; }
-.portrait-wrap.compact { height: 230px; flex-shrink: 0; }
+.portrait-wrap.compact { height: 340px; flex-shrink: 0; }
 .vehicle-card { padding: 22px 24px 26px; display: flex; flex-direction: column; gap: 10px; }
 .vehicle-head { display: flex; justify-content: space-between; align-items: center; min-height: 28px; }
 .vehicle-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 16px; border: 1px dashed var(--border); border-radius: 8px; background: var(--card); }
@@ -155,6 +159,7 @@
 .assistant-top { padding: 18px 28px; border-bottom: 1px solid var(--border); }
 .chat-shell { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 0 28px 18px; }
 .chat-empty { flex: 1; display: flex; flex-direction: column; justify-content: center; max-width: 580px; }
+.chat-shell .chat-empty { max-width: 520px; }
 .chat-empty .eyebrow { color: var(--primary); }
 .chat-empty h1 { font-size: 40px; font-weight: 800; line-height: 1.2; margin: 12px 0 12px; }
 .chat-empty p { color: var(--muted-foreground); font-size: 13px; line-height: 1.7; margin: 0 0 22px; }
@@ -186,7 +191,8 @@
 @media (max-width: 760px) {
   .workspace { height: auto; }
   .jackie-panel { display: flex; border-right: 0; border-bottom: 1px solid var(--border); overflow: visible; }
-  .portrait-wrap.compact { display: none; }
+  .portrait-wrap.compact { display: block; height: 215px; }
+  .portrait-label { bottom: 12px; left: 14px; padding: 6px 10px; }
   .chat-shell { padding: 0 16px 16px; min-height: 560px; }
   .chat-empty h1 { font-size: 32px; }
   .starter-grid { grid-template-columns: 1fr; }
@@ -521,3 +527,8 @@
 .ws-off-day { border: 0; background: none; padding: 0; font: inherit; font-weight: 600; color: var(--foreground); cursor: pointer; text-align: left; }
 .ws-off-x { border: 0; background: none; color: var(--muted-foreground); cursor: pointer; font-size: 16px; padding: 0 4px; }
 .ws-off-x:hover { color: var(--destructive); }
+@media (max-width: 760px) {
+  .site-header { height: auto; min-height: 76px; padding: 12px 0; flex-wrap: wrap; gap: 10px 12px; }
+  .site-header nav { flex-wrap: wrap; justify-content: flex-end; gap: 6px 8px; min-width: 0; }
+  .site-header nav .workshop-link { padding: 0 4px; }
+}
