@@ -570,3 +570,6 @@
 .field-tip { display: flex; align-items: center; gap: 6px; }
 .assistant-bottom strong { color: var(--foreground); font-weight: 600; }
 .booking-cal { border: 1px solid var(--border); border-radius: 10px; width: fit-content; }
+.when-grid { display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: start; }
+.when-grid .channel-row { align-content: flex-start; }
+@media (max-width: 760px) { .when-grid { grid-template-columns: 1fr; } }

@@ -112,13 +112,13 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId }: { card
 
         {step === 2 && <div className="visit-form">
           {days.length === 0 ? <p className="history-note">{b.noDays}</p> : <>
-            <div><Label className="field-tip"><Tip text={b.hTimes}/>{b.day}</Label>
+            <div className="when-grid"><div><Label className="field-tip"><Tip text={b.hTimes}/>{b.day}</Label>
               <Calendar mode="single" className="booking-cal" weekStartsOn={1} {...(selDate ? { selected: selDate, defaultMonth: selDate } : {})}
                 {...(firstDate ? { startMonth: firstDate } : {})} {...(lastDate ? { endMonth: lastDate } : {})}
                 disabled={d => !dayKeys.has(keyOf(d))}
                 onSelect={d => { if (d) { setDay(keyOf(d)); setPicks([]); } }}/></div>
             <div><Label>{b.time}</Label>
-              <div className="channel-row">{slots.map(sl => { const iso = sl.toISOString(); const on = picks.includes(iso); return <button key={iso} type="button" className={"slot" + (on ? " is-on" : "")} aria-pressed={on} onClick={() => setPicks(on ? [] : [iso])}>{fmtTime(sl)}</button>; })}</div></div>
+              <div className="channel-row">{slots.map(sl => { const iso = sl.toISOString(); const on = picks.includes(iso); return <button key={iso} type="button" className={"slot" + (on ? " is-on" : "")} aria-pressed={on} onClick={() => setPicks(on ? [] : [iso])}>{fmtTime(sl)}</button>; })}</div></div></div>
           </>}
         </div>}
 
