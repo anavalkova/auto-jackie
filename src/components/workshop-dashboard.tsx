@@ -123,6 +123,7 @@ export function WorkshopDashboard() {
   });
 
   const book = async (i: Inquiry, at: string | null) => {
+    if (demo) return;
     const { data, error } = await supabase.from("inquiries").update({ booked_at: at, status: at ? "booked" : "contacted" }).eq("id", i.id).select("*").single();
     if (error || !data) return;
     setItems(xs => xs.map(x => x.id === data.id ? data : x)); setSelected(data);
@@ -571,7 +572,7 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
   </form>;
 }
 
-function WorkshopPitch({ onSignIn }: { onSignIn: () => void }) {
+function WorkshopPitch({ onSignIn, signedIn, onOpenDemo }: { onSignIn: () => void; signedIn?: boolean; onOpenDemo?: () => void }) {
   const { t } = useT();
   const p = t.pitch;
   const icons = [<MessageCircle key="m"/>, <Sparkles key="s"/>, <Inbox key="i"/>, <CalendarCheck key="p"/>];
