@@ -77,11 +77,11 @@ export function WorkshopDashboard() {
   else if (!shop) body = <div className="ws-empty"><Wrench/><h1>Your workshop isn't set up yet</h1><p>AutoJackie's team sets up each workshop personally. If we've onboarded you, sign in with the email you gave us{user.email ? ` (you're signed in as ${user.email})` : ""}.</p>{isAdmin && <Button asChild><Link to="/admin">Go to operations</Link></Button>}</div>;
   else body = <>
     <div className="ws-title"><div><span className="eyebrow">WORKSHOP DASHBOARD</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div><div className="ws-filters"><Button variant={tab === "requests" ? "default" : "outline"} onClick={() => setTab("requests")}>Requests</Button><Button variant={tab === "settings" ? "default" : "outline"} onClick={() => setTab("settings")}>Settings</Button></div></div>
-    <WhyNote id="workshop" title="Every request here is a customer who would otherwise have hit a busy phone line, or given up." stats={[
-      { value: "~21%", text: "of calls to auto service businesses go unanswered. Even the best locations miss nearly 1 in 10.", source: { label: "Marchex", url: "https://www.marchex.com/up-to-21-percent-of-automotive-service-customer-calls-go-unanswered-creating-significant-revenue-leakage/" } },
-      { value: "68%", text: "of callers who can't reach a shop on the first try never call back. They book with whoever answers first.", source: { label: "Auto Service World / Marchex", url: "https://www.autoserviceworld.com/phone-fails-lead-to-missed-automotive-service-revenue-report/" } },
-      { value: "1 in 4", text: "of booked service appointments end up as no-shows when nothing keeps the booking alive. Confirmation flows, our next step, are built to fix that.", source: { label: "Solera via Dealership Guy", url: "https://news.dealershipguy.com/p/broken-service-scheduling-is-costing-dealers-big-time-here-s-how-some-are-closing-the-gaps" } },
-    ]} footer="Jackie answers instantly, in writing, with the diagnosis and a rough price already attached. So you call back warm leads instead of cold phone tag."/>
+    <WhyNote id="workshop-v2" title="Every request arrives with trust already built." stats={[
+      { value: "63%", text: "of drivers don't trust repair shops. Jackie's upfront price range changes that.", source: { label: "AAA", url: "https://newsroom.aaa.com/wp-content/uploads/2016/12/Auto-Repair-Survey-FINAL.pdf" } },
+      { value: "72%", text: "feel anxious about what a repair will cost. Here, they know before you call.", source: { label: "RepairPal / Harris", url: "https://repairpal.com/consumer-survey-march-2013" } },
+      { value: "1 in 4", text: "service bookings end as no-shows. Confirmations, our next step, fix that.", source: { label: "Solera via Dealership Guy", url: "https://news.dealershipguy.com/p/broken-service-scheduling-is-costing-dealers-big-time-here-s-how-some-are-closing-the-gaps" } },
+    ]} footer="Calmer customers, faster yeses, fewer empty slots."/>
     {tab === "settings" ? <WorkshopSettings workshopId={shop.id} canEdit={shop.role === "owner"}/> : <>
     <div className="ws-kpis">
       <Kpi icon={<Inbox/>} label="New requests" value={String(kpis.fresh)}/>
