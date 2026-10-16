@@ -31,6 +31,8 @@ export function useLang(): Lang {
 
 const dict = {
   en: {
+    bk: { title: "Book a workshop visit", back: "Back to chat", s1: "What", s2: "When", s3: "You", next: "Next", prev: "Back", workshop: "Workshop", job: "What needs doing?", other: "Something else", describe: "Describe it briefly", describePh: "E.g. rattle from the boot", fromChat: "From your chat with Jackie", day: "Pick a day", time: "Drop-off time", picked: "Your times (up to %n)", noPick: "Tap a time. You can pick up to %n so the workshop can choose.", remove: "Remove", noDays: "No free times right now. Try another workshop.", name: "Your name", phone: "Phone", confirmBy: "Confirm by", email: "Email", msg: "Anything else? (optional)", msgPh: "How the car feels, when suits you…", send: "Send request", sending: "Sending…", error: "Couldn't send it. Please try again.", signInNeeded: "Sign in so the workshop can reach you.", signIn: "Sign in to book", noShops: "No partner workshops have joined yet.", sentTitle: "Request sent. You're in good hands", sentBody: "The workshop picks one of your times and confirms by %c.", done: "Back to chat", shared: "The workshop sees the job, Jackie's rough price and your contact details. Nothing else from your chat.", chatTip: "Tip: you can also just ask Jackie in the chat to book for you." },
+    bookedTitle: "Visit requested", bookedBody: "%w will pick one of your times and confirm.",
     forWorkshops: "For workshops", account: "Your account", signOut: "Sign out", signInToSave: "Sign in to save",
     madeForSweden: "Made for Sweden", jackieNew: "Jackie is new. Go easy on her",
     yourSavedCar: "YOUR SAVED CAR", carForChat: "CAR FOR THIS CHAT", change: "Change",
@@ -85,6 +87,8 @@ const dict = {
     },
   },
   sv: {
+    bk: { title: "Boka verkstadsbesök", back: "Tillbaka till chatten", s1: "Vad", s2: "När", s3: "Du", next: "Nästa", prev: "Tillbaka", workshop: "Verkstad", job: "Vad behöver göras?", other: "Något annat", describe: "Beskriv kort", describePh: "T.ex. skrammel från bagageluckan", fromChat: "Från din chatt med Jackie", day: "Välj dag", time: "Lämningstid", picked: "Dina tider (upp till %n)", noPick: "Tryck på en tid. Välj upp till %n så kan verkstaden välja.", remove: "Ta bort", noDays: "Inga lediga tider just nu. Prova en annan verkstad.", name: "Ditt namn", phone: "Telefon", confirmBy: "Bekräfta via", email: "E-post", msg: "Något mer? (valfritt)", msgPh: "Hur bilen känns, när det passar dig…", send: "Skicka förfrågan", sending: "Skickar…", error: "Det gick inte att skicka. Försök igen.", signInNeeded: "Logga in så att verkstaden kan nå dig.", signIn: "Logga in för att boka", noShops: "Inga partnerverkstäder har anslutit än.", sentTitle: "Förfrågan skickad. Du är i goda händer", sentBody: "Verkstaden väljer en av dina tider och bekräftar via %c.", done: "Tillbaka till chatten", shared: "Verkstaden ser jobbet, Jackies ungefärliga pris och dina kontaktuppgifter. Inget annat från chatten.", chatTip: "Tips: du kan också be Jackie i chatten att boka åt dig." },
+    bookedTitle: "Besök begärt", bookedBody: "%w väljer en av dina tider och bekräftar.",
     forWorkshops: "För verkstäder", account: "Ditt konto", signOut: "Logga ut", signInToSave: "Logga in för att spara",
     madeForSweden: "Gjord för Sverige", jackieNew: "Jackie är ny. Var snäll mot henne",
     yourSavedCar: "DIN SPARADE BIL", carForChat: "BIL FÖR DEN HÄR CHATTEN", change: "Ändra",
@@ -105,7 +109,7 @@ const dict = {
     privacyBody: "Utan inloggning sparas ingenting: bil och chatt försvinner när du börjar om eller stänger fliken. Loggar du in sparas bil och chattar på ditt konto, synliga bara för dig, och du kan radera dem när som helst. Registeruppgifter från regnummer visas aldrig på skärmen.",
     aboutTitle: "Trevligt att träffas. Jag heter Jackie.",
     aboutBody: "Jag förklarar bilproblem med enkla ord och länkar varje källa. Jag använder Wikidata, den officiella OBD-II-listan med felkoder, Teslas servicemanual för Model 3, tyska KBA-registret för HSN/TSN och direktsökning av svenska regnummer. Jag pratar engelska, svenska och tyska.",
-    heroTitle: "Bikta din bils synder.", heroSub: "Jackie lyssnar utan att döma och förklarar sedan med enkla ord, hur bråttom det är och ett ungefärligt pris.",
+    heroTitle: "Bikta din bils synder.", heroSub: "Jackie lyssnar utan att döma, förklarar med enkla ord och ger en ungefärlig offert för din bokning.",
     whyTitle: "Bilprat förutsätter att alla kan 'mekaniska'. De flesta förare kan inte det, och ska inte behöva.",
     whyPitch: "Jackie lyssnar först och förklarar sedan problemet med enkla ord, ett ungefärligt pris och vad du gör härnäst. Utan fackspråk, utan dömande. På engelska, svenska och tyska.",
     whyChip: "Varför finns detta",
@@ -139,6 +143,8 @@ const dict = {
     },
   },
   de: {
+    bk: { title: "Werkstatttermin buchen", back: "Zurück zum Chat", s1: "Was", s2: "Wann", s3: "Du", next: "Weiter", prev: "Zurück", workshop: "Werkstatt", job: "Was muss gemacht werden?", other: "Etwas anderes", describe: "Kurz beschreiben", describePh: "Z. B. Klappern im Kofferraum", fromChat: "Aus deinem Chat mit Jackie", day: "Tag wählen", time: "Abgabezeit", picked: "Deine Zeiten (bis zu %n)", noPick: "Tippe auf eine Zeit. Bis zu %n, damit die Werkstatt wählen kann.", remove: "Entfernen", noDays: "Gerade keine freien Zeiten. Versuch eine andere Werkstatt.", name: "Dein Name", phone: "Telefon", confirmBy: "Bestätigung per", email: "E-Mail", msg: "Noch etwas? (optional)", msgPh: "Wie sich das Auto anfühlt, wann es dir passt…", send: "Anfrage senden", sending: "Wird gesendet…", error: "Senden fehlgeschlagen. Bitte versuch es noch einmal.", signInNeeded: "Melde dich an, damit die Werkstatt dich erreicht.", signIn: "Anmelden zum Buchen", noShops: "Noch keine Partnerwerkstätten.", sentTitle: "Anfrage gesendet. Du bist in guten Händen", sentBody: "Die Werkstatt wählt eine deiner Zeiten und bestätigt per %c.", done: "Zurück zum Chat", shared: "Die Werkstatt sieht den Auftrag, Jackies grobe Preisschätzung und deine Kontaktdaten. Sonst nichts aus dem Chat.", chatTip: "Tipp: Du kannst Jackie auch im Chat bitten, für dich zu buchen." },
+    bookedTitle: "Termin angefragt", bookedBody: "%w wählt eine deiner Zeiten und bestätigt.",
     forWorkshops: "Für Werkstätten", account: "Dein Konto", signOut: "Abmelden", signInToSave: "Anmelden zum Speichern",
     madeForSweden: "Gemacht für Schweden", jackieNew: "Jackie ist neu. Sei nett zu ihr",
     yourSavedCar: "DEIN GESPEICHERTES AUTO", carForChat: "AUTO FÜR DIESEN CHAT", change: "Ändern",
@@ -159,7 +165,7 @@ const dict = {
     privacyBody: "Ohne Anmeldung wird nichts gespeichert: Auto und Chat verschwinden, wenn du neu startest oder den Tab schließt. Mit Anmeldung liegen Auto und Chats in deinem Konto, nur für dich sichtbar, und du kannst sie jederzeit löschen. Registerdaten aus dem Kennzeichen werden nie angezeigt.",
     aboutTitle: "Schön dich kennenzulernen. Ich bin Jackie.",
     aboutBody: "Ich erkläre Autoprobleme in einfachen Worten und verlinke jede Quelle. Ich nutze Wikidata, die offizielle OBD-II-Fehlercodeliste, Teslas Model 3 Servicehandbuch, das KBA-Register für HSN/TSN und Live-Abfragen schwedischer Kennzeichen. Ich spreche Englisch, Schwedisch und Deutsch.",
-    heroTitle: "Beichte die Sünden deines Autos.", heroSub: "Jackie hört zu, ohne zu urteilen, und erklärt es dann einfach, mit Dringlichkeit und grobem Preis.",
+    heroTitle: "Beichte die Sünden deines Autos.", heroSub: "Jackie hört zu, ohne zu urteilen, erklärt es in einfachen Worten und gibt dir ein unverbindliches Angebot für deine Buchung.",
     whyTitle: "Autogespräche setzen voraus, dass alle 'Mechanisch' sprechen. Die meisten tun das nicht und sollten es auch nicht müssen.",
     whyPitch: "Jackie hört erst zu und erklärt das Problem dann in einfachen Worten, mit grobem Preis und dem nächsten Schritt. Ohne Fachjargon, ohne Bewertung. Auf Englisch, Schwedisch und Deutsch.",
     whyChip: "Warum gibt es das",

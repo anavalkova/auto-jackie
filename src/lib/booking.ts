@@ -75,3 +75,9 @@ export function upcomingDays(from: Date, count = 7, rules: BookingRules = {}): {
 
 export const slotLabel = (iso: string | Date, locale = "en-GB") =>
   new Date(iso).toLocaleString(locale, { timeZone: "Europe/Stockholm", weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+
+/** Turns the workshop_booking_rules RPC payload into BookingRules (holidays closed when unknown). */
+export function rulesFromRpc(data: unknown): BookingRules {
+  const r = data as { days?: number[]; hours?: number[]; notice?: number; maxAhead?: number; holidays?: boolean; closed?: string[] } | null;
+  return r ? { weekdays: r.days, hours: r.hours, noticeDays: r.notice, maxAheadDays: r.maxAhead, closeHolidays: r.holidays, closed: r.closed } : { closeHolidays: true };
+}

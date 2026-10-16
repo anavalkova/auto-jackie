@@ -18,3 +18,4 @@
 - [x] Map requests to Pricing engine services (+ always-present "Other"); Overview shows Your services + "Not offered yet" with Add button.
 - [x] Driver page: "Why this exists" as a corner chip in English, Swedish and German, like the workshop tabs.
 - [x] Jackie's portrait: show more of her on desktop, keep her visible on phone view.
+- [x] Booking: inline 3-step flow (no pop-up), day strip + times, EN/SV/DE; Jackie books in chat (free times + confirm).

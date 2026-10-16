@@ -2,7 +2,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, isToolUIPart, getToolName, type UIMessage } from "ai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CalendarCheck, RotateCcw } from "lucide-react";
-import { RequestVisitDialog, type VisitCard } from "@/components/request-visit-dialog";
+import type { VisitCard } from "@/components/request-visit-dialog";
 import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/ai-elements/conversation";
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { PromptInput, PromptInputFooter, PromptInputSubmit, PromptInputTextarea } from "@/components/ai-elements/prompt-input";
@@ -16,15 +16,14 @@ import { QUOTA_ERROR } from "@/lib/chat-quota";
 import { chatQuotaStatus, type ChatQuotaStatus } from "@/lib/chat-quota.functions";
 
 
-export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMessages, onTurnFinished, onReset, saving, workshopId, onSignIn }: {
-  workshopId?: string | undefined; onSignIn?: (() => void) | undefined;
+export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMessages, onTurnFinished, onReset, saving, workshopId, onSignIn, onBook }: {
+  workshopId?: string | undefined; onSignIn?: (() => void) | undefined; onBook: (card: VisitCard) => void;
   vehicle: Vehicle | null; pending: string | null; onPendingSent: () => void;
   chatId?: string | undefined; initialMessages?: UIMessage[] | undefined;
   onTurnFinished?: ((messages: UIMessage[]) => void) | undefined; onReset?: (() => void) | undefined; saving?: boolean | undefined;
 }) {
   const { t, lang } = useT();
   const [input, setInput] = useState("");
-  const [booking, setBooking] = useState<VisitCard | null>(null);
   const vehiclePayload = vehicle ? { confidential: vehicle.confidential, description: vehicle.confidential ? undefined : vehicle.description, mileageKm: vehicle.mileageKm } : null;
   const transport = useMemo(() => new DefaultChatTransport({
     api: "/api/chat",
@@ -78,14 +77,19 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
                   <span className="offer-urgency">{t.getLooked} {o.urgency}</span>
                   {o.priceLowSek != null && o.priceHighSek != null && <p className="offer-price">{t.about_} {o.priceLowSek.toLocaleString("sv-SE")} {t.to} {o.priceHighSek.toLocaleString("sv-SE")} kr <small>{t.vatNote}</small></p>}
                   {o.note && <p className="offer-note">{o.note}</p>}
-                  <Button onClick={() => setBooking({ issue: o.issue ?? "", service: o.service, urgency: o.urgency, priceLowSek: o.priceLowSek, priceHighSek: o.priceHighSek, note: o.note })}><CalendarCheck/> {t.requestVisit}</Button>
+                  <Button onClick={() => onBook({ issue: o.issue ?? "", service: o.service, urgency: o.urgency, priceLowSek: o.priceLowSek, priceHighSek: o.priceHighSek, note: o.note })}><CalendarCheck/> {t.requestVisit}</Button>
                 </div>;
               }
+              if (isToolUIPart(part) && getToolName(part) === "bookVisit") {
+                const o = part.state === "output-available" ? part.output as { ok?: boolean; workshop?: string; times?: string[] } : null;
+                if (!o?.ok) return null;
+                return <div key={i} className="booking-done"><strong><CalendarCheck/> {t.bookedTitle}</strong><span>{t.bookedBody.replace("%w", o.workshop ?? "")}</span><span className="history-note">{(o.times ?? []).join(" · ")}</span></div>;
+              }
               if (isToolUIPart(part)) {
-                const tools = m.parts.filter(p => isToolUIPart(p) && getToolName(p) !== "suggestWorkshopVisit");
+                const tools = m.parts.filter(p => isToolUIPart(p) && getToolName(p) !== "suggestWorkshopVisit" && getToolName(p) !== "bookVisit");
                 if (tools[0] !== part) return null;
                 const running = tools.some(p => isToolUIPart(p) && (p.state === "input-streaming" || p.state === "input-available"));
-                const label = (n: string) => n === "searchWikidata" ? t.toolSearch : n === "lookupFaultCode" ? t.toolCode : n.includes("Tesla") ? t.toolTesla : t.toolItem;
+                const label = (n: string) => n === "getAvailableTimes" ? t.bk.time : n === "searchWikidata" ? t.toolSearch : n === "lookupFaultCode" ? t.toolCode : n.includes("Tesla") ? t.toolTesla : t.toolItem;
                 return <details key={i} className="sources-used">
                   <summary>{running ? t.sourcesUsing : t.sourcesUsed.replace("%n", String(tools.length))}</summary>
                   {tools.map((p, j) => isToolUIPart(p) && <Tool key={j} defaultOpen={false}><ToolHeader type={p.type as `tool-${string}`} state={p.state} title={label(getToolName(p))}/><ToolContent><ToolInput input={p.input}/><ToolOutput output={p.output} errorText={p.errorText}/></ToolContent></Tool>)}
@@ -115,6 +119,5 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
         </div>
       </PromptInputFooter>
     </PromptInput>
-    <RequestVisitDialog card={booking} vehicleLabel={vehicle && !vehicle.confidential ? vehicle.label : ""} onClose={() => setBooking(null)} workshopId={workshopId}/>
   </div>;
 }
