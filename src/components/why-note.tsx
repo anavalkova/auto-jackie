@@ -3,7 +3,7 @@ import { ChevronDown, Lightbulb, X } from "lucide-react";
 
 export type WhyStat = { value: string; text: string; source?: { label: string; url: string } };
 
-type Props = { id: string; title: string; stats: WhyStat[]; footer?: string; summary?: string; pitch?: string; points?: string[]; overlay?: boolean };
+type Props = { id: string; title: string; stats: WhyStat[]; footer?: string; summary?: string; pitch?: string; points?: string[]; overlay?: boolean; label?: string; autoOpen?: boolean };
 
 /** "Why this exists" card with sourced numbers. Inline (collapsible) or as a corner overlay. */
 export function WhyNote(props: Props) {
@@ -31,10 +31,12 @@ function WhyBody({ stats, footer, pitch, points }: Props) {
 
 function WhyOverlay(props: Props) {
   const key = `autojackie.whyo.${props.id}`;
+  const label = props.label ?? "Why this exists";
+  const auto = props.autoOpen ?? true;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   // Open on first visit of each tab, then remember
-  useEffect(() => { try { if (localStorage.getItem(key) !== "seen") { setOpen(true); localStorage.setItem(key, "seen"); } } catch { /* ignore */ } }, [key]);
+  useEffect(() => { if (!auto) return; try { if (localStorage.getItem(key) !== "seen") { setOpen(true); localStorage.setItem(key, "seen"); } } catch { /* ignore */ } }, [key, auto]);
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
@@ -43,8 +45,8 @@ function WhyOverlay(props: Props) {
     return () => { document.removeEventListener("mousedown", onDown); document.removeEventListener("keydown", onKey); };
   }, [open]);
   return <div className="why-overlay" ref={ref}>
-    <button type="button" className="why-chip" aria-expanded={open} onClick={() => setOpen(o => !o)}><Lightbulb aria-hidden/> Why this exists</button>
-    {open && <aside className="why-note why-pop" aria-label="Why this exists">
+    <button type="button" className="why-chip" aria-expanded={open} onClick={() => setOpen(o => !o)}><Lightbulb aria-hidden/> {label}</button>
+    {open && <aside className="why-note why-pop" aria-label={label}>
       <div className="why-pop-head"><strong className="why-title">{props.title}</strong><button type="button" className="why-close" aria-label="Close" onClick={() => setOpen(false)}><X/></button></div>
       <WhyBody {...props}/>
     </aside>}
