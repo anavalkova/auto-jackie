@@ -176,7 +176,7 @@ function Pager({ page, pages, onPage }: { page: number; pages: number; onPage: (
 const BOOKING_STEPS = [{ title: "Requests" }, { title: "Booking settings" }];
 function BookingTab({ requests, settings }: { requests: React.ReactNode; settings: React.ReactNode }) {
   const [step, setStep] = useState(0);
-  return <div className="ws-section"><Stepper steps={BOOKING_STEPS} step={step} setStep={setStep}/>{step === 0 ? <div className="ws-section">{requests}</div> : settings}</div>;
+  return <div className="ws-section"><Stepper steps={BOOKING_STEPS} step={step} setStep={setStep}/>{step === 0 ? <Collapsible title="Requests"><div className="ws-section">{requests}</div></Collapsible> : settings}</div>;
 }
 
 function Collapsible({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
