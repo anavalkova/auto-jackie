@@ -3,8 +3,8 @@ import { ChevronDown } from "lucide-react";
 
 export type WhyStat = { value: string; text: string; source?: { label: string; url: string } };
 
-/** Small "why this exists" card that ties a screen to the problem it solves, with sourced numbers. Collapsible; expanded by default. */
-export function WhyNote({ id, title, stats, footer }: { id: string; title: string; stats: WhyStat[]; footer?: string }) {
+/** Collapsible "why this exists" card with sourced numbers. Expanded by default. */
+export function WhyNote({ id, title, stats, footer, summary }: { id: string; title: string; stats: WhyStat[]; footer?: string; summary?: string }) {
   const key = `autojackie.why.${id}`;
   const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem(key) === "0"; } catch { return false; } });
   const toggle = () => {
@@ -12,11 +12,15 @@ export function WhyNote({ id, title, stats, footer }: { id: string; title: strin
     setCollapsed(next);
     try { localStorage.setItem(key, next ? "0" : "1"); } catch { /* ignore */ }
   };
+  // Collapsed summary: use explicit prop or derive from first stat
+  const collapsedLine = summary ?? (stats[0] ? `${stats[0].value} ${stats[0].text.split(".")[0].toLowerCase()}` : title);
   return (
     <aside className="why-note" aria-label="Why this exists">
       <button type="button" className="why-toggle" aria-expanded={!collapsed} onClick={toggle}>
-        <span className="eyebrow">WHY THIS EXISTS</span>
-        <strong className="why-title">{title}</strong>
+        <span className="why-toggle-label">
+          <span className="eyebrow">WHY THIS EXISTS</span>
+          <strong className="why-title">{collapsed ? collapsedLine : title}</strong>
+        </span>
         <ChevronDown className={"why-chevron" + (collapsed ? " is-collapsed" : "")} aria-hidden />
       </button>
       {!collapsed && (
