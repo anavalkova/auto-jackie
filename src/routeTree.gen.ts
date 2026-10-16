@@ -11,10 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as WorkshopRouteImport } from './routes/workshop'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as CChatIdRouteImport } from './routes/c.$chatId'
 import { Route as WSlugRouteImport } from './routes/w.$slug'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiVehiclesLookupRouteImport } from './routes/api/vehicles.lookup'
 
 const IndexRoute = IndexRouteImport.update({
@@ -27,11 +30,22 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WorkshopRoute = WorkshopRouteImport.update({
   id: '/workshop',
   path: '/workshop',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -47,6 +61,11 @@ const WSlugRoute = WSlugRouteImport.update({
   path: '/w/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiVehiclesLookupRoute = ApiVehiclesLookupRouteImport.update({
   id: '/api/vehicles/lookup',
   path: '/api/vehicles/lookup',
@@ -56,29 +75,38 @@ const ApiVehiclesLookupRoute = ApiVehiclesLookupRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/mcp': typeof McpRoute
   '/workshop': typeof WorkshopRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/chat': typeof ApiChatRoute
   '/c/$chatId': typeof CChatIdRoute
   '/w/$slug': typeof WSlugRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/vehicles/lookup': typeof ApiVehiclesLookupRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/mcp': typeof McpRoute
   '/workshop': typeof WorkshopRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/chat': typeof ApiChatRoute
   '/c/$chatId': typeof CChatIdRoute
   '/w/$slug': typeof WSlugRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/vehicles/lookup': typeof ApiVehiclesLookupRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/mcp': typeof McpRoute
   '/workshop': typeof WorkshopRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/chat': typeof ApiChatRoute
   '/c/$chatId': typeof CChatIdRoute
   '/w/$slug': typeof WSlugRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/vehicles/lookup': typeof ApiVehiclesLookupRoute
 }
 export interface FileRouteTypes {
@@ -86,38 +114,50 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/mcp'
     | '/workshop'
+    | '/.well-known/oauth-protected-resource'
     | '/api/chat'
     | '/c/$chatId'
     | '/w/$slug'
+    | '/.lovable/oauth/consent'
     | '/api/vehicles/lookup'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
+    | '/mcp'
     | '/workshop'
+    | '/.well-known/oauth-protected-resource'
     | '/api/chat'
     | '/c/$chatId'
     | '/w/$slug'
+    | '/.lovable/oauth/consent'
     | '/api/vehicles/lookup'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/mcp'
     | '/workshop'
+    | '/.well-known/oauth-protected-resource'
     | '/api/chat'
     | '/c/$chatId'
     | '/w/$slug'
+    | '/.lovable/oauth/consent'
     | '/api/vehicles/lookup'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  McpRoute: typeof McpRoute
   WorkshopRoute: typeof WorkshopRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiChatRoute: typeof ApiChatRoute
   CChatIdRoute: typeof CChatIdRoute
   WSlugRoute: typeof WSlugRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   ApiVehiclesLookupRoute: typeof ApiVehiclesLookupRoute
 }
 
@@ -137,11 +177,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/workshop': {
       id: '/workshop'
       path: '/workshop'
       fullPath: '/workshop'
       preLoaderRoute: typeof WorkshopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -165,6 +219,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/vehicles/lookup': {
       id: '/api/vehicles/lookup'
       path: '/api/vehicles/lookup'
@@ -178,10 +239,14 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  McpRoute: McpRoute,
   WorkshopRoute: WorkshopRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiChatRoute: ApiChatRoute,
   CChatIdRoute: CChatIdRoute,
   WSlugRoute: WSlugRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   ApiVehiclesLookupRoute: ApiVehiclesLookupRoute,
 }
 export const routeTree = rootRouteImport

@@ -1,5 +1,7 @@
 import { slotLabel } from "@/lib/booking";
 import { Link } from "@tanstack/react-router";
+import { useWebMCP } from "use-webmcp-tool";
+import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 import { ensureOther, OTHER } from "@/lib/services";
 import { TIERS, TIER_INFO, DEFAULT_TIERS, type Tier } from "@/lib/ai-tiers";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -92,6 +94,22 @@ export function WorkshopDashboard() {
     };
   }, [items]);
   const shown = items.filter(i => filter === "open" ? OPEN.includes(i.status) : i.status === filter);
+  const FILTERS = ["open", ...STATUSES.map(x => x.id)] as const;
+  const changeFilter = (f: string) => { if (!(FILTERS as readonly string[]).includes(f)) throw new Error("Unknown filter."); setFilter(f as Status | "open"); setPage(0); };
+  useWebMCP({
+    name: "list_requests",
+    description: "List the driver requests shown in the workshop's request list for the active status filter.",
+    annotations: { readOnlyHint: true, untrustedContentHint: true },
+    enabled: !!shop,
+    execute: () => runWebMCPTool("list_requests", () => shown.length === 0 ? "No requests shown." : shown.slice(0, 50).map(i => `${i.id}: ${i.issue} · ${i.contact_name} · ${i.status}`).join("\n")),
+  });
+  useWebMCP({
+    name: "filter_requests",
+    description: "Change which requests the workshop request list shows: open, new, contacted, quoted, booked or closed.",
+    inputSchema: { type: "object", properties: { filter: { type: "string", enum: [...FILTERS], description: "Status filter to apply." } }, required: ["filter"] },
+    enabled: !!shop,
+    execute: ({ filter: f }: { filter: string }) => runWebMCPTool("filter_requests", () => { changeFilter(f); return `Showing ${f} requests.`; }),
+  });
 
   const book = async (i: Inquiry, at: string | null) => {
     const { data, error } = await supabase.from("inquiries").update({ booked_at: at, status: at ? "booked" : "contacted" }).eq("id", i.id).select("*").single();
@@ -118,7 +136,7 @@ export function WorkshopDashboard() {
     <div className="ws-tabs" role="tablist" aria-label="Dashboard sections">{TABS.map(t => <Button key={t.id} variant={tab === t.id ? "default" : "outline"} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</Button>)}<WhyNote key={tab} overlay {...WHY[tab]}/></div>
     {tab === "booking" ? <BookingTab requests={<>
     <div className="ws-filters" role="tablist" aria-label="Filter requests">
-      {([{ id: "open", label: "All open" }, ...STATUSES] as { id: Status | "open"; label: string }[]).map(s => <Button key={s.id} size="sm" variant={filter === s.id ? "default" : "outline"} role="tab" aria-selected={filter === s.id} onClick={() => { setFilter(s.id); setPage(0); }}>{s.label}</Button>)}
+      {([{ id: "open", label: "All open" }, ...STATUSES] as { id: Status | "open"; label: string }[]).map(s => <Button key={s.id} size="sm" variant={filter === s.id ? "default" : "outline"} role="tab" aria-selected={filter === s.id} onClick={() => changeFilter(s.id)}>{s.label}</Button>)}
     </div>
     {error && <p className="chat-error" role="alert">Couldn't load or update requests.</p>}
     {shown.length === 0 ? <div className="ws-list-empty"><p>No requests here yet.</p><p className="history-note">When a driver books {shop.name}, directly or from one of Jackie's cards, it lands here.</p></div>
