@@ -280,7 +280,7 @@ function InsightsView({ items, workshopId, canEdit }: { items: Inquiry[]; worksh
     label: c === "sms" ? "SMS" : c === "whatsapp" ? "WhatsApp" : "Email",
     v: items.filter(i => i.contact_channel === c).length,
   }));
-  return <div className="ws-section">
+  return <div className="ws-section ws-tight">
     <h2 className="ws-h2">Insights</h2>
     <div className="ws-insights">
       <Collapsible title="From request to booking" tip="How many requests moved from new to quoted to booked."><div className="ws-funnel">{funnel.map(f => <div key={f.label} className="ws-funnel-row"><span>{f.label}</span><span className="ws-bar"><span style={{ width: n ? `${(f.v / n) * 100}%` : 0 }}/></span><strong>{f.v}</strong></div>)}</div></Collapsible>
