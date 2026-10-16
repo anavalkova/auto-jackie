@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarClock, Car, Inbox, Phone, TrendingUp, Wrench } from "lucide-react";
+import { BadgeCheck, CalendarClock, Car, Clock, Inbox, MessageCircle, Moon, Phone, ShieldCheck, Sparkles, TrendingUp, Wrench } from "lucide-react";
+import jackieImg from "@/assets/jackie.jpg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -72,7 +73,7 @@ export function WorkshopDashboard() {
 
   let body;
   if (!ready || (user && shop === undefined)) body = <p className="history-note" role="status">Loading…</p>;
-  else if (!user) body = <div className="ws-empty"><Wrench/><h1>Your workshop, with Jackie on the front desk.</h1><p>Drivers explain their trouble to Jackie. You get a clear summary, a rough price and their phone number, ready to call.</p><Button onClick={() => setSignIn(true)}>Sign in to open your workshop</Button></div>;
+  else if (!user) body = <WorkshopPitch onSignIn={() => setSignIn(true)}/>;
   else if (!shop) body = <div className="ws-empty"><Wrench/><h1>Your workshop isn't set up yet</h1><p>AutoJackie's team sets up each workshop personally. If we've onboarded you, sign in with the email you gave us{user.email ? ` (you're signed in as ${user.email})` : ""}.</p>{isAdmin && <Button asChild><Link to="/admin">Go to operations</Link></Button>}</div>;
   else body = <>
     <div className="ws-title"><div><span className="eyebrow">WORKSHOP DASHBOARD</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div><div className="ws-filters"><Button variant={tab === "requests" ? "default" : "outline"} onClick={() => setTab("requests")}>Requests</Button><Button variant={tab === "settings" ? "default" : "outline"} onClick={() => setTab("settings")}>Settings</Button></div></div>
@@ -153,4 +154,44 @@ function WorkshopSettings({ workshopId, canEdit }: { workshopId: string; canEdit
     {!canEdit && <p className="history-note">Only the workshop owner can change these.</p>}
     {state && <p className="history-note" role="status">{state}</p>}
   </form>;
+}
+
+function WorkshopPitch({ onSignIn }: { onSignIn: () => void }) {
+  const steps = [
+    { icon: <MessageCircle/>, title: "Driver talks to Jackie", text: "Any hour. In plain words." },
+    { icon: <Sparkles/>, title: "Jackie sorts it out", text: "Likely issue, urgency, rough price." },
+    { icon: <Inbox/>, title: "You get a ready lead", text: "Summary, car and phone number." },
+    { icon: <Phone/>, title: "You call. They book.", text: "Warm customer, no phone tag." },
+  ];
+  const stats = [
+    { value: "21%", text: "of calls to workshops go unanswered.", src: { label: "Marchex", url: "https://www.marchex.com/up-to-21-percent-of-automotive-service-customer-calls-go-unanswered-creating-significant-revenue-leakage/" } },
+    { value: "68%", text: "of missed callers never call back.", src: { label: "Auto Service World", url: "https://www.autoserviceworld.com/phone-fails-lead-to-missed-automotive-service-revenue-report/" } },
+    { value: "36%", text: "of Swedish private cars belong to women. Few shops speak to them.", src: { label: "Trafikanalys", url: "https://www.trafa.se/vagtrafik/fordon/" } },
+  ];
+  return <div className="pitch">
+    <section className="pitch-hero">
+      <div>
+        <span className="eyebrow">FOR WORKSHOPS</span>
+        <h1>Never miss a customer again.</h1>
+        <p>Jackie answers every driver, 24/7. You get booked jobs, not missed calls.</p>
+        <div className="pitch-cta"><Button onClick={onSignIn}>Sign in to your workshop</Button><span className="history-note">Invite only. Set up by our team.</span></div>
+      </div>
+      <figure className="pitch-jackie"><img src={jackieImg} alt="Jackie, AutoJackie's assistant"/><figcaption>Jackie, your new front desk</figcaption></figure>
+    </section>
+    <ol className="pitch-flow" aria-label="How it works">
+      {steps.map((s, i) => <li key={s.title}><span className="pitch-step">{i + 1}</span>{s.icon}<strong>{s.title}</strong><span>{s.text}</span></li>)}
+    </ol>
+    <section className="pitch-gains" aria-label="What's in it for you">
+      <span className="eyebrow">WHAT'S IN IT FOR YOU</span>
+      <ul>
+        <li><Clock/><strong>Less phone time</strong><span>Jackie triages first.</span></li>
+        <li><Moon/><strong>After-hours leads</strong><span>Caught while you sleep.</span></li>
+        <li><BadgeCheck/><strong>Trusting customers</strong><span>They know the price range upfront.</span></li>
+        <li><ShieldCheck/><strong>Your data stays yours</strong><span>Isolated per workshop.</span></li>
+      </ul>
+    </section>
+    <section className="pitch-stats" aria-label="The problem in numbers">
+      {stats.map(s => <div key={s.value}><strong>{s.value}</strong><span>{s.text}</span><a href={s.src.url} target="_blank" rel="noreferrer">{s.src.label}</a></div>)}
+    </section>
+  </div>;
 }
