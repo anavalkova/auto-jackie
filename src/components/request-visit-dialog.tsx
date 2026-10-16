@@ -16,7 +16,7 @@ type Channel = "sms" | "whatsapp" | "email";
 const CHANNELS: { id: Channel; label: string }[] = [{ id: "sms", label: "SMS" }, { id: "whatsapp", label: "WhatsApp" }, { id: "email", label: "Email" }];
 
 export type VisitCard = { issue: string; service?: string | undefined; urgency?: string | undefined; priceLowSek?: number | undefined; priceHighSek?: number | undefined; note?: string | undefined };
-function Tip({ text }: { text: string }) {
+export function Tip({ text }: { text: string }) {
   return <Popover><PopoverTrigger asChild><button type="button" className="ws-tip" aria-label="What is this?"><CircleHelp/></button></PopoverTrigger><PopoverContent className="ws-tip-body" side="top" align="start"><p>{text}</p></PopoverContent></Popover>;
 }
 

@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { GarageDialog } from "@/components/garage-dialog";
 import { JackieChat } from "@/components/jackie-chat";
-import { BookingPanel, type VisitCard } from "@/components/request-visit-dialog";
+import { BookingPanel, Tip, type VisitCard } from "@/components/request-visit-dialog";
 import { WhyNote } from "@/components/why-note";
 import { SignInDialog } from "@/components/sign-in-dialog";
 import { useSessionUser } from "@/hooks/use-session-user";
@@ -166,7 +166,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
 
     <main className="workspace">
       <aside className="jackie-panel">
-        <div className="portrait-wrap compact"><img src={jackie} alt="Jackie, a mechanic in an orange work jacket" width={1024} height={1024}/><span className="portrait-label">{t.jackieNew}</span></div>
+        <div className="portrait-wrap compact"><img src={jackie} alt="Jackie, a mechanic in an orange work jacket" width={1024} height={1024}/><span className="portrait-label field-tip"><Tip text={`${t.aboutTitle} ${t.aboutBody}`}/>{t.jackieNew}</span></div>
 
         <section className="vehicle-card" aria-label="Your car">
           <div className="vehicle-head"><span className="eyebrow">{user ? t.yourSavedCar : t.carForChat}</span>{vehicle && <Button variant="ghost" size="sm" onClick={() => setGarageOpen(true)}><Pencil/> {t.change}</Button>}</div>
@@ -204,7 +204,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
           : initial === null ? <div className="chat-empty"><p>{t.opening}</p></div>
           : <JackieChat key={chatId ?? `new-${newChatKey}`} chatId={chatId} initialMessages={initial} vehicle={vehicle} pending={null} onPendingSent={() => {}} onTurnFinished={onTurnFinished} onReset={onReset} saving={!!user && !!chatId} workshopId={workshop?.id} onSignIn={() => setSignInOpen(true)} onBook={setDirectBooking}/>}
         </div>
-        <div className="assistant-bottom"><span className="swedish-flag"/><span><strong>{t.madeForSweden}</strong> · {t.bottom}</span><Button variant="ghost" size="icon" aria-label={t.about} onClick={() => setInfo("about")}><HelpCircle/></Button></div>
+        <div className="assistant-bottom"><span className="swedish-flag"/><span><strong>{t.madeForSweden}</strong> · {t.bottom}</span></div>
       </section>
     </main>
 
