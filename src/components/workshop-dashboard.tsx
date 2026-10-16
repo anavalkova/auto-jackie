@@ -296,10 +296,18 @@ function InsightsView({ items, workshopId, canEdit }: { items: Inquiry[]; worksh
     setS({ ...s, price_list: next }); setAdded(a => [...a, task]);
     await save({ price_list: next, job_durations: next.map(x => ({ job: x.task, minutes: x.minutes ?? 60 })) });
   };
+  const channels = (["sms", "whatsapp", "email"] as const).map(c => ({
+    label: c === "sms" ? "SMS" : c === "whatsapp" ? "WhatsApp" : "Email",
+    v: items.filter(i => i.contact_channel === c).length,
+  }));
   return <div className="ws-section">
     <h2 className="ws-h2">Insights</h2>
-    <div className="ws-stack">
+    <div className="ws-insights">
       <Collapsible title="From request to booking"><div className="ws-funnel">{funnel.map(f => <div key={f.label} className="ws-funnel-row"><span>{f.label}</span><span className="ws-bar"><span style={{ width: n ? `${(f.v / n) * 100}%` : 0 }}/></span><strong>{f.v}</strong></div>)}</div></Collapsible>
+      <Collapsible title="How drivers want to be reached">
+        <p className="ws-hint"><span>The channel each driver picked for confirmation. Automatic messages come in phase 2.</span></p>
+        <div className="ws-funnel">{channels.map(c => <div key={c.label} className="ws-funnel-row"><span>{c.label}</span><span className="ws-bar"><span style={{ width: n ? `${(c.v / n) * 100}%` : 0 }}/></span><strong>{c.v}</strong></div>)}</div>
+      </Collapsible>
       <Collapsible title="Your services">
         <p className="ws-hint"><span>Requests matched to your Pricing engine. Value = bookings × your price.</span></p>
         <table className="ws-table"><thead><tr><th>Service</th><th>Requests</th><th>Booked</th><th>Value</th></tr></thead><tbody>
