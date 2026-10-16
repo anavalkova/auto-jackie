@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Check, X } from "lucide-react";
+import { ArrowLeft, Check, CircleHelp, X } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,10 @@ type Channel = "sms" | "whatsapp" | "email";
 const CHANNELS: { id: Channel; label: string }[] = [{ id: "sms", label: "SMS" }, { id: "whatsapp", label: "WhatsApp" }, { id: "email", label: "Email" }];
 
 export type VisitCard = { issue: string; service?: string | undefined; urgency?: string | undefined; priceLowSek?: number | undefined; priceHighSek?: number | undefined; note?: string | undefined };
+function Tip({ text }: { text: string }) {
+  return <Popover><PopoverTrigger asChild><button type="button" className="ws-tip" aria-label="What is this?"><CircleHelp/></button></PopoverTrigger><PopoverContent className="ws-tip-body" side="top" align="start"><p>{text}</p></PopoverContent></Popover>;
+}
+
 type Shop = { id: string; name: string; city: string };
 
 /** Inline booking flow shown in place of the chat (no pop-up): 1 what, 2 when (day strip then times), 3 contact. */
@@ -51,7 +56,9 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId }: { card
     });
     supabase.rpc("workshop_jackie_profile", { _workshop: shopId }).then(({ data }) => {
       const list = ensureOther(((data as { price_list?: ServiceItem[] } | null)?.price_list ?? []));
-      setServices(list); setService(sv => list.some(x => x.task === sv) ? sv : (list[0]?.task ?? OTHER));
+      setServices(list);
+      const pick = card.issue ? (card.service && list.some(x => x.task === card.service) ? card.service : matchService(card.issue, list)) : "";
+      setService(sv => list.some(x => x.task === sv) ? sv : (pick || list[0]?.task || OTHER));
     });
   }, [shopId]);
 
@@ -60,10 +67,11 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId }: { card
   const fmtDay = (d: Date) => d.toLocaleDateString(locale, { timeZone: "Europe/Stockholm", weekday: "short", day: "numeric", month: "short" });
   const fmtTime = (d: Date) => d.toLocaleTimeString(locale, { timeZone: "Europe/Stockholm", hour: "2-digit", minute: "2-digit" });
   const job = (direct ? (service === OTHER ? issue : service) : card.issue).trim();
+  const suggested = !direct && services.length ? (card.service && services.some(x => x.task === card.service) ? card.service : matchService(card.issue, services)) : "";
   const canNext = step === 1 ? !!shopId && job.length >= 3 : step === 2 ? picks.length > 0 : true;
 
   const send = async () => {
-    const mapped = direct ? service : (card.service && services.some(x => x.task === card.service) ? card.service : matchService(card.issue, services));
+    const mapped = service;
     if (!user || !shopId || picks.length === 0 || !job) return;
     setState("sending");
     const { error } = await supabase.from("inquiries").insert({
@@ -89,13 +97,12 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId }: { card
         <ol className="booking-steps">{steps.map((s, i) => <li key={s} className={i + 1 === step ? "is-on" : i + 1 < step ? "is-done" : ""}><button type="button" disabled={i + 1 > step} onClick={() => setStep(i + 1)}><span>{i + 1 < step ? <Check/> : i + 1}</span>{s}</button></li>)}</ol>
 
         {step === 1 && <div className="visit-form">
-          {direct ? <>
-            <p className="eyebrow">{b.workshop}: {shops.find(x => x.id === shopId)?.name}</p>
-            <div><Label htmlFor="v-service">{b.job}</Label>
-              <select id="v-service" className="native-select" value={service} onChange={e => setService(e.target.value)}>{services.map(x => <option key={x.task} value={x.task}>{x.task === OTHER ? b.other : x.task}</option>)}</select></div>
-            {service === OTHER && <div><Label htmlFor="v-issue">{b.describe}</Label><Input id="v-issue" required minLength={3} maxLength={200} placeholder={b.describePh} value={issue} onChange={e => setIssue(e.target.value)}/></div>}
-          </> : <div className="booking-job"><span className="eyebrow">{b.workshop}: {shops.find(x => x.id === shopId)?.name}</span><span className="eyebrow">{b.fromChat}</span><strong>{card.issue}</strong>{card.priceLowSek != null && card.priceHighSek != null && <span>{card.priceLowSek.toLocaleString("sv-SE")} to {card.priceHighSek.toLocaleString("sv-SE")} kr</span>}</div>}
-          <p className="history-note">{b.shared}</p>
+          <p className="eyebrow field-tip"><Tip text={b.hWorkshop}/>{b.workshop}: {shops.find(x => x.id === shopId)?.name}</p>
+          {!direct && <div className="booking-job"><span className="eyebrow">{b.fromChat}</span><strong>{card.issue}</strong>{card.priceLowSek != null && card.priceHighSek != null && <span>{card.priceLowSek.toLocaleString("sv-SE")} to {card.priceHighSek.toLocaleString("sv-SE")} kr</span>}</div>}
+          <div><Label htmlFor="v-service" className="field-tip">{!direct && <Tip text={b.hJob}/>}{b.job}{!direct && service === suggested && <span className="preview-badge">{b.jackiePick}</span>}</Label>
+            <select id="v-service" className="native-select" value={service} onChange={e => setService(e.target.value)}>{services.map(x => <option key={x.task} value={x.task}>{x.task === OTHER ? b.other : x.task}</option>)}</select></div>
+          {direct && service === OTHER && <div><Label htmlFor="v-issue">{b.describe}</Label><Input id="v-issue" required minLength={3} maxLength={200} placeholder={b.describePh} value={issue} onChange={e => setIssue(e.target.value)}/></div>}
+          <p className="history-note field-tip"><Tip text={b.shared}/>{b.chatPrivate}</p>
         </div>}
 
         {step === 2 && <div className="visit-form">
@@ -104,7 +111,7 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId }: { card
               <div className="day-strip" role="listbox" aria-label={b.day}>{days.map(d => { const n = picks.filter(p => d.slots.some(s => s.toISOString() === p)).length; return <button key={d.key} type="button" role="option" aria-selected={d.key === day} className={"day-chip" + (d.key === day ? " is-on" : "")} onClick={() => setDay(d.key)}>{fmtDay(d.slots[0]!)}{n > 0 && <i>{n}</i>}</button>; })}</div></div>
             <div><Label>{b.time}</Label>
               <div className="channel-row">{slots.map(sl => { const iso = sl.toISOString(); const on = picks.includes(iso); return <button key={iso} type="button" className={"slot" + (on ? " is-on" : "")} aria-pressed={on} disabled={!on && picks.length >= MAX_PICKS} onClick={() => toggle(iso)}>{fmtTime(sl)}</button>; })}</div></div>
-            <div><Label>{b.picked.replace("%n", String(MAX_PICKS))}</Label>
+            <div><Label className="field-tip"><Tip text={b.hTimes.replace("%n", String(MAX_PICKS))}/>{b.picked.replace("%n", String(MAX_PICKS))}</Label>
               {picks.length === 0 ? <p className="history-note">{b.noPick.replace("%n", String(MAX_PICKS))}</p>
                 : <div className="channel-row">{picks.map(p => <button key={p} type="button" className="pick-chip" aria-label={b.remove} onClick={() => toggle(p)}>{fmtDay(new Date(p))} · {fmtTime(new Date(p))} <X/></button>)}</div>}</div>
           </>}
@@ -113,7 +120,7 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId }: { card
         {step === 3 && <div className="visit-form booking-grid">
           <div><Label htmlFor="v-name">{b.name}</Label><Input id="v-name" required maxLength={80} value={name} onChange={e => setName(e.target.value)} autoComplete="name"/></div>
           <div><Label htmlFor="v-phone">{b.phone}</Label><Input id="v-phone" required type="tel" minLength={5} maxLength={30} placeholder="070 123 45 67" value={phone} onChange={e => setPhone(e.target.value)} autoComplete="tel"/></div>
-          <div><Label>{b.confirmBy}</Label><div className="channel-row" role="radiogroup">{CHANNELS.map(c => <button key={c.id} type="button" role="radio" aria-checked={channel === c.id} className={"slot" + (channel === c.id ? " is-on" : "")} onClick={() => setChannel(c.id)}>{c.label}</button>)}</div></div>
+          <div><Label className="field-tip"><Tip text={b.hConfirm}/>{b.confirmBy}</Label><div className="channel-row" role="radiogroup">{CHANNELS.map(c => <button key={c.id} type="button" role="radio" aria-checked={channel === c.id} className={"slot" + (channel === c.id ? " is-on" : "")} onClick={() => setChannel(c.id)}>{c.label}</button>)}</div></div>
           {channel === "email" && <div><Label htmlFor="v-email">{b.email}</Label><Input id="v-email" type="email" required maxLength={120} value={email} onChange={e => setEmail(e.target.value)}/></div>}
           <div className="ws-span"><Label htmlFor="v-msg">{b.msg}</Label><Textarea id="v-msg" rows={2} maxLength={1000} value={message} onChange={e => setMessage(e.target.value)} placeholder={b.msgPh}/></div>
           {state === "error" && <p className="chat-error ws-span" role="alert">{b.error}</p>}

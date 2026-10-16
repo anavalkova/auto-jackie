@@ -567,3 +567,4 @@
 .vehicle-empty { flex-direction: row; align-items: center; gap: 6px; padding: 4px 8px; border-style: dashed; }
 .vehicle-empty > svg { display: block; width: 16px; height: 16px; flex-shrink: 0; }
 .vehicle-empty button { padding: 0 6px; }
+.field-tip { display: flex; align-items: center; gap: 6px; }
