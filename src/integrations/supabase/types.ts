@@ -224,29 +224,56 @@ export type Database = {
       workshop_settings: {
         Row: {
           address: string
+          booking_days: number[]
+          contact_email: string
           hourly_rate_sek: number
+          jackie_context: string
+          job_durations: Json
+          min_notice_days: number
           opening_hours: string
           phone: string
+          price_list: Json
           services: Json
+          slot_hours: number[]
+          specialties: string
           updated_at: string
+          website: string
           workshop_id: string
         }
         Insert: {
           address?: string
+          booking_days?: number[]
+          contact_email?: string
           hourly_rate_sek?: number
+          jackie_context?: string
+          job_durations?: Json
+          min_notice_days?: number
           opening_hours?: string
           phone?: string
+          price_list?: Json
           services?: Json
+          slot_hours?: number[]
+          specialties?: string
           updated_at?: string
+          website?: string
           workshop_id: string
         }
         Update: {
           address?: string
+          booking_days?: number[]
+          contact_email?: string
           hourly_rate_sek?: number
+          jackie_context?: string
+          job_durations?: Json
+          min_notice_days?: number
           opening_hours?: string
           phone?: string
+          price_list?: Json
           services?: Json
+          slot_hours?: number[]
+          specialties?: string
           updated_at?: string
+          website?: string
           workshop_id?: string
         }
         Relationships: [
@@ -266,6 +293,7 @@ export type Database = {
           created_by: string
           id: string
           name: string
+          vat_number: string
         }
         Insert: {
           city?: string
@@ -273,6 +301,7 @@ export type Database = {
           created_by?: string
           id?: string
           name: string
+          vat_number?: string
         }
         Update: {
           city?: string
@@ -280,6 +309,7 @@ export type Database = {
           created_by?: string
           id?: string
           name?: string
+          vat_number?: string
         }
         Relationships: []
       }
@@ -292,6 +322,15 @@ export type Database = {
         Args: { _city?: string; _email: string; _name: string }
         Returns: string
       }
+      admin_set_workshop_profile: {
+        Args: {
+          _address: string
+          _phone: string
+          _vat: string
+          _workshop: string
+        }
+        Returns: undefined
+      }
       claim_my_access: { Args: never; Returns: Json }
       has_role: {
         Args: {
@@ -300,6 +339,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      workshop_booking_rules: { Args: { _workshop: string }; Returns: Json }
       workshop_role_of: {
         Args: { _user: string; _workshop: string }
         Returns: Database["public"]["Enums"]["workshop_role"]

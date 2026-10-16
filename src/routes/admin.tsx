@@ -31,6 +31,7 @@ function AdminPage() {
   const { user, ready, isAdmin } = useAccess();
   const [rows, setRows] = useState<Row[]>([]);
   const [name, setName] = useState(""); const [email, setEmail] = useState(""); const [city, setCity] = useState("");
+  const [vat, setVat] = useState(""); const [phone, setPhone] = useState(""); const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false); const [msg, setMsg] = useState("");
   const [demo, setDemo] = useState<{ email: string; password: string } | null>(null);
   const [signIn, setSignIn] = useState(false);
@@ -47,11 +48,12 @@ function AdminPage() {
 
   const onboard = async () => {
     setBusy(true); setMsg("");
-    const { error } = await supabase.rpc("admin_onboard_workshop", { _name: name, _email: email, _city: city });
+    const { data: id, error } = await supabase.rpc("admin_onboard_workshop", { _name: name, _email: email, _city: city });
+    if (!error && id) await supabase.rpc("admin_set_workshop_profile", { _workshop: id as string, _vat: vat, _phone: phone, _address: address });
     setBusy(false);
     if (error) return setMsg("Couldn't onboard. Check the name and email.");
     setMsg(`${name} is ready. When ${email} signs in, they'll land in their dashboard.`);
-    setName(""); setEmail(""); setCity(""); void load();
+    setName(""); setEmail(""); setCity(""); setVat(""); setPhone(""); setAddress(""); void load();
   };
   const makeDemo = async () => {
     setBusy(true); setMsg("");
@@ -79,6 +81,9 @@ function AdminPage() {
             <div><Label htmlFor="a-name">Workshop name</Label><Input id="a-name" required minLength={2} maxLength={80} value={name} onChange={e => setName(e.target.value)}/></div>
             <div><Label htmlFor="a-email">Owner's email</Label><Input id="a-email" required type="email" value={email} onChange={e => setEmail(e.target.value)}/></div>
             <div><Label htmlFor="a-city">City (optional)</Label><Input id="a-city" maxLength={60} value={city} onChange={e => setCity(e.target.value)}/></div>
+            <div><Label htmlFor="a-vat">VAT number</Label><Input id="a-vat" maxLength={30} placeholder="SE556677889901" value={vat} onChange={e => setVat(e.target.value)}/></div>
+            <div><Label htmlFor="a-phone">Workshop phone</Label><Input id="a-phone" maxLength={30} value={phone} onChange={e => setPhone(e.target.value)}/></div>
+            <div><Label htmlFor="a-addr">Address</Label><Input id="a-addr" maxLength={200} value={address} onChange={e => setAddress(e.target.value)}/></div>
             <Button type="submit" disabled={busy}>Onboard</Button>
           </form>
           {msg && <p className="history-note" role="status">{msg}</p>}

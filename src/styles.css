@@ -275,7 +275,7 @@
   .ws-row .ws-row-main { grid-column: 1 / -1; grid-row: 1; }
   .ws-row time, .ws-price { display: none; }
 }
-.admin-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; align-items: end; margin-bottom: 12px; }
+.admin-form { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; align-items: end; margin-bottom: 12px; }
 .admin-form > div { display: grid; gap: 6px; }
 .admin-demo { margin-top: 32px; }
 .admin-demo h2, .admin-h2 { font-size: 20px; margin: 4px 0; }
@@ -381,3 +381,30 @@
 .slot:disabled { opacity: .4; cursor: not-allowed; }
 .slot.is-on { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
 .channel-row { display: flex; gap: 8px; margin-top: 6px; }
+
+/* Workshop sections */
+.ws-tabs { flex-wrap: wrap; }
+.ws-section { display: grid; gap: 20px; }
+.ws-section-intro { margin: 0; color: var(--muted-foreground); font-size: 14px; max-width: 640px; }
+.ws-card { border: 1px solid var(--border); border-radius: 14px; padding: 18px; background: var(--card); display: grid; gap: 12px; }
+.ws-card h2 { font-size: 16px; margin: 0; }
+.ws-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.ws-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ws-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.ws-table th { text-align: left; font-weight: 600; font-size: 12px; color: var(--muted-foreground); padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.ws-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.ws-table td:last-child { width: 1%; }
+.ws-table input { height: 34px; }
+.ws-funnel { display: grid; gap: 8px; }
+.ws-funnel-row { display: grid; grid-template-columns: 110px 1fr 48px; gap: 10px; align-items: center; font-size: 14px; }
+.ws-bar { height: 10px; border-radius: 99px; background: var(--muted); overflow: hidden; }
+.ws-bar > span { display: block; height: 100%; background: var(--primary); border-radius: 99px; }
+.ws-big { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.ws-big > div { border: 1px solid var(--border); border-radius: 12px; padding: 14px; display: grid; gap: 4px; background: var(--card); }
+.ws-big strong { font-size: 24px; }
+.ws-big small { color: var(--muted-foreground); font-size: 12px; }
+.ws-readonly { padding: 8px 12px; border-radius: 8px; background: var(--muted); font-size: 14px; min-height: 36px; display: flex; align-items: center; }
+.ws-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.ws-form > div { display: grid; gap: 6px; }
+.ws-form .ws-span { grid-column: 1 / -1; }
+@media (max-width: 900px) { .ws-grid2, .ws-form { grid-template-columns: 1fr; } .ws-big { grid-template-columns: 1fr 1fr; } }

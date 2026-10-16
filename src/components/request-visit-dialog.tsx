@@ -27,7 +27,7 @@ export function RequestVisitDialog({ card, vehicleLabel, onClose }: { card: Visi
   const [email, setEmail] = useState("");
   const [channel, setChannel] = useState<Channel>("sms");
   const [picks, setPicks] = useState<string[]>([]);
-  const [days] = useState(() => upcomingDays(new Date(), 6));
+  const [days, setDays] = useState(() => upcomingDays(new Date(), 6));
   const toggle = (iso: string) => setPicks(p => p.includes(iso) ? p.filter(x => x !== iso) : p.length >= MAX_PICKS ? p : [...p, iso]);
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [signIn, setSignIn] = useState(false);
@@ -38,6 +38,16 @@ export function RequestVisitDialog({ card, vehicleLabel, onClose }: { card: Visi
     if (user?.email) setEmail(e => e || user.email || "");
     supabase.from("workshops").select("id,name,city").order("name").then(({ data }) => { setShops(data ?? []); if (data?.[0]) { const first = data[0].id; setShopId(s => s || first); }; });
   }, [card]);
+
+  // Each workshop decides its own bookable days, times and notice
+  useEffect(() => {
+    if (!shopId) return;
+    setPicks([]);
+    supabase.rpc("workshop_booking_rules", { _workshop: shopId }).then(({ data }) => {
+      const r = data as { days?: number[]; hours?: number[]; notice?: number } | null;
+      setDays(upcomingDays(new Date(), 6, r ? { weekdays: r.days, hours: r.hours, noticeDays: r.notice } : undefined));
+    });
+  }, [shopId]);
 
   const send = async () => {
     if (!card || !user || !shopId || picks.length === 0) return;

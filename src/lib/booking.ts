@@ -10,14 +10,20 @@ export function stockholmTime(y: number, m: number, d: number, h: number): Date 
   return new Date(guess.getTime() - (shown.getTime() - asUtc.getTime()));
 }
 
-export function upcomingDays(from: Date, count = 7): { key: string; slots: Date[] }[] {
+export type BookingRules = { weekdays?: number[] | undefined; hours?: number[] | undefined; noticeDays?: number | undefined };
+
+/** weekdays use 0=Sun..6=Sat; noticeDays is at least 1 (never same day). */
+export function upcomingDays(from: Date, count = 7, rules: BookingRules = {}): { key: string; slots: Date[] }[] {
+  const weekdays = rules.weekdays?.length ? rules.weekdays : [1, 2, 3, 4, 5];
+  const hours = rules.hours?.length ? [...rules.hours].sort((a, b) => a - b) : SLOT_HOURS;
+  const notice = Math.max(1, rules.noticeDays ?? 1);
   const out: { key: string; slots: Date[] }[] = [];
   const d = new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate()));
-  while (out.length < count) {
-    d.setUTCDate(d.getUTCDate() + 1); // never same day
-    const wd = d.getUTCDay();
-    if (wd === 0 || wd === 6) continue;
-    out.push({ key: d.toISOString().slice(0, 10), slots: SLOT_HOURS.map(h => stockholmTime(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), h)) });
+  d.setUTCDate(d.getUTCDate() + notice - 1);
+  for (let guard = 0; out.length < count && guard < 60; guard++) {
+    d.setUTCDate(d.getUTCDate() + 1);
+    if (!weekdays.includes(d.getUTCDay())) continue;
+    out.push({ key: d.toISOString().slice(0, 10), slots: hours.map(h => stockholmTime(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), h)) });
   }
   return out;
 }
