@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { WhyNote } from "@/components/why-note";
 import type { Vehicle } from "@/lib/vehicles";
 
-const starters = ["He said it's “probably nothing” — it was the brakes", "The noise disappears whenever the mechanic gets in", "I named the warning light. We coexist now."];
+const starters = ["The brakes squeal every time I slow down — is it dangerous?", "The noise disappears whenever the mechanic gets in", "I named the warning light. We coexist now."];
 
 export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMessages, onTurnFinished, onReset, saving }: {
   vehicle: Vehicle | null; pending: string | null; onPendingSent: () => void;
