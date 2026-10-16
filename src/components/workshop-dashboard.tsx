@@ -202,7 +202,7 @@ function BookingTab({ requests, settings }: { requests: React.ReactNode; setting
 }
 
 function Collapsible({ title, tip, children, defaultOpen = true }: { title: string; tip?: string; children: React.ReactNode; defaultOpen?: boolean }) {
-  return <details className="ws-card ws-collapsible" open={defaultOpen}><summary><h2>{title}</h2>{tip && <span onClick={e => e.preventDefault()}><Tip><p>{tip}</p></Tip></span>}</summary>{children}</details>;
+  return <details className="ws-card ws-collapsible" open={defaultOpen}><summary>{tip && <span onClick={e => e.preventDefault()}><Tip><p>{tip}</p></Tip></span>}<h2>{title}</h2></summary>{children}</details>;
 }
 
 function QuoteSection({ item }: { item: Inquiry }) {
