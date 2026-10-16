@@ -17,6 +17,20 @@ import jackie from "@/assets/jackie.jpg";
 const fmt = (n: number) => n.toLocaleString("sv-SE");
 type ChatRow = { id: string; title: string; updated_at: string };
 
+function readGuestChat(): UIMessage[] {
+  try {
+    const raw = sessionStorage.getItem("autojackie.guestChat");
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch { return []; }
+}
+function readGuestVehicle(): Vehicle | null {
+  try {
+    const raw = sessionStorage.getItem("autojackie.guestVehicle");
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
 function titleFrom(messages: UIMessage[]) {
   const first = messages.find(m => m.role === "user")?.parts.find(p => p.type === "text");
   const t = first && "text" in first ? first.text.trim() : "New chat";
