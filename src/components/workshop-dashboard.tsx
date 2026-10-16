@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SignInDialog } from "@/components/sign-in-dialog";
-import { WhyNote } from "@/components/why-note";
+import { WhyNote, type WhyStat } from "@/components/why-note";
 import { useAccess } from "@/hooks/use-access";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
@@ -24,6 +24,26 @@ const TABS: { id: Tab; label: string }[] = [
 const STATUSES: { id: Status; label: string }[] = [
   { id: "new", label: "New" }, { id: "contacted", label: "Contacted" }, { id: "quoted", label: "Quoted" }, { id: "booked", label: "Booked" }, { id: "closed", label: "Closed" },
 ];
+const WHY: Record<Tab, { id: string; title: string; pitch: string; stats: WhyStat[]; points?: string[]; footer?: string }> = {
+  overview: { id: "ws-overview", title: "See how your business performs. Then adapt.", pitch: "Every request, booking and estimated value in one place, not scattered across calendar, phone and accounting. Spot what drivers need and adjust your offer before the competition does.", stats: [
+    { value: "63%", text: "of drivers don't trust repair shops. Requests here arrive with an upfront price range already explained.", source: { label: "AAA", url: "https://newsroom.aaa.com/wp-content/uploads/2016/12/Auto-Repair-Survey-FINAL.pdf" } },
+    { value: "72%", text: "feel anxious about repair costs. Drivers who used Jackie already have a number in mind.", source: { label: "RepairPal / Harris", url: "https://repairpal.com/consumer-survey-march-2013" } },
+  ] },
+  booking: { id: "ws-booking", title: "Bookings that don't depend on your phone.", pitch: "Drivers book online in your open times and get confirmed by email, SMS or WhatsApp, whatever they prefer. No lost booking because nobody picked up or it was after hours.", stats: [
+    { value: "7x", text: "more likely to win a lead when you respond within an hour.", source: { label: "Harvard Business Review", url: "https://hbr.org/2011/03/the-short-life-of-online-sales-leads" } },
+    { value: "1 in 4", text: "service bookings end as no-shows. Confirmations in the driver's own channel cut that down.", source: { label: "Solera via Dealership Guy", url: "https://news.dealershipguy.com/p/broken-service-scheduling-is-costing-dealers-big-time-here-s-how-some-are-closing-the-gaps" } },
+  ] },
+  context: { id: "ws-context", title: "Your expertise is your advantage. Teach it to Jackie.", pitch: "Your prices, specialties and way of working shape every answer Jackie gives. Drivers see why your workshop fits them, not just another price.", stats: [
+    { value: "71%", text: "of Swedish drivers pick a workshop for skilled staff, not low price.", source: { label: "OKQ8", url: "https://www.mynewsdesk.com/se/okq8/pressreleases/7-av-10-bilister-efterfraagar-kunnig-verkstadspersonal-visar-ny-undersoekning-922496" } },
+    { value: "3 800", text: "workshops in Sweden compete for the same customers.", source: { label: "Mekonomen", url: "https://www.mynewsdesk.com/se/mekonomen/pressreleases/var-tredje-bilaegare-har-kaent-sig-lurad-av-verkstaden-oekad-kunskap-om-godkaend-bilverkstad-kan-vara-en-loesning-3359302" } },
+  ] },
+  profile: { id: "ws-profile", title: "How Jackie works for you.", pitch: "Jackie is your friendly front desk. Drivers talk to her first and arrive feeling helped, not sold to.", stats: [], points: [
+    "Drivers are already in a friendly conversation before they reach you.",
+    "Advice feels tailored to your workshop's expertise, not generic.",
+    "Made for drivers without deep car knowledge. No jargon, no judging.",
+    "Service in English, Swedish and German, so you don't miss foreign customers.",
+  ] },
+};
 const OPEN: Status[] = ["new", "contacted", "quoted", "booked"];
 const kr = (n: number) => `${Math.round(n).toLocaleString("sv-SE")} kr`;
 const when = (d: string) => new Date(d).toLocaleString("en-GB", { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -88,28 +108,16 @@ export function WorkshopDashboard() {
   else if (!shop) body = <div className="ws-empty"><Wrench/><h1>Your workshop isn't set up yet</h1><p>AutoJackie's team sets up each workshop personally. If we've onboarded you, sign in with the email you gave us{user.email ? ` (you're signed in as ${user.email})` : ""}.</p>{isAdmin && <Button asChild><Link to="/admin">Go to operations</Link></Button>}</div>;
   else body = <>
     <div className="ws-title"><div><span className="eyebrow">WORKSHOP DASHBOARD</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div></div>
-    {(tab === "overview" || tab === "context") && <div className="ws-overview">
-    {tab === "context" ? <WhyNote id="workshop-settings" title="71% of Swedish drivers choose on expertise, not price. Show them yours." summary="71% pick expertise over price. Your settings make that visible." stats={[
-      { value: "3 800", text: "workshops in Sweden compete for the same customers.", source: { label: "Mekonomen", url: "https://www.mynewsdesk.com/se/mekonomen/pressreleases/var-tredje-bilaegare-har-kaent-sig-lurad-av-verkstaden-oekad-kunskap-om-godkaend-bilverkstad-kan-vara-en-loesning-3359302" } },
-      { value: "71%", text: "of Swedish drivers pick a workshop for skilled staff, not low price.", source: { label: "OKQ8", url: "https://www.mynewsdesk.com/se/okq8/pressreleases/7-av-10-bilister-efterfraagar-kunnig-verkstadspersonal-visar-ny-undersoekning-922496" } },
-      { value: "7x", text: "more likely to win a lead when you respond within an hour. Your hours tell Jackie when to promise that.", source: { label: "Harvard Business Review", url: "https://hbr.org/2011/03/the-short-life-of-online-sales-leads" } },
-    ]} footer="What you fill in here is what Jackie quotes back to drivers. Accurate settings mean no surprises on either side."/>
-    : <WhyNote id="workshop-v2" title="63% of drivers don't trust workshops before they call. These are the ones who already do." summary="63% of drivers distrust workshops. Yours get context before they call." stats={[
-      { value: "63%", text: "of drivers don't trust repair shops. Jackie's upfront price range changes that before you pick up the phone.", source: { label: "AAA", url: "https://newsroom.aaa.com/wp-content/uploads/2016/12/Auto-Repair-Survey-FINAL.pdf" } },
-      { value: "72%", text: "feel anxious about repair costs. Drivers who used Jackie already have a number in mind.", source: { label: "RepairPal / Harris", url: "https://repairpal.com/consumer-survey-march-2013" } },
-      { value: "1 in 4", text: "bookings end as no-shows. SMS confirmation, coming next, cuts that down.", source: { label: "Solera via Dealership Guy", url: "https://news.dealershipguy.com/p/broken-service-scheduling-is-costing-dealers-big-time-here-s-how-some-are-closing-the-gaps" } },
-    ]} footer="Less convincing to do. Shorter calls. Higher close rate."/>}
+    <div className="ws-tabs" role="tablist" aria-label="Dashboard sections">{TABS.map(t => <Button key={t.id} variant={tab === t.id ? "default" : "outline"} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</Button>)}<WhyNote key={tab} overlay {...WHY[tab]}/></div>
+    {tab === "booking" ? <BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>
+    : tab === "context" ? <ContextSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>
+    : tab === "profile" ? <ProfileView shop={shop} canEdit={shop.role === "owner"} onSaved={loadShop}/> : <>
     <div className="ws-kpis">
       <Kpi icon={<Inbox/>} label="New requests" value={String(kpis.fresh)}/>
       <Kpi icon={<CalendarClock/>} label="Need you this week" value={String(kpis.urgent)}/>
       <Kpi icon={<TrendingUp/>} label="Open pipeline (est.)" value={kr(kpis.pipeline)} hint="Midpoint of Jackie's rough ranges, incl. VAT"/>
       <Kpi icon={<Moon/>} label="After hours" value={kpis.afterHours} hint="Requests that came in evenings or weekends, when you were closed"/>
     </div>
-    </div>}
-    <div className="ws-tabs" role="tablist" aria-label="Dashboard sections">{TABS.map(t => <Button key={t.id} variant={tab === t.id ? "default" : "outline"} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</Button>)}</div>
-    {tab === "booking" ? <BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>
-    : tab === "context" ? <ContextSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>
-    : tab === "profile" ? <ProfileView shop={shop} canEdit={shop.role === "owner"} onSaved={loadShop}/> : <>
     <InsightsView items={items}/>
     <h2 className="ws-h2">Requests</h2>
     <div className="ws-filters" role="tablist" aria-label="Filter requests">
@@ -282,6 +290,8 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
       <p className="history-note ws-span">Company name and VAT number are managed by AutoJackie. Contact us to change them.</p>
     </fieldset>
     <SaveRow canEdit={canEdit} state={state}/>
+    <section className="ws-card ws-soon"><div className="ws-soon-head"><h2>Pricing engine</h2><span className="ws-status">Coming soon</span></div>
+      <p className="history-note">Fine-tune how Jackie builds indicative quotes for you: parts margins, brand and car-age multipliers, seasonal campaigns and price floors. More competitive quotes, still on your terms.</p></section>
   </form>;
 }
 
