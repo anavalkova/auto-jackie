@@ -50,7 +50,7 @@ export function createBookingTools(opts: { workshopId?: string | undefined; user
   });
 
   const bookVisit = tool({
-    description: `Send a booking request to the workshop. Only call after the driver explicitly confirmed a summary of: workshop, job, 1 to ${MAX_PICKS} drop-off times taken from getAvailableTimes, their name, phone and how to confirm (sms, whatsapp or email).`,
+    description: `Send a booking request to the workshop. Only call after the driver explicitly confirmed a summary of: workshop, job, one drop-off time taken from getAvailableTimes, their name, phone and how to confirm (sms, whatsapp or email).`,
     inputSchema: z.object({
       workshopId: z.string().uuid(),
       slots: z.array(z.string()).min(1).max(MAX_PICKS).describe("ISO times exactly as returned by getAvailableTimes"),
