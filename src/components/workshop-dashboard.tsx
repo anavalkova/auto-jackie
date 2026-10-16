@@ -1,5 +1,6 @@
 import { slotLabel } from "@/lib/booking";
 import { Link } from "@tanstack/react-router";
+import { ensureOther, OTHER } from "@/lib/services";
 import { TIERS, TIER_INFO, DEFAULT_TIERS, type Tier } from "@/lib/ai-tiers";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BadgeCheck, CalendarClock, Car, Clock, Inbox, MessageCircle, Moon, Phone, ShieldCheck, Sparkles, TrendingUp, Wrench } from "lucide-react";
@@ -124,7 +125,7 @@ export function WorkshopDashboard() {
       <Kpi icon={<TrendingUp/>} label="Open pipeline (est.)" value={kr(kpis.pipeline)} hint="Midpoint of Jackie's rough ranges, incl. VAT"/>
       <Kpi icon={<Moon/>} label="After hours" value={kpis.afterHours} hint="Requests that came in evenings or weekends, when you were closed"/>
     </div>
-    <InsightsView items={items}/>
+    <InsightsView items={items} workshopId={shop.id} canEdit={shop.role === "owner"}/>
     <h2 className="ws-h2">Requests</h2>
     <div className="ws-filters" role="tablist" aria-label="Filter requests">
       {([{ id: "open", label: "All open" }, ...STATUSES] as { id: Status | "open"; label: string }[]).map(s => <Button key={s.id} size="sm" variant={filter === s.id ? "default" : "outline"} role="tab" aria-selected={filter === s.id} onClick={() => setFilter(s.id)}>{s.label}</Button>)}
@@ -197,17 +198,46 @@ function isAfterHours(i: Inquiry) {
   return wd === "Sat" || wd === "Sun" || h < 8 || h >= 17;
 }
 
-function InsightsView({ items }: { items: Inquiry[] }) {
+function InsightsView({ items, workshopId, canEdit }: { items: Inquiry[]; workshopId: string; canEdit: boolean }) {
+  const { s, setS, save } = useSettings(workshopId);
   const n = items.length;
   const reached = items.filter(i => i.status !== "new").length;
   const quoted = items.filter(i => ["quoted", "booked"].includes(i.status) || (i.status === "closed" && i.booked_at)).length;
-  const booked = items.filter(i => i.booked_at || i.status === "booked").length;
-  const top = Object.entries(items.reduce<Record<string, number>>((m, i) => { m[i.issue] = (m[i.issue] ?? 0) + 1; return m; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const isBooked = (i: Inquiry) => !!i.booked_at || i.status === "booked";
+  const booked = items.filter(isBooked).length;
   const funnel = [{ label: "Received", v: n }, { label: "Contacted", v: reached }, { label: "Quoted", v: quoted }, { label: "Booked", v: booked }];
+  const services = ensureOther((s?.price_list as PriceItem[] | undefined) ?? []);
+  const rows = services.filter(x => x.task !== OTHER).map(x => {
+    const its = items.filter(i => i.service === x.task);
+    const b = its.filter(isBooked).length;
+    return { task: x.task, req: its.length, booked: b, value: b * x.price_sek };
+  }).sort((a, b) => b.req - a.req);
+  const otherCount = items.filter(i => !i.service || i.service === OTHER).length;
+  const known = new Set(services.map(x => x.task.toLowerCase()));
+  const missing = Object.entries(items.filter(i => !i.service || i.service === OTHER).reduce<Record<string, number>>((m, i) => { const k = i.issue.trim(); if (!known.has(k.toLowerCase())) m[k] = (m[k] ?? 0) + 1; return m; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const [added, setAdded] = useState<string[]>([]);
+  const addService = async (task: string) => {
+    if (!s) return;
+    const list = ensureOther(s.price_list as PriceItem[]);
+    const next = [...list.filter(x => x.task !== OTHER), { task: task.slice(0, 80), price_sek: 0, minutes: 60 }, ...list.filter(x => x.task === OTHER)];
+    setS({ ...s, price_list: next }); setAdded(a => [...a, task]);
+    await save({ price_list: next, job_durations: next.map(x => ({ job: x.task, minutes: x.minutes ?? 60 })) });
+  };
   return <div className="ws-section">
     <div className="ws-grid2">
       <section className="ws-card"><h2>From request to booking</h2><div className="ws-funnel">{funnel.map(f => <div key={f.label} className="ws-funnel-row"><span>{f.label}</span><span className="ws-bar"><span style={{ width: n ? `${(f.v / n) * 100}%` : 0 }}/></span><strong>{f.v}</strong></div>)}</div></section>
-      <section className="ws-card"><h2>What drivers ask about</h2>{top.length === 0 ? <p className="history-note">No requests yet.</p> : <table className="ws-table"><tbody>{top.map(([k, v]) => <tr key={k}><td>{k}</td><td><strong>{v}</strong></td></tr>)}</tbody></table>}</section>
+      <section className="ws-card"><h2>Your services</h2>
+        <p className="ws-hint"><span>Requests matched to your Pricing engine. Value = bookings × your price.</span></p>
+        <table className="ws-table"><thead><tr><th>Service</th><th>Requests</th><th>Booked</th><th>Value</th></tr></thead><tbody>
+          {rows.map(r => <tr key={r.task}><td>{r.task}</td><td><strong>{r.req}</strong></td><td>{r.booked}</td><td>{r.value ? kr(r.value) : "–"}</td></tr>)}
+          <tr><td>Other <small className="history-note">(you price these)</small></td><td><strong>{otherCount}</strong></td><td>{items.filter(i => (!i.service || i.service === OTHER) && isBooked(i)).length}</td><td>–</td></tr>
+        </tbody></table>
+      </section>
+      <section className="ws-card ws-span" style={{ gridColumn: "1 / -1" }}><h2>Drivers asked, you don't offer yet</h2>
+        <p className="ws-hint"><span>Requests that landed in Other. Add the common ones to your Pricing engine so Jackie can quote them next time.</span></p>
+        {missing.length === 0 ? <p className="history-note">Nothing yet. Every request matched one of your services.</p>
+          : <table className="ws-table"><tbody>{missing.map(([k, v]) => <tr key={k}><td>{k}</td><td><strong>{v}</strong></td><td style={{ textAlign: "right" }}>{added.includes(k) ? <span className="history-note">Added. Set its price in Pricing engine.</span> : canEdit && <Button type="button" size="sm" variant="outline" onClick={() => void addService(k)}>Add to Pricing engine</Button>}</td></tr>)}</tbody></table>}
+      </section>
     </div>
   </div>;
 }
@@ -325,11 +355,11 @@ function PricingView({ workshopId, canEdit }: { workshopId: string; canEdit: boo
   const { s, setS, save, state } = useSettings(workshopId);
   if (!s) return <p className="history-note" role="status">Loading…</p>;
   const durations = s.job_durations as Duration[];
-  const prices = (s.price_list as PriceItem[]).map(p => ({ ...p, minutes: p.minutes ?? durations.find(d => d.job === p.task)?.minutes ?? 60 }));
+  const prices = ensureOther(s.price_list as PriceItem[]).map(p => ({ ...p, minutes: p.minutes ?? durations.find(d => d.job === p.task)?.minutes ?? 60 }));
   const setP = (p: PriceItem[]) => setS({ ...s, price_list: p });
   const available = PREDEFINED_SERVICES.filter(x => !prices.some(p => p.task === x.task));
   const submit = () => {
-    const clean = prices.filter(p => p.task.trim());
+    const clean = ensureOther(prices.filter(p => p.task.trim() && (p.task !== OTHER || true)));
     void save({ hourly_rate_sek: s.hourly_rate_sek, price_list: clean, job_durations: clean.map(p => ({ job: p.task, minutes: p.minutes ?? 60 })) });
   };
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); submit(); }}>
@@ -339,10 +369,10 @@ function PricingView({ workshopId, canEdit }: { workshopId: string; canEdit: boo
         <Hint controls="the price range in Jackie's “What's next” card and how long each booking takes." shows="prices to drivers on your Jackie page, labelled as an estimate. Times only to you."/>
         <Label htmlFor="c-rate">Hourly labour rate (kr)</Label><Input id="c-rate" type="number" min={0} max={10000} value={s.hourly_rate_sek} onChange={e => setS({ ...s, hourly_rate_sek: Number(e.target.value) })}/>
         <table className="ws-table"><thead><tr><th>Service</th><th>Price (kr)</th><th>Time (min)</th><th/></tr></thead><tbody>
-          {prices.map((p, i) => <tr key={i}><td><Input aria-label="Service" maxLength={80} value={p.task} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, task: e.target.value } : x))}/></td><td><Input aria-label="Price" type="number" min={0} max={200000} value={p.price_sek} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></td><td><Input aria-label="Minutes" type="number" min={5} max={2880} step={5} value={p.minutes} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, minutes: Number(e.target.value) } : x))}/></td><td><Button type="button" size="sm" variant="ghost" aria-label="Remove" onClick={() => setP(prices.filter((_, j) => j !== i))}>×</Button></td></tr>)}
+          {prices.map((p, i) => p.task === OTHER ? <tr key={i} className="ws-other-row"><td><strong>Other</strong><small className="history-note"> Anything Jackie can't match. You price it after a look.</small></td><td><Input aria-label="Price" type="number" min={0} max={200000} value={p.price_sek} title="0 = evaluated by you" onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></td><td><Input aria-label="Minutes" type="number" min={5} max={2880} step={5} value={p.minutes} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, minutes: Number(e.target.value) } : x))}/></td><td/></tr> : <tr key={i}><td><Input aria-label="Service" maxLength={80} value={p.task} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, task: e.target.value } : x))}/></td><td><Input aria-label="Price" type="number" min={0} max={200000} value={p.price_sek} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></td><td><Input aria-label="Minutes" type="number" min={5} max={2880} step={5} value={p.minutes} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, minutes: Number(e.target.value) } : x))}/></td><td><Button type="button" size="sm" variant="ghost" aria-label="Remove" onClick={() => setP(prices.filter((_, j) => j !== i))}>×</Button></td></tr>)}
         </tbody></table>
         <div className="ws-chips">
-          <select aria-label="Add a service" className="native-select" value="" onChange={e => { const v = e.target.value; if (v === "__custom") setP([...prices, { task: "", price_sek: 0, minutes: 60 }]); else { const x = PREDEFINED_SERVICES.find(o => o.task === v); if (x) setP([...prices, { ...x }]); } }}>
+          <select aria-label="Add a service" className="native-select" value="" onChange={e => { const v = e.target.value; if (v === "__custom") setP([...prices.filter(p => p.task !== OTHER), { task: "", price_sek: 0, minutes: 60 }, ...prices.filter(p => p.task === OTHER)]); else { const x = PREDEFINED_SERVICES.find(o => o.task === v); if (x) setP([...prices.filter(p => p.task !== OTHER), { ...x }, ...prices.filter(p => p.task === OTHER)]); } }}>
             <option value="">Add a service…</option>
             {available.map(o => <option key={o.task} value={o.task}>{o.task}</option>)}
             <option value="__custom">Custom service…</option>

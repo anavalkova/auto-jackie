@@ -60,7 +60,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
             {m.parts.map((part, i) => {
               if (part.type === "text") return m.role === "user" ? <p key={i}>{part.text}</p> : <MessageResponse key={i}>{part.text}</MessageResponse>;
               if (isToolUIPart(part) && getToolName(part) === "suggestWorkshopVisit") {
-                const o = (part.state === "output-available" ? part.output : part.input) as { issue?: string; urgency?: string; priceLowSek?: number; priceHighSek?: number; note?: string } | undefined;
+                const o = (part.state === "output-available" ? part.output : part.input) as { issue?: string; service?: string; urgency?: string; priceLowSek?: number; priceHighSek?: number; note?: string } | undefined;
                 if (!o?.issue) return null;
                 return <div key={i} className="offer-card">
                   <span className="eyebrow">{t.whatsNext}</span>
@@ -68,7 +68,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
                   <span className="offer-urgency">{t.getLooked} {o.urgency}</span>
                   {o.priceLowSek != null && o.priceHighSek != null && <p className="offer-price">{t.about_} {o.priceLowSek.toLocaleString("sv-SE")} {t.to} {o.priceHighSek.toLocaleString("sv-SE")} kr <small>{t.vatNote}</small></p>}
                   {o.note && <p className="offer-note">{o.note}</p>}
-                  <Button onClick={() => setBooking({ issue: o.issue ?? "", urgency: o.urgency, priceLowSek: o.priceLowSek, priceHighSek: o.priceHighSek, note: o.note })}><CalendarCheck/> {t.requestVisit}</Button>
+                  <Button onClick={() => setBooking({ issue: o.issue ?? "", service: o.service, urgency: o.urgency, priceLowSek: o.priceLowSek, priceHighSek: o.priceHighSek, note: o.note })}><CalendarCheck/> {t.requestVisit}</Button>
                 </div>;
               }
               if (isToolUIPart(part)) {

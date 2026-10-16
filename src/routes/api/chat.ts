@@ -26,7 +26,7 @@ const bodySchema = z.object({
   workshopId: z.string().uuid().optional(),
 });
 
-type WorkshopProfile = { name: string; city: string; hourly_rate_sek: number; price_list: { task: string; price_sek: number }[]; services: string[]; specialties: string; notes: string; opening_hours: string; chat_tier: string; quote_tier: string };
+type WorkshopProfile = { name: string; city: string; hourly_rate_sek: number; price_list: { task: string; price_sek: number; minutes?: number }[]; services: string[]; specialties: string; notes: string; opening_hours: string; chat_tier: string; quote_tier: string };
 
 async function loadWorkshop(id: string): Promise<WorkshopProfile | null> {
   const url = process.env["SUPABASE_URL"], key = process.env["SUPABASE_PUBLISHABLE_KEY"];
@@ -36,7 +36,7 @@ async function loadWorkshop(id: string): Promise<WorkshopProfile | null> {
   return (await res.json().catch(() => null)) as WorkshopProfile | null;
 }
 
-const priceLines = (w: WorkshopProfile) => [`Hourly labour: ${w.hourly_rate_sek} kr`, ...(w.price_list ?? []).map(p => `${p.task}: ${p.price_sek} kr`)].join("\n");
+const priceLines = (w: WorkshopProfile) => [`Hourly labour: ${w.hourly_rate_sek} kr`, ...(w.price_list ?? []).map(p => p.task === "Other" ? "Other: priced personally by the workshop after a look" : `${p.task}: ${p.price_sek} kr`)].join("\n");
 
 function workshopContext(w: WorkshopProfile) {
   return `You are speaking on behalf of ${w.name}${w.city ? ` in ${w.city}` : ""}. Drivers on this page are this workshop's potential customers; when a visit is needed, recommend this workshop warmly (no hard selling).
@@ -98,7 +98,7 @@ export const Route = createFileRoute("/api/chat")({
         const shop = parsed.data.workshopId ? await loadWorkshop(parsed.data.workshopId) : null;
         const chatAi = tierModel(asTier(shop?.chat_tier, DEFAULT_TIERS.chat));
         const quoteAi = tierModel(asTier(shop?.quote_tier, DEFAULT_TIERS.quote));
-        const suggestWorkshopVisit = createSuggestWorkshopVisit(provider.responses(quoteAi.model), quoteAi.effort, shop ? priceLines(shop) : "");
+        const suggestWorkshopVisit = createSuggestWorkshopVisit(provider.responses(quoteAi.model), quoteAi.effort, shop ? priceLines(shop) : "", shop?.price_list ?? []);
         const result = streamText({
           model: provider.responses(chatAi.model),
           instructions: `${BASE_PROMPT}${shop ? `\n\n${workshopContext(shop)}` : ""}\n\nInterface language: ${({ en: "English", sv: "Swedish", de: "German" })[parsed.data.lang ?? "en"]}.\n\nVehicle: ${vehicleContext(parsed.data.vehicle)}`,

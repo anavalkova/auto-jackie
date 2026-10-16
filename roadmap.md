@@ -15,3 +15,4 @@
 - [x] Jackie's brain: per-workshop AI tiers for chat and quotes.
 - [x] Your brand: accent color, logo link, greeting.
 - [ ] Logo upload (blocked: public file storage disabled in workspace settings).
+- [x] Map requests to Pricing engine services (+ always-present "Other"); Overview shows Your services + "Not offered yet" with Add button.
