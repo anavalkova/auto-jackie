@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { GarageDialog } from "@/components/garage-dialog";
 import { JackieChat } from "@/components/jackie-chat";
-import { RequestVisitDialog, type VisitCard } from "@/components/request-visit-dialog";
+import { BookingPanel, type VisitCard } from "@/components/request-visit-dialog";
 import { WhyNote } from "@/components/why-note";
 import { SignInDialog } from "@/components/sign-in-dialog";
 import { useSessionUser } from "@/hooks/use-session-user";
@@ -199,16 +199,18 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
           { value: "36%", text: t.why1, source: { label: "Trafikanalys, 2022", url: "https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" } },
           { value: "P0301?", text: t.why2 },
         ]}/></div></div>
+        {directBooking && <BookingPanel card={directBooking} vehicleLabel={vehicle && !vehicle.confidential ? vehicle.label : ""} onClose={() => setDirectBooking(null)} workshopId={workshop?.id}/>}
+        <div className="chat-slot" hidden={!!directBooking}>
         {missing ? <div className="chat-empty"><h1>{t.missingTitle}</h1><p>{user ? t.missingDeleted : t.missingSignIn}</p><div className="starter-grid">{!user && <Button onClick={() => setSignInOpen(true)}>{t.signIn}</Button>}<Button variant="outline" asChild><Link to="/">{t.startNew}</Link></Button></div></div>
           : initial === null ? <div className="chat-empty"><p>{t.opening}</p></div>
-          : <JackieChat key={chatId ?? `new-${newChatKey}`} chatId={chatId} initialMessages={initial} vehicle={vehicle} pending={null} onPendingSent={() => {}} onTurnFinished={onTurnFinished} onReset={onReset} saving={!!user && !!chatId} workshopId={workshop?.id} onSignIn={() => setSignInOpen(true)}/>}
+          : <JackieChat key={chatId ?? `new-${newChatKey}`} chatId={chatId} initialMessages={initial} vehicle={vehicle} pending={null} onPendingSent={() => {}} onTurnFinished={onTurnFinished} onReset={onReset} saving={!!user && !!chatId} workshopId={workshop?.id} onSignIn={() => setSignInOpen(true)} onBook={setDirectBooking}/>}
+        </div>
         <div className="assistant-bottom"><span className="swedish-flag"/><span>{t.bottom}</span><Button variant="ghost" size="icon" aria-label={t.about} onClick={() => setInfo("about")}><HelpCircle/></Button></div>
       </section>
     </main>
 
     <footer className="site-footer"><span>© {new Date().getFullYear()} AutoJackie</span><div><Button variant="link" onClick={() => setInfo("privacy")}>{t.privacy}</Button><Button variant="link" onClick={() => setInfo("about")}>{t.about} <ArrowUpRight/></Button></div></footer>
 
-    <RequestVisitDialog card={directBooking} vehicleLabel={vehicle && !vehicle.confidential ? vehicle.label : ""} onClose={() => setDirectBooking(null)} workshopId={workshop?.id}/>
     <GarageDialog key={garageOpen ? "open" : "closed"} open={garageOpen} onOpenChange={setGarageOpen} vehicle={vehicle} onSave={saveVehicle} signedIn={!!user}/>
     <SignInDialog open={signInOpen} onOpenChange={setSignInOpen}/>
     <Dialog open={info !== null} onOpenChange={open => { if (!open) setInfo(null); }}><DialogContent><DialogHeader><DialogTitle>{info === "privacy" ? t.privacyTitle : t.aboutTitle}</DialogTitle><DialogDescription>{info === "privacy" ? t.privacyBody : t.aboutBody}</DialogDescription></DialogHeader><Button onClick={() => setInfo(null)}>{t.gotIt}</Button></DialogContent></Dialog>
