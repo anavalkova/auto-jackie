@@ -12,10 +12,12 @@ import { Button } from "@/components/ui/button";
 import { WhyNote } from "@/components/why-note";
 import type { Vehicle } from "@/lib/vehicles";
 import { useT } from "@/lib/i18n";
+import { supabase } from "@/integrations/supabase/client";
+import { QUOTA_ERROR } from "@/lib/chat-quota";
 
 
-export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMessages, onTurnFinished, onReset, saving, workshopId }: {
-  workshopId?: string | undefined;
+export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMessages, onTurnFinished, onReset, saving, workshopId, onSignIn }: {
+  workshopId?: string | undefined; onSignIn?: (() => void) | undefined;
   vehicle: Vehicle | null; pending: string | null; onPendingSent: () => void;
   chatId?: string | undefined; initialMessages?: UIMessage[] | undefined;
   onTurnFinished?: ((messages: UIMessage[]) => void) | undefined; onReset?: (() => void) | undefined; saving?: boolean | undefined;
@@ -24,7 +26,15 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
   const [input, setInput] = useState("");
   const [booking, setBooking] = useState<VisitCard | null>(null);
   const vehiclePayload = vehicle ? { confidential: vehicle.confidential, description: vehicle.confidential ? undefined : vehicle.description, mileageKm: vehicle.mileageKm } : null;
-  const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat", body: { vehicle: vehiclePayload, lang, ...(workshopId ? { workshopId } : {}) } }), [JSON.stringify(vehiclePayload), lang, workshopId]);
+  const transport = useMemo(() => new DefaultChatTransport({
+    api: "/api/chat",
+    body: { vehicle: vehiclePayload, lang, ...(workshopId ? { workshopId } : {}) },
+    headers: async (): Promise<Record<string, string>> => {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      return token ? { Authorization: `Bearer ${token}` } : {};
+    },
+  }), [JSON.stringify(vehiclePayload), lang, workshopId]);
   const { messages, sendMessage, status, stop, error, setMessages, clearError } = useChat({ transport, ...(chatId ? { id: chatId } : {}), ...(initialMessages ? { messages: initialMessages } : {}) });
   const busy = status === "submitted" || status === "streaming";
   const wasBusy = useRef(false);
@@ -80,7 +90,9 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
           </MessageContent>
         </Message>)}
         {status === "submitted" && <Shimmer className="chat-wait">{t.checking}</Shimmer>}
-        {error && <p className="chat-error" role="alert">{error.message || t.genericError}</p>}
+        {error && (error.message.includes(QUOTA_ERROR.guest)
+          ? <div className="chat-error" role="alert"><p>{t.quotaGuest}</p>{onSignIn && <Button size="sm" onClick={onSignIn}>{t.signIn}</Button>}</div>
+          : <p className="chat-error" role="alert">{error.message.includes(QUOTA_ERROR.user) ? t.quotaUser : error.message || t.genericError}</p>)}
       </ConversationContent>
       <ConversationScrollButton/>
     </Conversation>}
