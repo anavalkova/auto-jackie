@@ -12,6 +12,7 @@ import { lookupFaultCode } from "@/lib/ai/obd.server";
 import { createSuggestWorkshopVisit } from "@/lib/ai/workshop.server";
 import { asTier, DEFAULT_TIERS, tierModel } from "@/lib/ai-tiers";
 import { readTeslaManualPage, searchTeslaManual } from "@/lib/ai/tesla.server";
+import { QUOTA_ERROR, quotaLimit } from "@/lib/chat-quota";
 
 const vehicleSchema = z.object({
   confidential: z.boolean(),
@@ -77,6 +78,29 @@ function vehicleContext(v: z.infer<typeof vehicleSchema>) {
   return `The driver's car: ${v.description}.${km} You may refer to it, but Wikidata facts about parts still need citations.`;
 }
 
+async function signedInUserId(request: Request): Promise<string | null> {
+  const token = request.headers.get("authorization")?.replace(/^Bearer /, "") ?? "";
+  const url = process.env["SUPABASE_URL"], key = process.env["SUPABASE_PUBLISHABLE_KEY"];
+  if (!token || token.split(".").length !== 3 || !url || !key) return null;
+  const res = await fetch(`${url}/auth/v1/user`, { headers: { apikey: key, Authorization: `Bearer ${token}` } }).catch(() => null);
+  if (!res?.ok) return null;
+  return ((await res.json().catch(() => null)) as { id?: string } | null)?.id ?? null;
+}
+
+async function guestKey(request: Request) {
+  const ip = request.headers.get("cf-connecting-ip") ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`autojackie-guest:${ip}`));
+  return "g:" + Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Counts one question; returns false when the monthly limit is used up. */
+async function consumeQuestion(request: Request, userId: string | null) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin.rpc("consume_chat_quota", { _key: userId ? `u:${userId}` : await guestKey(request), _limit: quotaLimit(!!userId) });
+  if (error) throw error;
+  return (data as number) >= 0;
+}
+
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
@@ -87,6 +111,10 @@ export const Route = createFileRoute("/api/chat")({
         if (!apiKey) return Response.json({ error: "AI is not configured" }, { status: 500 });
 
         const messages = parsed.data.messages as UIMessage[];
+        const userId = await signedInUserId(request);
+        const allowed = await consumeQuestion(request, userId).catch(() => null);
+        if (allowed === null) return Response.json({ error: "Please try again in a moment." }, { status: 503 });
+        if (!allowed) return new Response(userId ? QUOTA_ERROR.user : QUOTA_ERROR.guest, { status: 429 });
         const runIdFetch = createLovableAiGatewayRunIdFetch(getLovableAiGatewayRunId(request));
         const provider = createOpenAI({
           baseURL: "https://ai.gateway.lovable.dev/v1",
