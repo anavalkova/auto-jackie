@@ -63,6 +63,7 @@ export function WorkshopDashboard() {
   const [filter, setFilter] = useState<Status | "open">("open");
   const [selected, setSelected] = useState<Inquiry | null>(null);
   const [signIn, setSignIn] = useState(false);
+  const [page, setPage] = useState(0);
   const [error, setError] = useState(false);
 
   const loadShop = useCallback(async () => {
@@ -125,20 +126,21 @@ export function WorkshopDashboard() {
       <Kpi icon={<TrendingUp/>} label="Open pipeline (est.)" value={kr(kpis.pipeline)} hint="Midpoint of Jackie's rough ranges, incl. VAT"/>
       <Kpi icon={<Moon/>} label="After hours" value={kpis.afterHours} hint="Requests that came in evenings or weekends, when you were closed"/>
     </div>
-    <InsightsView items={items} workshopId={shop.id} canEdit={shop.role === "owner"}/>
     <h2 className="ws-h2">Requests</h2>
     <div className="ws-filters" role="tablist" aria-label="Filter requests">
-      {([{ id: "open", label: "All open" }, ...STATUSES] as { id: Status | "open"; label: string }[]).map(s => <Button key={s.id} size="sm" variant={filter === s.id ? "default" : "outline"} role="tab" aria-selected={filter === s.id} onClick={() => setFilter(s.id)}>{s.label}</Button>)}
+      {([{ id: "open", label: "All open" }, ...STATUSES] as { id: Status | "open"; label: string }[]).map(s => <Button key={s.id} size="sm" variant={filter === s.id ? "default" : "outline"} role="tab" aria-selected={filter === s.id} onClick={() => { setFilter(s.id); setPage(0); }}>{s.label}</Button>)}
     </div>
     {error && <p className="chat-error" role="alert">Couldn't load or update requests.</p>}
     {shown.length === 0 ? <div className="ws-list-empty"><p>No requests here yet.</p><p className="history-note">When a driver taps “Request a workshop visit” on one of Jackie's cards and picks {shop.name}, it lands here.</p></div>
-      : <ul className="ws-list">{shown.map(i => <li key={i.id}><button type="button" className="ws-row" onClick={() => setSelected(i)}>
+      : <ul className="ws-list">{shown.slice(page * PAGE, (page + 1) * PAGE).map(i => <li key={i.id}><button type="button" className="ws-row" onClick={() => setSelected(i)}>
         <span className={`ws-status s-${i.status}`}>{STATUSES.find(s => s.id === i.status)?.label}</span>
         <span className="ws-row-main"><strong>{i.issue}</strong><span>{i.contact_name}{i.vehicle_label ? ` · ${i.vehicle_label}` : ""}</span></span>
         <span className={`ws-urgency u-${i.urgency.replace(" ", "-")}`}>{i.urgency}</span>
         <span className="ws-price">{i.price_low_sek != null && i.price_high_sek != null ? `${kr(i.price_low_sek)} to ${kr(i.price_high_sek)}` : "No price"}</span>
         <time dateTime={i.created_at}>{when(i.created_at)}</time>
       </button></li>)}</ul>}
+    {shown.length > PAGE && <Pager page={page} pages={Math.ceil(shown.length / PAGE)} onPage={setPage}/>}
+    <InsightsView items={items} workshopId={shop.id} canEdit={shop.role === "owner"}/>
     </>}
   </>;
 
@@ -151,7 +153,7 @@ export function WorkshopDashboard() {
         <div className="ws-detail">
           <section><span className="eyebrow">CUSTOMER</span><p><strong>{selected.contact_name}</strong></p><Button variant="outline" asChild><a href={`tel:${selected.contact_phone.replace(/\s/g, "")}`}><Phone/> {selected.contact_phone}</a></Button></section>
           {selected.vehicle_label && <section><span className="eyebrow">CAR</span><p>{selected.vehicle_label}</p></section>}
-          <section><span className="eyebrow">JACKIE'S ROUGH ESTIMATE</span><p>{selected.price_low_sek != null && selected.price_high_sek != null ? `${kr(selected.price_low_sek)} to ${kr(selected.price_high_sek)} incl. VAT` : "No estimate"}</p>{selected.note && <p className="history-note">{selected.note}</p>}</section>
+          <QuoteSection key={selected.id} item={selected} shopName={shop?.name ?? ""} onSaved={d => { setItems(xs => xs.map(x => x.id === d.id ? d : x)); setSelected(d); }}/>
           <section><span className="eyebrow">{selected.booked_at ? "BOOKED" : "PREFERRED TIMES"}</span>
             {selected.booked_at ? <p><strong>{slotLabel(selected.booked_at)}</strong> <Button variant="link" size="sm" onClick={() => void book(selected, null)}>Change</Button></p>
               : selected.preferred_slots.length === 0 ? <p className="history-note">No times given. Call to agree one.</p>
@@ -159,12 +161,57 @@ export function WorkshopDashboard() {
             <p className="history-note">Wants confirmation by {selected.contact_channel === "email" ? `email (${selected.contact_email})` : selected.contact_channel === "whatsapp" ? "WhatsApp" : "SMS"}. Automatic messages come in phase 2.</p></section>
           {selected.message && <section><span className="eyebrow">MESSAGE FROM THE DRIVER</span><p>{selected.message}</p></section>}
           <section><span className="eyebrow">STATUS</span><div className="ws-filters">{STATUSES.map(s => <Button key={s.id} size="sm" variant={selected.status === s.id ? "default" : "outline"} onClick={() => void setStatus(selected, s.id)}>{s.label}</Button>)}</div></section>
-          <Button disabled title="Coming with the quoting engine">Draft a quote · coming soon</Button>
         </div>
       </>}</SheetContent>
     </Sheet>
     <SignInDialog open={signIn} onOpenChange={setSignIn}/>
   </div>;
+}
+
+const PAGE = 10;
+function Pager({ page, pages, onPage }: { page: number; pages: number; onPage: (p: number) => void }) {
+  return <div className="ws-pager"><Button type="button" size="sm" variant="outline" disabled={page === 0} onClick={() => onPage(page - 1)}>Previous</Button><span className="history-note">Page {page + 1} of {pages}</span><Button type="button" size="sm" variant="outline" disabled={page >= pages - 1} onClick={() => onPage(page + 1)}>Next</Button></div>;
+}
+
+function Collapsible({ title, children, defaultOpen = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+  return <details className="ws-card ws-collapsible" open={defaultOpen}><summary><h2>{title}</h2></summary>{children}</details>;
+}
+
+function QuoteSection({ item, shopName, onSaved }: { item: Inquiry; shopName: string; onSaved: (d: Inquiry) => void }) {
+  const [low, setLow] = useState(item.quote_low_sek ?? item.price_low_sek ?? 0);
+  const [high, setHigh] = useState(item.quote_high_sek ?? item.price_high_sek ?? 0);
+  const [msg, setMsg] = useState("");
+  const jackie = item.price_low_sek != null && item.price_high_sek != null ? `${kr(item.price_low_sek)} to ${kr(item.price_high_sek)}` : null;
+  const yours = item.quote_low_sek != null && item.quote_high_sek != null ? `${kr(item.quote_low_sek)} to ${kr(item.quote_high_sek)}` : null;
+  const saveQuote = async () => {
+    const lo = Math.min(low, high), hi = Math.max(low, high);
+    const { data, error } = await supabase.from("inquiries").update({ quote_low_sek: lo, quote_high_sek: hi, status: item.status === "new" || item.status === "contacted" ? "quoted" : item.status }).eq("id", item.id).select("*").single();
+    setMsg(error || !data ? "Couldn't save. Please try again." : "Saved. Now let the driver know.");
+    if (data) onSaved(data);
+  };
+  const price = yours ?? jackie;
+  const text = `Hi ${item.contact_name}, this is ${shopName} about your request "${item.issue}". ${price ? `${yours ? "Our price" : "Jackie's rough estimate"} is ${price} incl. VAT.` : ""}${yours && jackie && yours !== jackie ? ` (Jackie estimated ${jackie}.)` : ""} Does that work for you?`;
+  const phone = item.contact_phone.replace(/[^\d+]/g, "");
+  const intl = phone.startsWith("+") ? phone.slice(1) : phone.startsWith("0") ? `46${phone.slice(1)}` : phone;
+  return <section><span className="eyebrow">INDICATIVE QUOTE</span>
+    <table className="ws-table"><tbody>
+      <tr><td>Service</td><td><strong>{item.service ?? OTHER}</strong></td></tr>
+      <tr><td>Jackie quoted the driver</td><td><strong>{jackie ? `${jackie} incl. VAT` : "No estimate (direct booking)"}</strong></td></tr>
+      {yours && <tr><td>Your adjusted price</td><td><strong>{yours} incl. VAT</strong></td></tr>}
+    </tbody></table>
+    {item.note && <p className="history-note">Jackie told the driver: “{item.note}”</p>}
+    <Label>Adjust the price (kr, incl. VAT)</Label>
+    <div className="ws-chips"><Input aria-label="From" type="number" min={0} max={500000} value={low} onChange={e => setLow(Number(e.target.value))} style={{ width: 110 }}/><span>to</span><Input aria-label="To" type="number" min={0} max={500000} value={high} onChange={e => setHigh(Number(e.target.value))} style={{ width: 110 }}/><Button type="button" size="sm" onClick={() => void saveQuote()}>Save price</Button></div>
+    {msg && <p className="history-note" role="status">{msg}</p>}
+    <Label>Contact the driver about the quote</Label>
+    <div className="ws-chips">
+      <Button size="sm" variant="outline" asChild><a href={`sms:${phone}?body=${encodeURIComponent(text)}`}>SMS</a></Button>
+      <Button size="sm" variant="outline" asChild><a href={`https://wa.me/${intl}?text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer">WhatsApp</a></Button>
+      {item.contact_email && <Button size="sm" variant="outline" asChild><a href={`mailto:${item.contact_email}?subject=${encodeURIComponent(`Your quote: ${item.issue}`)}&body=${encodeURIComponent(text)}`}>Email</a></Button>}
+      <Button size="sm" variant="outline" asChild><a href={`tel:${phone}`}><Phone/> Call</a></Button>
+    </div>
+    <p className="history-note">Opens your phone or email with a ready message. The driver prefers {item.contact_channel === "email" ? "email" : item.contact_channel === "whatsapp" ? "WhatsApp" : "SMS"}.</p>
+  </section>;
 }
 
 function Kpi({ icon, label, value, hint }: { icon: React.ReactNode; label: string; value: string; hint?: string }) {
@@ -214,8 +261,10 @@ function InsightsView({ items, workshopId, canEdit }: { items: Inquiry[]; worksh
   }).sort((a, b) => b.req - a.req);
   const otherCount = items.filter(i => !i.service || i.service === OTHER).length;
   const known = new Set(services.map(x => x.task.toLowerCase()));
-  const missing = Object.entries(items.filter(i => !i.service || i.service === OTHER).reduce<Record<string, number>>((m, i) => { const k = i.issue.trim(); if (!known.has(k.toLowerCase())) m[k] = (m[k] ?? 0) + 1; return m; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const missing = Object.entries(items.filter(i => !i.service || i.service === OTHER).reduce<Record<string, number>>((m, i) => { const k = i.issue.trim(); if (!known.has(k.toLowerCase())) m[k] = (m[k] ?? 0) + 1; return m; }, {})).sort((a, b) => b[1] - a[1]);
   const [added, setAdded] = useState<string[]>([]);
+  const [sp, setSp] = useState(0);
+  const [mp, setMp] = useState(0);
   const addService = async (task: string) => {
     if (!s) return;
     const list = ensureOther(s.price_list as PriceItem[]);
@@ -224,20 +273,23 @@ function InsightsView({ items, workshopId, canEdit }: { items: Inquiry[]; worksh
     await save({ price_list: next, job_durations: next.map(x => ({ job: x.task, minutes: x.minutes ?? 60 })) });
   };
   return <div className="ws-section">
-    <div className="ws-grid2">
-      <section className="ws-card"><h2>From request to booking</h2><div className="ws-funnel">{funnel.map(f => <div key={f.label} className="ws-funnel-row"><span>{f.label}</span><span className="ws-bar"><span style={{ width: n ? `${(f.v / n) * 100}%` : 0 }}/></span><strong>{f.v}</strong></div>)}</div></section>
-      <section className="ws-card"><h2>Your services</h2>
+    <h2 className="ws-h2">Insights</h2>
+    <div className="ws-stack">
+      <Collapsible title="From request to booking"><div className="ws-funnel">{funnel.map(f => <div key={f.label} className="ws-funnel-row"><span>{f.label}</span><span className="ws-bar"><span style={{ width: n ? `${(f.v / n) * 100}%` : 0 }}/></span><strong>{f.v}</strong></div>)}</div></Collapsible>
+      <Collapsible title="Your services">
         <p className="ws-hint"><span>Requests matched to your Pricing engine. Value = bookings × your price.</span></p>
         <table className="ws-table"><thead><tr><th>Service</th><th>Requests</th><th>Booked</th><th>Value</th></tr></thead><tbody>
-          {rows.map(r => <tr key={r.task}><td>{r.task}</td><td><strong>{r.req}</strong></td><td>{r.booked}</td><td>{r.value ? kr(r.value) : "–"}</td></tr>)}
+          {rows.slice(sp * PAGE, (sp + 1) * PAGE).map(r => <tr key={r.task}><td>{r.task}</td><td><strong>{r.req}</strong></td><td>{r.booked}</td><td>{r.value ? kr(r.value) : "–"}</td></tr>)}
           <tr><td>Other <small className="history-note">(you price these)</small></td><td><strong>{otherCount}</strong></td><td>{items.filter(i => (!i.service || i.service === OTHER) && isBooked(i)).length}</td><td>–</td></tr>
         </tbody></table>
-      </section>
-      <section className="ws-card ws-span" style={{ gridColumn: "1 / -1" }}><h2>Drivers asked, you don't offer yet</h2>
+        {rows.length > PAGE && <Pager page={sp} pages={Math.ceil(rows.length / PAGE)} onPage={setSp}/>}
+      </Collapsible>
+      <Collapsible title="Drivers asked, you don't offer yet">
         <p className="ws-hint"><span>Requests that landed in Other. Add the common ones to your Pricing engine so Jackie can quote them next time.</span></p>
         {missing.length === 0 ? <p className="history-note">Nothing yet. Every request matched one of your services.</p>
-          : <table className="ws-table"><tbody>{missing.map(([k, v]) => <tr key={k}><td>{k}</td><td><strong>{v}</strong></td><td style={{ textAlign: "right" }}>{added.includes(k) ? <span className="history-note">Added. Set its price in Pricing engine.</span> : canEdit && <Button type="button" size="sm" variant="outline" onClick={() => void addService(k)}>Add to Pricing engine</Button>}</td></tr>)}</tbody></table>}
-      </section>
+          : <table className="ws-table"><tbody>{missing.slice(mp * PAGE, (mp + 1) * PAGE).map(([k, v]) => <tr key={k}><td>{k}</td><td><strong>{v}</strong></td><td style={{ textAlign: "right" }}>{added.includes(k) ? <span className="history-note">Added. Set its price in Pricing engine.</span> : canEdit && <Button type="button" size="sm" variant="outline" onClick={() => void addService(k)}>Add to Pricing engine</Button>}</td></tr>)}</tbody></table>}
+        {missing.length > PAGE && <Pager page={mp} pages={Math.ceil(missing.length / PAGE)} onPage={setMp}/>}
+      </Collapsible>
     </div>
   </div>;
 }

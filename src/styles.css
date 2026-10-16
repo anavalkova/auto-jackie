@@ -463,3 +463,11 @@
 .ws-step-head { display: grid; gap: 2px; margin-bottom: 8px; }
 .ws-wizard-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
 .ws-textarea-tall { min-height: 180px; }
+.ws-pager { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 10px; }
+.ws-stack { display: grid; gap: 12px; }
+.ws-collapsible > summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; }
+.ws-collapsible > summary::-webkit-details-marker { display: none; }
+.ws-collapsible > summary h2 { margin: 0; }
+.ws-collapsible > summary::after { content: "▾"; color: var(--muted-foreground); transition: transform .2s; }
+.ws-collapsible:not([open]) > summary::after { transform: rotate(-90deg); }
+.ws-collapsible[open] > summary { margin-bottom: 10px; }
