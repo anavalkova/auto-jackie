@@ -108,7 +108,7 @@ export function JackieHome({ chatId }: { chatId?: string }) {
       <Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span></Link>
       <nav aria-label="Main navigation">
         <span className="market-label"><span className="swedish-flag"/>Made for Sweden</span>
-        <Button variant="ghost" onClick={() => setInfo("workshop")} className="workshop-link">For workshops <ArrowUpRight/></Button>
+        <Button variant="ghost" asChild className="workshop-link"><Link to="/workshop">For workshops <ArrowUpRight/></Link></Button>
         {ready && (user ? <>
           <DropdownMenu>
             <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="Your account"><UserRound/></Button></DropdownMenuTrigger>
