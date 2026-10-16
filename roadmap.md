@@ -22,3 +22,4 @@
 - [x] Driver page: "Made for Sweden" moved out of the top bar into the bottom line with the existing note.
 - [x] Driver page: dropped the "Chats saved"/"Private chat" badge from the chat header (already covered by the note under the message box and the chat-history panel).
 - [x] "Add your car" row: single car icon + label, discreet chevron at the right edge; whole row clickable.
+- [x] Driver chat: "start a new chat" plus next to the "Why this exists" chip (also covers phone view, where the left panel is hidden).
