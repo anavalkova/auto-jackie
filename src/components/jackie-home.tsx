@@ -69,6 +69,20 @@ export function JackieHome({ chatId }: { chatId?: string }) {
     });
   }, [chatId, ready, user?.id]);
 
+  // After a guest signs in, keep their conversation: save it to the account and open it.
+  useEffect(() => {
+    if (!ready || !user || chatId) return;
+    const draft = readGuestChat();
+    if (draft.length === 0) return;
+    void (async () => {
+      const payload = { messages: draft as unknown as Json, title: titleFrom(draft), updated_at: new Date().toISOString() };
+      const { data, error } = await supabase.from("chats").insert({ ...payload, user_id: user.id }).select("id").single();
+      if (error || !data) return console.error("Couldn't save chat", error);
+      try { sessionStorage.removeItem("autojackie.guestChat"); } catch { /* ignore */ }
+      navigate({ to: "/c/$chatId", params: { chatId: data.id }, replace: true });
+    })();
+  }, [ready, user?.id, chatId]);
+
   const loadChats = useCallback(async () => {
     if (!user) return;
     setChatsLoading(true);
