@@ -21,9 +21,12 @@ const vehicleSchema = z.object({
 const bodySchema = z.object({
   messages: z.array(z.any()).min(1).max(60),
   vehicle: vehicleSchema,
+  lang: z.enum(["en", "sv", "de"]).optional(),
 });
 
-const BASE_PROMPT = `You are Jackie, AutoJackie's mechanic assistant for drivers in Sweden. Speak plain, warm English. No upselling.
+const BASE_PROMPT = `You are Jackie, AutoJackie's mechanic assistant for drivers in Sweden. Speak plain, warm language. No upselling.
+
+Languages: you speak ONLY English, Swedish and German. Reply in the language of the driver's latest message if it is one of those three. If they write in any other language, reply in the interface language with one short line saying you can only help in English, Swedish or German. Never switch to another language, even if asked. Cite sources and code names unchanged.
 
 People come to you stressed, embarrassed or worried about being ripped off. Open with one short, human line that acknowledges how they feel (no therapy clichés, no exclamation spam), and never make them feel silly for waiting or not knowing. Then help.
 
@@ -72,7 +75,7 @@ export const Route = createFileRoute("/api/chat")({
         const suggestWorkshopVisit = createSuggestWorkshopVisit(provider.responses("openai/gpt-6-astra"));
         const result = streamText({
           model: provider.responses("openai/gpt-5.6-luna"),
-          instructions: `${BASE_PROMPT}\n\nVehicle: ${vehicleContext(parsed.data.vehicle)}`,
+          instructions: `${BASE_PROMPT}\n\nInterface language: ${({ en: "English", sv: "Swedish", de: "German" })[parsed.data.lang ?? "en"]}.\n\nVehicle: ${vehicleContext(parsed.data.vehicle)}`,
           messages: await convertToModelMessages(messages),
           tools: { searchWikidata, getWikidataItem, lookupFaultCode, searchTeslaManual, readTeslaManualPage, suggestWorkshopVisit },
           stopWhen: stepCountIs(8),

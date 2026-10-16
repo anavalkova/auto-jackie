@@ -11,18 +11,19 @@ import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
 import { WhyNote } from "@/components/why-note";
 import type { Vehicle } from "@/lib/vehicles";
+import { useT } from "@/lib/i18n";
 
-const starters = ["P0301 just appeared. Should I panic?", "The noise disappears whenever the mechanic gets in", "I named the warning light. We coexist now."];
 
 export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMessages, onTurnFinished, onReset, saving }: {
   vehicle: Vehicle | null; pending: string | null; onPendingSent: () => void;
   chatId?: string | undefined; initialMessages?: UIMessage[] | undefined;
   onTurnFinished?: ((messages: UIMessage[]) => void) | undefined; onReset?: (() => void) | undefined; saving?: boolean | undefined;
 }) {
+  const { t, lang } = useT();
   const [input, setInput] = useState("");
   const [booking, setBooking] = useState<VisitCard | null>(null);
   const vehiclePayload = vehicle ? { confidential: vehicle.confidential, description: vehicle.confidential ? undefined : vehicle.description, mileageKm: vehicle.mileageKm } : null;
-  const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat", body: { vehicle: vehiclePayload } }), [JSON.stringify(vehiclePayload)]);
+  const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat", body: { vehicle: vehiclePayload, lang } }), [JSON.stringify(vehiclePayload), lang]);
   const { messages, sendMessage, status, stop, error, setMessages, clearError } = useChat({ transport, ...(chatId ? { id: chatId } : {}), ...(initialMessages ? { messages: initialMessages } : {}) });
   const busy = status === "submitted" || status === "streaming";
   const wasBusy = useRef(false);
@@ -45,11 +46,11 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
 
   return <div className="chat-shell">
     {messages.length === 0 ? <div className="chat-empty">
-      <h1>Confess your car's sins.</h1>
-      <p>Jackie listens without judging, then explains it in plain words, with urgency and a rough price.</p>
-      <WhyNote id="driver" title="Car talk assumes everyone speaks 'mechanic'. Most drivers don't, and shouldn't have to." stats={[
-        { value: "36%", text: "of privately owned cars in Sweden are registered to women, yet most workshop communication still assumes deep technical knowledge.", source: { label: "Trafikanalys, 2022", url: "https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" } },
-        { value: "P0301?", text: "Warning lights, HSN/TSN codes, service intervals. The industry speaks in codes. Jackie translates them into plain words, with sources." },
+      <h1>{t.heroTitle}</h1>
+      <p>{t.heroSub}</p>
+      <WhyNote id="driver" title={t.whyTitle} stats={[
+        { value: "36%", text: t.why1, source: { label: "Trafikanalys, 2022", url: "https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" } },
+        { value: "P0301?", text: t.why2 },
       ]}/>
     </div> : <Conversation className="chat-log">
       <ConversationContent>
@@ -61,33 +62,33 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
                 const o = (part.state === "output-available" ? part.output : part.input) as { issue?: string; urgency?: string; priceLowSek?: number; priceHighSek?: number; note?: string } | undefined;
                 if (!o?.issue) return null;
                 return <div key={i} className="offer-card">
-                  <span className="eyebrow">WHAT'S NEXT</span>
+                  <span className="eyebrow">{t.whatsNext}</span>
                   <strong>{o.issue}</strong>
-                  <span className="offer-urgency">Get it looked at: {o.urgency}</span>
-                  {o.priceLowSek != null && o.priceHighSek != null && <p className="offer-price">About {o.priceLowSek.toLocaleString("sv-SE")} to {o.priceHighSek.toLocaleString("sv-SE")} kr <small>incl. VAT · rough estimate, not a quote</small></p>}
+                  <span className="offer-urgency">{t.getLooked} {o.urgency}</span>
+                  {o.priceLowSek != null && o.priceHighSek != null && <p className="offer-price">{t.about_} {o.priceLowSek.toLocaleString("sv-SE")} {t.to} {o.priceHighSek.toLocaleString("sv-SE")} kr <small>{t.vatNote}</small></p>}
                   {o.note && <p className="offer-note">{o.note}</p>}
-                  <Button onClick={() => setBooking({ issue: o.issue ?? "", urgency: o.urgency, priceLowSek: o.priceLowSek, priceHighSek: o.priceHighSek, note: o.note })}><CalendarCheck/> Request a workshop visit</Button>
+                  <Button onClick={() => setBooking({ issue: o.issue ?? "", urgency: o.urgency, priceLowSek: o.priceLowSek, priceHighSek: o.priceHighSek, note: o.note })}><CalendarCheck/> {t.requestVisit}</Button>
                 </div>;
               }
               if (isToolUIPart(part)) {
-                const name = getToolName(part) === "searchWikidata" ? "Searching Wikidata" : getToolName(part) === "lookupFaultCode" ? "Looking up fault code" : getToolName(part).includes("Tesla") ? "Reading Tesla service manual" : "Reading Wikidata record";
+                const name = getToolName(part) === "searchWikidata" ? t.toolSearch : getToolName(part) === "lookupFaultCode" ? t.toolCode : getToolName(part).includes("Tesla") ? t.toolTesla : t.toolItem;
                 return <Tool key={i} defaultOpen={false}><ToolHeader type={part.type as `tool-${string}`} state={part.state} title={name}/><ToolContent><ToolInput input={part.input}/><ToolOutput output={part.output} errorText={part.errorText}/></ToolContent></Tool>;
               }
               return null;
             })}
           </MessageContent>
         </Message>)}
-        {status === "submitted" && <Shimmer className="chat-wait">Jackie is checking her sources…</Shimmer>}
-        {error && <p className="chat-error" role="alert">{error.message || "Something went wrong. Please try again."}</p>}
+        {status === "submitted" && <Shimmer className="chat-wait">{t.checking}</Shimmer>}
+        {error && <p className="chat-error" role="alert">{error.message || t.genericError}</p>}
       </ConversationContent>
       <ConversationScrollButton/>
     </Conversation>}
 
-    {messages.length === 0 && <div className="try-row"><span>Try:</span>{starters.map(s => <button key={s} type="button" onClick={() => send(s)}>{s}</button>)}</div>}
+    {messages.length === 0 && <div className="try-row"><span>{t.tryLabel}</span>{t.starters.map(s => <button key={s} type="button" onClick={() => send(s)}>{s}</button>)}</div>}
     <PromptInput className="chat-composer" onSubmit={({ text }) => send(text)}>
-      <PromptInputTextarea value={input} onChange={e => setInput(e.target.value)} placeholder="Describe the noise, light or part you're wondering about…"/>
+      <PromptInputTextarea value={input} onChange={e => setInput(e.target.value)} placeholder={t.placeholder}/>
       <PromptInputFooter>
-        <span className="composer-hint">{saving ? "Saved to My chats" : ""}</span>
+        <span className="composer-hint">{saving ? t.savedToChats : ""}</span>
         <div className="composer-actions">
           {messages.length > 0 && !busy && <Button variant="ghost" size="sm" type="button" onClick={() => { setMessages([]); clearError(); onReset?.(); }}><RotateCcw/> New chat</Button>}
           <PromptInputSubmit status={status} onStop={stop} disabled={!busy && !input.trim()}/>
