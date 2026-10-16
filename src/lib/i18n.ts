@@ -61,6 +61,7 @@ const dict = {
     vatNote: "incl. VAT · rough estimate, not a quote", requestVisit: "Request a workshop visit",
     toolSearch: "Searching Wikidata", toolCode: "Looking up fault code", toolTesla: "Reading Tesla service manual", toolItem: "Reading Wikidata record",
     checking: "Jackie is checking her sources…", genericError: "Something went wrong. Please try again.", quotaGuest: "You have used your 5 free questions this month. Sign in to keep talking to Jackie, with 50 questions a month.", quotaUser: "You have used your 50 questions this month. Jackie will be back for you next month.",
+    quotaHintGuest: "%n of %m free questions left this month. Sign in for 50 a month.", quotaHintUser: "%n of %m questions left this month.",
   },
   sv: {
     forWorkshops: "För verkstäder", account: "Ditt konto", signOut: "Logga ut", signInToSave: "Logga in för att spara",
