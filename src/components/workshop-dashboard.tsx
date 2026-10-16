@@ -362,7 +362,7 @@ function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
               <span className="history-note">{hrs.length ? hrs.join(", ") : "All day"}</span>
               <button type="button" className="ws-off-x" aria-label={`Reopen ${dayLabel(d)}`} onClick={() => setClosed(closed.filter(k => k.slice(0, 10) !== d))}>×</button>
             </li>)}</ul>
-            <Pager page={pg} pages={pages} onPage={setOffPage}/>}</>}
+            {<Pager page={pg} pages={pages} onPage={setOffPage}/>}</>}</>}
       </section>
     </fieldset>
     <SaveRow canEdit={canEdit} state={state}/>
