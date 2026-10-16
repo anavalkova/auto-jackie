@@ -4,15 +4,17 @@ import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { oauthReturnPath } from "@/lib/oauth-return-path";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-export function SignInDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+/** returnTo: same-origin path to come back to after sign-in (e.g. an assistant connection request). */
+export function SignInDialog({ open, onOpenChange, returnTo }: { open: boolean; onOpenChange: (o: boolean) => void; returnTo?: string }) {
   const [error, setError] = useState("");
   
   const [email, setEmail] = useState(""); const [password, setPassword] = useState("");
   const go = async (provider: "google" | "lovable") => {
     setError("");
-    const r = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin });
+    const r = await lovable.auth.signInWithOAuth(provider, { redirect_uri: returnTo ? new URL(oauthReturnPath(returnTo), window.location.origin).href : window.location.origin });
     if (r.error) return setError("Sign-in didn't go through. Please try again.");
     if (!r.redirected) onOpenChange(false);
   };

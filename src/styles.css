@@ -476,3 +476,6 @@
 .ws-row { grid-template-columns: 96px minmax(0,1fr) 100px 170px 120px; }
 .ws-row-main { min-width: 0; }
 .ws-row-main strong, .ws-row-main span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+.consent-page { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+.consent-card { max-width: 480px; width: 100%; display: grid; gap: 12px; }
+.consent-card h1 { font-size: 22px; margin: 0; }
