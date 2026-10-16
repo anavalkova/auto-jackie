@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 
 export function SignInDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const [error, setError] = useState("");
-  const [withPassword, setWithPassword] = useState(false);
+  
   const [email, setEmail] = useState(""); const [password, setPassword] = useState("");
   const go = async (provider: "google" | "lovable") => {
     setError("");
@@ -38,12 +38,12 @@ export function SignInDialog({ open, onOpenChange }: { open: boolean; onOpenChan
         Continue with Google
       </Button>
       <button type="button" className="lovable-auth-button" onClick={() => go("lovable")}>Continue with Lovable</button>
-      {!withPassword ? <Button variant="link" onClick={() => setWithPassword(true)}>Have a workshop or demo password?</Button>
-        : <form className="visit-form" onSubmit={e => { e.preventDefault(); void passwordSignIn(); }}>
+      <p className="signin-divider">Workshop or demo login</p>
+      <form className="visit-form" onSubmit={e => { e.preventDefault(); void passwordSignIn(); }}>
           <Input type="email" required aria-label="Email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)}/>
           <Input type="password" required aria-label="Password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)}/>
-          <Button type="submit">Sign in</Button>
-        </form>}
+          <Button type="submit">Sign in with password</Button>
+        </form>
       {error && <p className="garage-error" role="alert">{error}</p>}
     </DialogContent>
   </Dialog>;
