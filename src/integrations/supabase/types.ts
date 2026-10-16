@@ -366,6 +366,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      list_partner_workshops: {
+        Args: never
+        Returns: {
+          city: string
+          id: string
+          name: string
+        }[]
+      }
       workshop_booking_rules: { Args: { _workshop: string }; Returns: Json }
       workshop_jackie_profile: { Args: { _workshop: string }; Returns: Json }
       workshop_public_profile: { Args: { _slug: string }; Returns: Json }
