@@ -40,7 +40,7 @@ function titleFrom(messages: UIMessage[]) {
 export function JackieHome({ chatId }: { chatId?: string }) {
   const navigate = useNavigate();
   const { user, ready } = useSessionUser();
-  const [vehicle, setVehicle] = useState<Vehicle | null>(null);
+  const [vehicle, setVehicle] = useState<Vehicle | null>(() => (chatId ? null : readGuestVehicle()));
   const [garageOpen, setGarageOpen] = useState(false);
   const [signInOpen, setSignInOpen] = useState(false);
   const [chats, setChats] = useState<ChatRow[]>([]);
@@ -86,9 +86,11 @@ export function JackieHome({ chatId }: { chatId?: string }) {
   const saveVehicle = async (v: Vehicle) => {
     setVehicle(v);
     if (user) await supabase.from("saved_vehicles").upsert({ user_id: user.id, vehicle: v as unknown as Json, updated_at: new Date().toISOString() });
+    else try { sessionStorage.setItem("autojackie.guestVehicle", JSON.stringify(v)); } catch { /* ignore */ }
   };
   const forgetVehicle = async () => {
     setVehicle(null);
+    try { sessionStorage.removeItem("autojackie.guestVehicle"); } catch { /* ignore */ }
     if (user) await supabase.from("saved_vehicles").delete().eq("user_id", user.id);
   };
 
