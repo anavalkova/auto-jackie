@@ -37,10 +37,10 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
   return <div className="chat-shell">
     {messages.length === 0 ? <div className="chat-empty">
       <h1>Confess your car's sins.</h1>
-      <p>Jackie listens without judging — then explains it in plain words, with urgency and a rough price.</p>
-      <WhyNote id="driver" title="Car talk assumes everyone speaks 'mechanic'. Most drivers don't — and shouldn't have to." stats={[
+      <p>Jackie listens without judging, then explains it in plain words, with urgency and a rough price.</p>
+      <WhyNote id="driver" title="Car talk assumes everyone speaks 'mechanic'. Most drivers don't, and shouldn't have to." stats={[
         { value: "36%", text: "of privately owned cars in Sweden are registered to women, yet most workshop communication still assumes deep technical knowledge.", source: { label: "Trafikanalys, 2022", url: "https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" } },
-        { value: "P0301?", text: "Warning lights, HSN/TSN codes, service intervals — the industry speaks in codes. Jackie translates them into plain words, with sources." },
+        { value: "P0301?", text: "Warning lights, HSN/TSN codes, service intervals. The industry speaks in codes. Jackie translates them into plain words, with sources." },
       ]}/>
     </div> : <Conversation className="chat-log">
       <ConversationContent>
@@ -55,7 +55,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
                   <span className="eyebrow">WHAT'S NEXT</span>
                   <strong>{o.issue}</strong>
                   <span className="offer-urgency">Get it looked at: {o.urgency}</span>
-                  {o.priceLowSek != null && o.priceHighSek != null && <p className="offer-price">About {o.priceLowSek.toLocaleString("sv-SE")}–{o.priceHighSek.toLocaleString("sv-SE")} kr <small>incl. VAT · rough estimate, not a quote</small></p>}
+                  {o.priceLowSek != null && o.priceHighSek != null && <p className="offer-price">About {o.priceLowSek.toLocaleString("sv-SE")} to {o.priceHighSek.toLocaleString("sv-SE")} kr <small>incl. VAT · rough estimate, not a quote</small></p>}
                   {o.note && <p className="offer-note">{o.note}</p>}
                   <Button onClick={() => setBooking({ issue: o.issue ?? "", urgency: o.urgency, priceLowSek: o.priceLowSek, priceHighSek: o.priceHighSek, note: o.note })}><CalendarCheck/> Request a workshop visit</Button>
                 </div>;

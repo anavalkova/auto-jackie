@@ -44,8 +44,8 @@ export function RequestVisitDialog({ card, vehicleLabel, onClose }: { card: Visi
     <Dialog open={card !== null} onOpenChange={o => { if (!o) onClose(); }}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{state === "sent" ? "Sent — you're in good hands" : "Ask a workshop to take a look"}</DialogTitle>
-          <DialogDescription>{state === "sent" ? "The workshop sees Jackie's summary and will contact you to agree a time and confirm the price." : `They'll see “${card?.issue ?? ""}”, Jackie's rough price and your contact details — nothing else from your chat.`}</DialogDescription>
+          <DialogTitle>{state === "sent" ? "Sent. You're in good hands" : "Ask a workshop to take a look"}</DialogTitle>
+          <DialogDescription>{state === "sent" ? "The workshop sees Jackie's summary and will contact you to agree a time and confirm the price." : `They'll see “${card?.issue ?? ""}”, Jackie's rough price and your contact details. Nothing else from your chat.`}</DialogDescription>
         </DialogHeader>
         {state === "sent" ? <Button onClick={onClose}>Done</Button>
           : !ready ? null
@@ -58,7 +58,7 @@ export function RequestVisitDialog({ card, vehicleLabel, onClose }: { card: Visi
             <div><Label htmlFor="v-phone">Phone</Label><Input id="v-phone" required type="tel" minLength={5} maxLength={30} placeholder="070 123 45 67" value={phone} onChange={e => setPhone(e.target.value)}/></div>
             <div><Label htmlFor="v-msg">Anything else? (optional)</Label><Textarea id="v-msg" maxLength={1000} value={message} onChange={e => setMessage(e.target.value)} placeholder="When suits you, how the car feels…"/></div>
             <WhyNote id="visit" title="No phone queue, no explaining the noise twice." stats={[
-              { value: "1 in 5", text: "calls to auto service businesses go unanswered — your request arrives in writing instead, with Jackie's diagnosis and rough price attached.", source: { label: "Marchex", url: "https://www.marchex.com/up-to-21-percent-of-automotive-service-customer-calls-go-unanswered-creating-significant-revenue-leakage/" } },
+              { value: "1 in 5", text: "calls to auto service businesses go unanswered. Your request arrives in writing instead, with Jackie's diagnosis and rough price attached.", source: { label: "Marchex", url: "https://www.marchex.com/up-to-21-percent-of-automotive-service-customer-calls-go-unanswered-creating-significant-revenue-leakage/" } },
             ]}/>
             {state === "error" && <p className="chat-error" role="alert">Couldn't send it. Please try again.</p>}
             <Button type="submit" disabled={state === "sending"}>{state === "sending" ? "Sending…" : "Send request"}</Button>

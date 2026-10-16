@@ -125,18 +125,18 @@ export function JackieHome({ chatId }: { chatId?: string }) {
 
     <main className="workspace">
       <aside className="jackie-panel">
-        <div className="portrait-wrap compact"><img src={jackie} alt="Jackie, a mechanic in an orange work jacket" width={1024} height={1024}/><span className="portrait-label">Jackie is new — go easy on her</span></div>
+        <div className="portrait-wrap compact"><img src={jackie} alt="Jackie, a mechanic in an orange work jacket" width={1024} height={1024}/><span className="portrait-label">Jackie is new. Go easy on her</span></div>
 
         <section className="vehicle-card" aria-label="Your car">
           <div className="vehicle-head"><span className="eyebrow">{user ? "YOUR SAVED CAR" : "CAR FOR THIS CHAT"}</span>{vehicle && <Button variant="ghost" size="sm" onClick={() => setGarageOpen(true)}><Pencil/> Change</Button>}</div>
           {!vehicle ? <div className="vehicle-empty"><Car/>
-            <p>{user ? "No car saved yet. Add it once and Jackie remembers it." : "Share a plate, HSN/TSN or pick it by hand. Used for this chat only — nothing is saved."}</p>
+            <p>{user ? "No car saved yet. Add it once and Jackie remembers it." : "Share a plate, HSN/TSN or pick it by hand. Used for this chat only. Nothing is saved."}</p>
             <Button onClick={() => setGarageOpen(true)}><Plus/> {user ? "Add your car" : "Tell Jackie about your car"}</Button>
           </div> : <>
             <h2 className="vehicle-name">{vehicle.confidential ? <span className="plate-chip"><span className="plate-eu">S</span>{vehicle.label}</span> : vehicle.label}</h2>
             <p className="vehicle-spec">{vehicle.confidential ? <><LockKeyhole/> Registry details kept private</> : vehicle.description}</p>
             <div className="service-box"><Gauge/>{service ? <div><strong>Next service in about {fmt(service.remaining)} km</strong><span>Estimated at {fmt(service.dueAt)} km · every {fmt(vehicle.serviceKm)} km</span><div className="service-bar"><span style={{ width: `${Math.round(service.progress * 100)}%` }}/></div></div> : <div><strong>Add your odometer reading</strong><span>to estimate the next service.</span></div>}</div>
-            <p className="estimate-note">{user ? "Saved to your account." : "Not saved — gone when you start a new chat."} <button type="button" className="text-link" onClick={forgetVehicle}>Remove car</button></p>
+            <p className="estimate-note">{user ? "Saved to your account." : "Not saved. Gone when you start a new chat."} <button type="button" className="text-link" onClick={forgetVehicle}>Remove car</button></p>
           </>}
         </section>
 
