@@ -89,7 +89,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
                 const tools = m.parts.filter(p => isToolUIPart(p) && getToolName(p) !== "suggestWorkshopVisit" && getToolName(p) !== "bookVisit");
                 if (tools[0] !== part) return null;
                 const running = tools.some(p => isToolUIPart(p) && (p.state === "input-streaming" || p.state === "input-available"));
-                const label = (n: string) => n === "searchWikidata" ? t.toolSearch : n === "lookupFaultCode" ? t.toolCode : n.includes("Tesla") ? t.toolTesla : t.toolItem;
+                const label = (n: string) => n === "getAvailableTimes" ? t.bk.time : n === "searchWikidata" ? t.toolSearch : n === "lookupFaultCode" ? t.toolCode : n.includes("Tesla") ? t.toolTesla : t.toolItem;
                 return <details key={i} className="sources-used">
                   <summary>{running ? t.sourcesUsing : t.sourcesUsed.replace("%n", String(tools.length))}</summary>
                   {tools.map((p, j) => isToolUIPart(p) && <Tool key={j} defaultOpen={false}><ToolHeader type={p.type as `tool-${string}`} state={p.state} title={label(getToolName(p))}/><ToolContent><ToolInput input={p.input}/><ToolOutput output={p.output} errorText={p.errorText}/></ToolContent></Tool>)}
