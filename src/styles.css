@@ -244,11 +244,12 @@
 .native-select { height: 36px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; background: var(--card); color: var(--foreground); font: inherit; font-size: 14px; }
 .ws-title { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
 .ws-title h1 { font-size: 28px; margin: 4px 0 0; }
-.ws-kpis { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-bottom: 24px; }
-.ws-kpi { display: grid; gap: 4px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--secondary); }
-.ws-kpi > svg { color: var(--primary); width: 18px; height: 18px; }
-.ws-kpi strong { font-family: var(--font-heading); font-size: 22px; }
-.ws-kpi small { color: var(--muted-foreground); font-size: 11px; }
+.ws-kpis { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 20px; }
+.ws-kpi { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--secondary); min-height: 0; }
+.ws-kpi > svg { color: var(--primary); width: 15px; height: 15px; flex-shrink: 0; }
+.ws-kpi .eyebrow { font-size: 10px; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ws-kpi strong { font-family: var(--font-heading); font-size: 18px; line-height: 1; }
+.ws-kpi small { display: none; }
 .ws-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
 .ws-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
 .ws-list li + li { border-top: 1px solid var(--border); }
