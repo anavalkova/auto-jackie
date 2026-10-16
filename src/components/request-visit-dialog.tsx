@@ -89,13 +89,14 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId }: { card
         <ol className="booking-steps">{steps.map((s, i) => <li key={s} className={i + 1 === step ? "is-on" : i + 1 < step ? "is-done" : ""}><button type="button" disabled={i + 1 > step} onClick={() => setStep(i + 1)}><span>{i + 1 < step ? <Check/> : i + 1}</span>{s}</button></li>)}</ol>
 
         {step === 1 && <div className="visit-form">
-          {!workshopId && <div><Label htmlFor="v-shop">{b.workshop}</Label>
+          {false && <div><Label htmlFor="v-shop">{b.workshop}</Label>
             <select id="v-shop" className="native-select" value={shopId} onChange={e => setShopId(e.target.value)}>{shops.map(s => <option key={s.id} value={s.id}>{s.name}{s.city ? ` · ${s.city}` : ""}</option>)}</select></div>}
           {direct ? <>
+            <p className="eyebrow">{b.workshop}: {shops.find(x => x.id === shopId)?.name}</p>
             <div><Label htmlFor="v-service">{b.job}</Label>
               <select id="v-service" className="native-select" value={service} onChange={e => setService(e.target.value)}>{services.map(x => <option key={x.task} value={x.task}>{x.task === OTHER ? b.other : x.task}</option>)}</select></div>
             {service === OTHER && <div><Label htmlFor="v-issue">{b.describe}</Label><Input id="v-issue" required minLength={3} maxLength={200} placeholder={b.describePh} value={issue} onChange={e => setIssue(e.target.value)}/></div>}
-          </> : <div className="booking-job"><span className="eyebrow">{b.fromChat}</span><strong>{card.issue}</strong>{card.priceLowSek != null && card.priceHighSek != null && <span>{card.priceLowSek.toLocaleString("sv-SE")} to {card.priceHighSek.toLocaleString("sv-SE")} kr</span>}</div>}
+          </> : <div className="booking-job"><span className="eyebrow">{b.workshop}: {shops.find(x => x.id === shopId)?.name}</span><span className="eyebrow">{b.fromChat}</span><strong>{card.issue}</strong>{card.priceLowSek != null && card.priceHighSek != null && <span>{card.priceLowSek.toLocaleString("sv-SE")} to {card.priceHighSek.toLocaleString("sv-SE")} kr</span>}</div>}
           <p className="history-note">{b.shared}</p>
         </div>}
 

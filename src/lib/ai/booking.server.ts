@@ -18,7 +18,7 @@ async function resolveShop(fixedId: string | undefined, name: string | undefined
   const shops = (await rpc<Shop[]>("list_partner_workshops", {})) ?? [];
   if (fixedId) return { shop: shops.find(s => s.id === fixedId) ?? null, shops };
   const q = (name ?? "").toLowerCase().trim();
-  const shop = shops.length === 1 ? shops[0]! : q ? shops.find(s => s.name.toLowerCase().includes(q) || q.includes(s.name.toLowerCase())) ?? null : null;
+  const shop = q ? shops.find(s => s.name.toLowerCase().includes(q) || q.includes(s.name.toLowerCase())) ?? shops[0] ?? null : shops[0] ?? null;
   return { shop, shops };
 }
 
