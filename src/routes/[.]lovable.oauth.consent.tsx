@@ -15,7 +15,7 @@ const oauth = () => (supabase.auth as unknown as { oauth: OAuthApi }).oauth;
 
 export const Route = createFileRoute("/.lovable/oauth/consent")({
   ssr: false,
-  validateSearch: (s: Record<string, unknown>) => ({ authorization_id: typeof s.authorization_id === "string" ? s.authorization_id : "" }),
+  validateSearch: (s: Record<string, unknown>) => ({ authorization_id: typeof s["authorization_id"] === "string" ? s["authorization_id"] : "" }),
   head: () => ({ meta: [{ title: "Connect an assistant · AutoJackie" }, { name: "robots", content: "noindex" }] }),
   beforeLoad: ({ search }) => { if (!search.authorization_id) throw new Error("This connection link is missing its request ID. Start again from your assistant."); },
   component: Consent,
