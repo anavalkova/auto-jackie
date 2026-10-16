@@ -85,6 +85,13 @@
       "when": 1792173560811,
       "tag": "0011_chat_quota",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792178773508,
+      "tag": "0012_workshop_settings_validation",
+      "breakpoints": true
     }
   ]
 }
