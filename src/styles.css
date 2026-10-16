@@ -358,3 +358,17 @@
   .pitch-stats { grid-template-columns: 1fr; } .pitch-stats > div + div { border-left: 0; border-top: 1px solid var(--border); }
 }
 /* why-note width is unrestricted inside ws-main; it matches the KPI grid naturally */
+
+/* Workshop overview: value note beside KPIs on both tabs; tabs sit below */
+.ws-overview { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 16px; align-items: start; margin-bottom: 20px; }
+.ws-overview .why-note { margin: 0; }
+.ws-overview .ws-kpis { grid-template-columns: 1fr; margin: 0; }
+.ws-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px; }
+.ws-settings { max-width: none; }
+.ws-settings fieldset.visit-form { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 20px; }
+.ws-settings .ws-span { grid-column: 1 / -1; }
+@media (max-width: 1024px) {
+  .ws-overview { grid-template-columns: 1fr; }
+  .ws-overview .ws-kpis { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 640px) { .ws-settings fieldset.visit-form { grid-template-columns: 1fr; } }

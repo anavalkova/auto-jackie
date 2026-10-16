@@ -156,8 +156,8 @@ function WorkshopSettings({ workshopId, canEdit }: { workshopId: string; canEdit
       <div><Label htmlFor="s-hours">Opening hours</Label><Input id="s-hours" maxLength={200} value={f.opening_hours} onChange={e => setF({ ...f, opening_hours: e.target.value })}/></div>
       <div><Label htmlFor="s-phone">Phone</Label><Input id="s-phone" maxLength={30} value={f.phone} onChange={e => setF({ ...f, phone: e.target.value })}/></div>
       <div><Label htmlFor="s-addr">Address</Label><Input id="s-addr" maxLength={200} value={f.address} onChange={e => setF({ ...f, address: e.target.value })}/></div>
-      <div><Label htmlFor="s-serv">Services you offer (one per line)</Label><textarea id="s-serv" className="native-select ws-textarea" value={f.services} onChange={e => setF({ ...f, services: e.target.value })}/></div>
-      {canEdit && <Button type="submit">Save settings</Button>}
+      <div className="ws-span"><Label htmlFor="s-serv">Services you offer (one per line)</Label><textarea id="s-serv" className="native-select ws-textarea" value={f.services} onChange={e => setF({ ...f, services: e.target.value })}/></div>
+      {canEdit && <div className="ws-span"><Button type="submit">Save settings</Button></div>}
     </fieldset>
     {!canEdit && <p className="history-note">Only the workshop owner can change these.</p>}
     {state && <p className="history-note" role="status">{state}</p>}
