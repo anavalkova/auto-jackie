@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SignInDialog } from "@/components/sign-in-dialog";
+import { WhyNote } from "@/components/why-note";
 import { useAccess } from "@/hooks/use-access";
 import { supabase } from "@/integrations/supabase/client";
 import { setUpDemoWorkshop } from "@/lib/admin.functions";
@@ -69,6 +70,11 @@ function AdminPage() {
         : !isAdmin ? <div className="ws-empty"><ShieldCheck/><h1>Operations team only</h1><p>This account isn't an AutoJackie admin.</p></div>
         : <>
           <div className="ws-title"><div><span className="eyebrow">OPERATIONS</span><h1>Onboard a workshop</h1><p className="history-note">Each workshop gets its own space, started from the standard template (rates, opening hours, services).</p></div></div>
+          <WhyNote id="admin" title="The business case in one glance." stats={[
+            { value: "36%", text: "of privately owned cars in Sweden are registered to women — a huge customer group the industry's jargon-heavy booking flow underserves.", source: { label: "Trafikanalys, 2022", url: "https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" } },
+            { value: "$108k", text: "estimated revenue a single auto service location loses per year to poor call handling. Jackie captures that demand in writing instead.", source: { label: "Marchex via Auto Service World", url: "https://www.autoserviceworld.com/phone-fails-lead-to-missed-automotive-service-revenue-report/" } },
+            { value: "2 models", text: "a lightweight everyday model for chat, a stronger one only for price estimates — keeping cost per conversation low enough for workshop monetization." },
+          ]} footer="Onboarding stays manual on purpose: we verify each workshop before drivers can send them requests."/>
           <form className="admin-form" onSubmit={e => { e.preventDefault(); void onboard(); }}>
             <div><Label htmlFor="a-name">Workshop name</Label><Input id="a-name" required minLength={2} maxLength={80} value={name} onChange={e => setName(e.target.value)}/></div>
             <div><Label htmlFor="a-email">Owner's email</Label><Input id="a-email" required type="email" value={email} onChange={e => setEmail(e.target.value)}/></div>
