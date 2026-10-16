@@ -41,6 +41,68 @@ export type Database = {
         }
         Relationships: []
       }
+      inquiries: {
+        Row: {
+          contact_name: string
+          contact_phone: string
+          created_at: string
+          driver_id: string
+          id: string
+          issue: string
+          message: string
+          note: string
+          price_high_sek: number | null
+          price_low_sek: number | null
+          status: Database["public"]["Enums"]["inquiry_status"]
+          updated_at: string
+          urgency: string
+          vehicle_label: string
+          workshop_id: string
+        }
+        Insert: {
+          contact_name: string
+          contact_phone: string
+          created_at?: string
+          driver_id?: string
+          id?: string
+          issue: string
+          message?: string
+          note?: string
+          price_high_sek?: number | null
+          price_low_sek?: number | null
+          status?: Database["public"]["Enums"]["inquiry_status"]
+          updated_at?: string
+          urgency?: string
+          vehicle_label?: string
+          workshop_id: string
+        }
+        Update: {
+          contact_name?: string
+          contact_phone?: string
+          created_at?: string
+          driver_id?: string
+          id?: string
+          issue?: string
+          message?: string
+          note?: string
+          price_high_sek?: number | null
+          price_low_sek?: number | null
+          status?: Database["public"]["Enums"]["inquiry_status"]
+          updated_at?: string
+          urgency?: string
+          vehicle_label?: string
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inquiries_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_vehicles: {
         Row: {
           updated_at: string
@@ -59,15 +121,72 @@ export type Database = {
         }
         Relationships: []
       }
+      workshop_members: {
+        Row: {
+          created_at: string
+          role: Database["public"]["Enums"]["workshop_role"]
+          user_id: string
+          workshop_id: string
+        }
+        Insert: {
+          created_at?: string
+          role?: Database["public"]["Enums"]["workshop_role"]
+          user_id: string
+          workshop_id: string
+        }
+        Update: {
+          created_at?: string
+          role?: Database["public"]["Enums"]["workshop_role"]
+          user_id?: string
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workshop_members_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workshops: {
+        Row: {
+          city: string
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+        }
+        Insert: {
+          city?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      workshop_role_of: {
+        Args: { _user: string; _workshop: string }
+        Returns: Database["public"]["Enums"]["workshop_role"]
+      }
     }
     Enums: {
-      [_ in never]: never
+      inquiry_status: "new" | "contacted" | "quoted" | "booked" | "closed"
+      workshop_role: "owner" | "staff"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -194,6 +313,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      inquiry_status: ["new", "contacted", "quoted", "booked", "closed"],
+      workshop_role: ["owner", "staff"],
+    },
   },
 } as const
