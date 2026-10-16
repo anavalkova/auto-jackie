@@ -471,3 +471,8 @@
 .ws-collapsible > summary::after { content: "▾"; color: var(--muted-foreground); transition: transform .2s; }
 .ws-collapsible:not([open]) > summary::after { transform: rotate(-90deg); }
 .ws-collapsible[open] > summary { margin-bottom: 10px; }
+/* Same width on every workshop tab, regardless of content */
+.ws-main { width: 100%; max-width: 1240px; margin-inline: auto; box-sizing: border-box; min-width: 0; }
+.ws-row { grid-template-columns: 96px minmax(0,1fr) 100px 170px 120px; }
+.ws-row-main { min-width: 0; }
+.ws-row-main strong, .ws-row-main span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
