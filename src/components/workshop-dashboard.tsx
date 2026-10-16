@@ -77,11 +77,16 @@ export function WorkshopDashboard() {
   else if (!shop) body = <div className="ws-empty"><Wrench/><h1>Your workshop isn't set up yet</h1><p>AutoJackie's team sets up each workshop personally. If we've onboarded you, sign in with the email you gave us{user.email ? ` (you're signed in as ${user.email})` : ""}.</p>{isAdmin && <Button asChild><Link to="/admin">Go to operations</Link></Button>}</div>;
   else body = <>
     <div className="ws-title"><div><span className="eyebrow">WORKSHOP DASHBOARD</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div><div className="ws-filters"><Button variant={tab === "requests" ? "default" : "outline"} onClick={() => setTab("requests")}>Requests</Button><Button variant={tab === "settings" ? "default" : "outline"} onClick={() => setTab("settings")}>Settings</Button></div></div>
-    <WhyNote id="workshop-v2" title="Every request arrives with trust already built." stats={[
+    {tab === "settings" ? <WhyNote id="workshop-settings" title="Fast quotes win. Your touch makes them yours." stats={[
+      { value: "3 800", text: "workshops in Sweden. Your specialities are what set you apart.", source: { label: "Mekonomen", url: "https://www.mynewsdesk.com/se/mekonomen/pressreleases/var-tredje-bilaegare-har-kaent-sig-lurad-av-verkstaden-oekad-kunskap-om-godkaend-bilverkstad-kan-vara-en-loesning-3359302" } },
+      { value: "71%", text: "of Swedish drivers pick a workshop for skilled staff, not low price.", source: { label: "OKQ8", url: "https://www.mynewsdesk.com/se/okq8/pressreleases/7-av-10-bilister-efterfraagar-kunnig-verkstadspersonal-visar-ny-undersoekning-922496" } },
+      { value: "7x", text: "more likely to win a lead when you answer within an hour.", source: { label: "Harvard Business Review", url: "https://hbr.org/2011/03/the-short-life-of-online-sales-leads" } },
+    ]} footer="Your rates, strengths and ways of working teach Jackie to quote like you."/>
+    : <WhyNote id="workshop-v2" title="Every request arrives with trust already built." stats={[
       { value: "63%", text: "of drivers don't trust repair shops. Jackie's upfront price range changes that.", source: { label: "AAA", url: "https://newsroom.aaa.com/wp-content/uploads/2016/12/Auto-Repair-Survey-FINAL.pdf" } },
       { value: "72%", text: "feel anxious about what a repair will cost. Here, they know before you call.", source: { label: "RepairPal / Harris", url: "https://repairpal.com/consumer-survey-march-2013" } },
       { value: "1 in 4", text: "service bookings end as no-shows. Confirmations, our next step, fix that.", source: { label: "Solera via Dealership Guy", url: "https://news.dealershipguy.com/p/broken-service-scheduling-is-costing-dealers-big-time-here-s-how-some-are-closing-the-gaps" } },
-    ]} footer="Calmer customers, faster yeses, fewer empty slots."/>
+    ]} footer="Calmer customers, faster yeses, fewer empty slots."/>}
     {tab === "settings" ? <WorkshopSettings workshopId={shop.id} canEdit={shop.role === "owner"}/> : <>
     <div className="ws-kpis">
       <Kpi icon={<Inbox/>} label="New requests" value={String(kpis.fresh)}/>
