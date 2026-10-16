@@ -56,7 +56,7 @@ export function RequestVisitDialog({ card, vehicleLabel, onClose }: { card: Visi
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{state === "sent" ? "Request sent. You're in good hands" : "Book a workshop visit"}</DialogTitle>
-          <DialogDescription>{state === "sent" ? `The workshop picks one of your times and confirms by ${CHANNELS.find(c => c.id === channel)?.label}. You'll see the confirmed time here under your chat soon.` : `They'll see “${card?.issue ?? ""}”, Jackie's rough price and your contact details. Nothing else from your chat.`}</DialogDescription>
+          <DialogDescription>{state === "sent" ? `The workshop picks one of your times and confirms by ${CHANNELS.find(c => c.id === channel)?.label}.` : `They'll see “${card?.issue ?? ""}”, Jackie's rough price and your contact details. Nothing else from your chat.`}</DialogDescription>
         </DialogHeader>
         {state === "sent" ? <Button onClick={onClose}>Done</Button>
           : !ready ? null
