@@ -10,6 +10,7 @@ import {
 import { getWikidataItem, searchWikidata } from "@/lib/ai/wikidata.server";
 import { lookupFaultCode } from "@/lib/ai/obd.server";
 import { createSuggestWorkshopVisit } from "@/lib/ai/workshop.server";
+import { createBookingTools } from "@/lib/ai/booking.server";
 import { asTier, DEFAULT_TIERS, tierModel } from "@/lib/ai-tiers";
 import { readTeslaManualPage, searchTeslaManual } from "@/lib/ai/tesla.server";
 import { QUOTA_ERROR, quotaLimit } from "@/lib/chat-quota";
@@ -64,7 +65,8 @@ Hard rules:
 5. Tesla Model 3 (2017–2023) only: if the driver has told you their car is a Tesla Model 3, or asks about one, also use searchTeslaManual and readTeslaManualPage (Tesla's official service manual) and cite the page as a markdown link with its title. Turn manual content into plain words about what it means for the driver; do not give step-by-step repair instructions, and warn that anything orange-cabled is high voltage and only for trained technicians. If the car came from a confidential plate lookup, use the manual only if the driver named the car themselves.
 6. Prices: never state money figures yourself; the suggestWorkshopVisit card drafts a rough SEK range incl. VAT. Call it an estimate, not a quote. When the issue needs a workshop, end by calling suggestWorkshopVisit once.
 7. Car context first: if no vehicle is selected and the driver has not named their car yet, ask once, early and briefly, for make, model and year (and mileage if relevant), explaining it helps you be more precise; still give a useful general answer in the same reply. If they give only part (e.g. just the brand) or decline, accept it, never ask again, and proceed with clearly stated general assumptions. Never ask this when a car is selected, including a confidential plate lookup.
-8. If the driver mentions warning signs like brake failure, smoke, burning smell, steering loss or a flashing engine light, tell them first to stop driving and get help.
+8. Booking in chat: when the driver wants to book or asks when they can come in, call getAvailableTimes and offer a few concrete free times in plain words (never invent times). Let them pick 1 to 3. Then collect what is still missing: the job (use the issue from your workshop card if there is one), their name, phone, and whether the workshop should confirm by SMS, WhatsApp or email (ask for the email if email). Show a short summary and ask "Shall I send it?". Only after a clear yes, call bookVisit once, passing any price range from your workshop card. If they are not signed in, tell them to sign in first with the button at the top; their chat stays. They can also use the "Book a visit" button instead.
+9. If the driver mentions warning signs like brake failure, smoke, burning smell, steering loss or a flashing engine light, tell them first to stop driving and get help.
 
 For troubleshooting, answer with this structure (markdown headings, short):
 ### What it could be
@@ -130,10 +132,10 @@ export const Route = createFileRoute("/api/chat")({
         const suggestWorkshopVisit = createSuggestWorkshopVisit(provider.responses(quoteAi.model), quoteAi.effort, shop ? priceLines(shop) : "", shop?.price_list ?? []);
         const result = streamText({
           model: provider.responses(chatAi.model),
-          instructions: `${BASE_PROMPT}${shop ? `\n\n${workshopContext(shop)}` : ""}\n\nInterface language: ${({ en: "English", sv: "Swedish", de: "German" })[parsed.data.lang ?? "en"]}.\n\nVehicle: ${vehicleContext(parsed.data.vehicle)}`,
+          instructions: `${BASE_PROMPT}\n\nToday (Stockholm): ${new Date().toLocaleDateString("en-GB", { timeZone: "Europe/Stockholm", weekday: "long", day: "numeric", month: "long", year: "numeric" })}.${shop ? `\n\n${workshopContext(shop)}` : ""}\n\nInterface language: ${({ en: "English", sv: "Swedish", de: "German" })[parsed.data.lang ?? "en"]}.\n\nVehicle: ${vehicleContext(parsed.data.vehicle)}`,
           messages: await convertToModelMessages(messages),
-          tools: { searchWikidata, getWikidataItem, lookupFaultCode, searchTeslaManual, readTeslaManualPage, suggestWorkshopVisit },
-          stopWhen: stepCountIs(8),
+          tools: { searchWikidata, getWikidataItem, lookupFaultCode, searchTeslaManual, readTeslaManualPage, suggestWorkshopVisit, ...createBookingTools({ workshopId: parsed.data.workshopId, userId, token: request.headers.get("authorization")?.replace(/^Bearer /, "") ?? "", vehicleLabel: parsed.data.vehicle && !parsed.data.vehicle.confidential ? parsed.data.vehicle.description ?? "" : "" }) },
+          stopWhen: stepCountIs(10),
           abortSignal: request.signal,
           providerOptions: {
             openai: {

@@ -80,8 +80,13 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
                   <Button onClick={() => onBook({ issue: o.issue ?? "", service: o.service, urgency: o.urgency, priceLowSek: o.priceLowSek, priceHighSek: o.priceHighSek, note: o.note })}><CalendarCheck/> {t.requestVisit}</Button>
                 </div>;
               }
+              if (isToolUIPart(part) && getToolName(part) === "bookVisit") {
+                const o = part.state === "output-available" ? part.output as { ok?: boolean; workshop?: string; times?: string[] } : null;
+                if (!o?.ok) return null;
+                return <div key={i} className="booking-done"><strong><CalendarCheck/> {t.bookedTitle}</strong><span>{t.bookedBody.replace("%w", o.workshop ?? "")}</span><span className="history-note">{(o.times ?? []).join(" · ")}</span></div>;
+              }
               if (isToolUIPart(part)) {
-                const tools = m.parts.filter(p => isToolUIPart(p) && getToolName(p) !== "suggestWorkshopVisit");
+                const tools = m.parts.filter(p => isToolUIPart(p) && getToolName(p) !== "suggestWorkshopVisit" && getToolName(p) !== "bookVisit");
                 if (tools[0] !== part) return null;
                 const running = tools.some(p => isToolUIPart(p) && (p.state === "input-streaming" || p.state === "input-available"));
                 const label = (n: string) => n === "searchWikidata" ? t.toolSearch : n === "lookupFaultCode" ? t.toolCode : n.includes("Tesla") ? t.toolTesla : t.toolItem;
