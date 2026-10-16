@@ -41,7 +41,7 @@ export function RequestVisitDialog({ card, vehicleLabel, onClose, workshopId }: 
     if (!card) return;
     setState("idle"); setPicks([]); setIssue(""); setService("");
     if (user?.email) setEmail(e => e || user.email || "");
-    supabase.from("workshops").select("id,name,city").order("name").then(({ data }) => { const list = (data ?? []).filter(w => !workshopId || w.id === workshopId); setShops(list); if (list[0]) { const first = list[0].id; setShopId(s => workshopId ?? (s || first)); }; });
+    supabase.rpc("list_partner_workshops").then(({ data }) => { const list = (data ?? []).filter(w => !workshopId || w.id === workshopId); setShops(list); if (list[0]) { const first = list[0].id; setShopId(s => workshopId ?? (s || first)); }; });
   }, [card]);
 
   // Each workshop decides its own bookable days, times and notice
