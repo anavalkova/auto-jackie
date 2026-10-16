@@ -71,6 +71,7 @@ const dict = {
       title: "Your phone can keep ringing. Jackie already answered.",
       sub: "Jackie chats with drivers around the clock, in plain words, in three languages. You wake up to booked jobs instead of missed calls.",
       cta: "Sign in to your workshop", ctaNote: "Invite only. We set you up personally.",
+      demoCta: "Explore the demo workshop", demoNote: "Signed in? Open Demo Verkstad in read-only mode and click around freely.",
       jackieCaption: "Jackie. Never sleeps, never judges.",
       steps: [
         { t: "A driver vents", d: "2 a.m., strange noise, mild panic." },
