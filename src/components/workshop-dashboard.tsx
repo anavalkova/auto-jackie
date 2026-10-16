@@ -163,16 +163,19 @@ export function WorkshopDashboard() {
       <SheetContent className="ws-sheet">{selected && <>
         <SheetHeader><SheetTitle>{selected.issue}</SheetTitle><SheetDescription>Received {when(selected.created_at)} · get it looked at: {selected.urgency}</SheetDescription></SheetHeader>
         <div className="ws-detail">
-          <section><span className="eyebrow">CUSTOMER</span><p><strong>{selected.contact_name}</strong></p><Button variant="outline" asChild><a href={`tel:${selected.contact_phone.replace(/\s/g, "")}`}><Phone/> {selected.contact_phone}</a></Button></section>
-          {selected.vehicle_label && <section><span className="eyebrow">CAR</span><p>{selected.vehicle_label}</p></section>}
-          <QuoteSection key={selected.id} item={selected} shopName={shop?.name ?? ""} onSaved={d => { setItems(xs => xs.map(x => x.id === d.id ? d : x)); setSelected(d); }}/>
-          <section><span className="eyebrow">{selected.booked_at ? "BOOKED" : "PREFERRED TIMES"}</span>
+          <section><span className="eyebrow">THE VISIT</span>
+            <table className="ws-table"><tbody>
+              <tr><td>Customer</td><td><strong>{selected.contact_name}</strong></td></tr>
+              {selected.vehicle_label && <tr><td>Car</td><td>{selected.vehicle_label}</td></tr>}
+              <tr><td>Service</td><td>{selected.service ?? OTHER}</td></tr>
+              <tr><td>Wants confirmation by</td><td>{selected.contact_channel === "email" ? `email (${selected.contact_email ?? "not given"})` : selected.contact_channel === "whatsapp" ? "WhatsApp" : "SMS"}</td></tr>
+            </tbody></table>
             {selected.booked_at ? <p><strong>{slotLabel(selected.booked_at)}</strong> <Button variant="link" size="sm" onClick={() => void book(selected, null)}>Change</Button></p>
-              : selected.preferred_slots.length === 0 ? <p className="history-note">No times given. Call to agree one.</p>
+              : selected.preferred_slots.length === 0 ? <p className="history-note">No time chosen yet.</p>
               : <div className="ws-filters">{selected.preferred_slots.map(t => <Button key={t} size="sm" variant="outline" onClick={() => void book(selected, t)}>Book {slotLabel(t)}</Button>)}</div>}
-            <p className="history-note">Wants confirmation by {selected.contact_channel === "email" ? `email (${selected.contact_email})` : selected.contact_channel === "whatsapp" ? "WhatsApp" : "SMS"}. Automatic messages come in phase 2.</p></section>
-          {selected.message && <section><span className="eyebrow">MESSAGE FROM THE DRIVER</span><p>{selected.message}</p></section>}
-          <section><span className="eyebrow">STATUS</span><div className="ws-filters">{STATUSES.map(s => <Button key={s.id} size="sm" variant={selected.status === s.id ? "default" : "outline"} onClick={() => void setStatus(selected, s.id)}>{s.label}</Button>)}</div></section>
+            {selected.message && <p className="history-note">The driver wrote: “{selected.message}”</p>}
+          </section>
+          <QuoteSection key={selected.id} item={selected} shopName={shop?.name ?? ""} onSaved={d => { setItems(xs => xs.map(x => x.id === d.id ? d : x)); setSelected(d); }}/>
         </div>
       </>}</SheetContent>
     </Sheet>
