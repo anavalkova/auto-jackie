@@ -564,3 +564,6 @@
 .booking-actions { display: flex; justify-content: flex-end; gap: 8px; position: sticky; bottom: 0; padding: 12px 0 4px; background: var(--background); }
 @media (max-width: 760px) { .booking-panel { padding: 0 16px 16px; overflow: visible; } .booking-grid { grid-template-columns: 1fr; } .booking-steps button { justify-content: center; } }
 .booking-done { display: grid; gap: 4px; padding: 12px 14px; border: 1px solid var(--primary); border-radius: 10px; background: var(--card); margin-top: 8px; }
+.vehicle-empty { flex-direction: row; align-items: center; gap: 6px; padding: 4px 8px; border-style: dashed; }
+.vehicle-empty > svg { display: block; width: 16px; height: 16px; flex-shrink: 0; }
+.vehicle-empty button { padding: 0 6px; }

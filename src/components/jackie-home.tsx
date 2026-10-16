@@ -170,9 +170,8 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
 
         <section className="vehicle-card" aria-label="Your car">
           <div className="vehicle-head"><span className="eyebrow">{user ? t.yourSavedCar : t.carForChat}</span>{vehicle && <Button variant="ghost" size="sm" onClick={() => setGarageOpen(true)}><Pencil/> {t.change}</Button>}</div>
-          {!vehicle ? <div className="vehicle-empty"><Car/>
-            <p>{user ? t.noCarSaved : t.noCarGuest}</p>
-            <Button onClick={() => setGarageOpen(true)}><Plus/> {user ? t.addCar : t.tellCar}</Button>
+          {!vehicle ? <div className="vehicle-empty" title={user ? t.noCarSaved : t.noCarGuest}><Car/>
+            <Button variant="ghost" size="sm" onClick={() => setGarageOpen(true)}><Plus/> {user ? t.addCar : t.tellCar}</Button>
           </div> : <>
             <h2 className="vehicle-name">{vehicle.confidential ? <span className="plate-chip"><span className="plate-eu">S</span>{vehicle.label}</span> : vehicle.label}</h2>
             <p className="vehicle-spec">{vehicle.confidential ? <><LockKeyhole/> {t.privateDetails}</> : vehicle.description}</p>
