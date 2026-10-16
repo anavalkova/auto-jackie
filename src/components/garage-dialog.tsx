@@ -67,14 +67,14 @@ export function GarageDialog({ open, onOpenChange, vehicle, onSave, signedIn }: 
 
   return <Dialog open={open} onOpenChange={o => { onOpenChange(o); setError(""); setPlateDone(false); }}>
     <DialogContent className="garage-dialog">
-      <DialogHeader><DialogTitle>{vehicle ? "Change your car" : "Tell Jackie about your car"}</DialogTitle><DialogDescription>{signedIn ? "Saved to your account so Jackie remembers it next time. Remove it any time." : "Used for this chat only. Nothing is saved — start a new chat or close the tab and it's gone."}</DialogDescription></DialogHeader>
+      <DialogHeader><DialogTitle>{vehicle ? "Change your car" : "Tell Jackie about your car"}</DialogTitle><DialogDescription>{signedIn ? "Saved to your account so Jackie remembers it next time. Remove it any time." : "Used for this chat only. Nothing is saved. Start a new chat or close the tab and it's gone."}</DialogDescription></DialogHeader>
       <div className="garage-field"><Label htmlFor="mileage">Odometer (km), optional</Label><Input id="mileage" inputMode="numeric" placeholder="e.g. 84 000" value={mileage} onChange={e => setMileage(e.target.value)}/></div>
       <Tabs defaultValue="plate" onValueChange={() => setError("")}>
         <TabsList className="garage-tabs"><TabsTrigger value="plate">Swedish plate</TabsTrigger><TabsTrigger value="hsn">German HSN/TSN</TabsTrigger><TabsTrigger value="manual">Pick manually</TabsTrigger></TabsList>
         <TabsContent value="plate" className="garage-pane">
           {plateDone ? <p className="plate-confirm" role="status">I got the information.</p> : <>
             <div className="garage-field"><Label htmlFor="plate">Registration number</Label><Input id="plate" placeholder="ABC 123" value={plate} onChange={e => setPlate(e.target.value)} className="plate-input"/></div>
-            <p className="garage-note">Registry details stay private — they're used for service timing, not shown here.</p>
+            <p className="garage-note">Registry details stay private. They're used for service timing, not shown here.</p>
             <Button onClick={savePlate} disabled={looking || !plate.trim()}>{looking ? "Checking the register…" : "Use this plate"}</Button>
           </>}
         </TabsContent>
