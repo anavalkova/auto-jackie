@@ -521,7 +521,7 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
   const link = shop.slug && typeof window !== "undefined" ? `${window.location.origin}/w/${shop.slug}` : "";
   const submit = async () => {
     if (city !== shop.city) { await supabase.from("workshops").update({ city }).eq("id", shop.id); onSaved(); }
-    await save({ phone: s.phone, address: s.address, opening_hours: s.opening_hours, contact_email: s.contact_email, website: s.website,
+    await save({ phone: s.phone, address: s.address, opening_hours: s.opening_hours, contact_email: s.contact_email,
       brand_accent: /^#[0-9a-fA-F]{6}$/.test(s.brand_accent) ? s.brand_accent : "", brand_logo_url: s.brand_logo_url.startsWith("data:image/") ? s.brand_logo_url : "", brand_greeting: s.brand_greeting,
       website: /^https?:\/\//i.test(s.website) ? s.website : "" });
   };
