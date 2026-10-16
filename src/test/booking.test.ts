@@ -1,0 +1,12 @@
+import { describe, expect, it } from "vitest";
+import { upcomingDays } from "@/lib/booking";
+
+describe("booking slots", () => {
+  it("skips today and weekends", () => {
+    const days = upcomingDays(new Date("2026-10-16T10:00:00Z"), 3); // Friday
+    expect(days.map(d => d.key)).toEqual(["2026-10-19", "2026-10-20", "2026-10-21"]);
+  });
+  it("uses Stockholm time (08:00 CEST = 06:00 UTC)", () => {
+    expect(upcomingDays(new Date("2026-10-16T10:00:00Z"), 1)[0]!.slots[0]!.toISOString()).toBe("2026-10-19T06:00:00.000Z");
+  });
+});

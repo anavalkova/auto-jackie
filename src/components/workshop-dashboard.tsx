@@ -1,3 +1,4 @@
+import { slotLabel } from "@/lib/booking";
 import { Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BadgeCheck, CalendarClock, Car, Clock, Inbox, MessageCircle, Moon, Phone, ShieldCheck, Sparkles, TrendingUp, Wrench } from "lucide-react";
@@ -60,6 +61,11 @@ export function WorkshopDashboard() {
   }, [items]);
   const shown = items.filter(i => filter === "open" ? OPEN.includes(i.status) : i.status === filter);
 
+  const book = async (i: Inquiry, at: string | null) => {
+    const { data, error } = await supabase.from("inquiries").update({ booked_at: at, status: at ? "booked" : "contacted" }).eq("id", i.id).select("*").single();
+    if (error || !data) return;
+    setItems(xs => xs.map(x => x.id === data.id ? data : x)); setSelected(data);
+  };
   const setStatus = async (i: Inquiry, status: Status) => {
     const { data, error } = await supabase.from("inquiries").update({ status }).eq("id", i.id).select("*").single();
     if (error || !data) { setError(true); return; }
@@ -122,6 +128,11 @@ export function WorkshopDashboard() {
           <section><span className="eyebrow">CUSTOMER</span><p><strong>{selected.contact_name}</strong></p><Button variant="outline" asChild><a href={`tel:${selected.contact_phone.replace(/\s/g, "")}`}><Phone/> {selected.contact_phone}</a></Button></section>
           {selected.vehicle_label && <section><span className="eyebrow">CAR</span><p>{selected.vehicle_label}</p></section>}
           <section><span className="eyebrow">JACKIE'S ROUGH ESTIMATE</span><p>{selected.price_low_sek != null && selected.price_high_sek != null ? `${kr(selected.price_low_sek)} to ${kr(selected.price_high_sek)} incl. VAT` : "No estimate"}</p>{selected.note && <p className="history-note">{selected.note}</p>}</section>
+          <section><span className="eyebrow">{selected.booked_at ? "BOOKED" : "PREFERRED TIMES"}</span>
+            {selected.booked_at ? <p><strong>{slotLabel(selected.booked_at)}</strong> <Button variant="link" size="sm" onClick={() => void book(selected, null)}>Change</Button></p>
+              : selected.preferred_slots.length === 0 ? <p className="history-note">No times given. Call to agree one.</p>
+              : <div className="ws-filters">{selected.preferred_slots.map(t => <Button key={t} size="sm" variant="outline" onClick={() => void book(selected, t)}>Book {slotLabel(t)}</Button>)}</div>}
+            <p className="history-note">Wants confirmation by {selected.contact_channel === "email" ? `email (${selected.contact_email})` : selected.contact_channel === "whatsapp" ? "WhatsApp" : "SMS"}. Automatic messages come in phase 2.</p></section>
           {selected.message && <section><span className="eyebrow">MESSAGE FROM THE DRIVER</span><p>{selected.message}</p></section>}
           <section><span className="eyebrow">STATUS</span><div className="ws-filters">{STATUSES.map(s => <Button key={s.id} size="sm" variant={selected.status === s.id ? "default" : "outline"} onClick={() => void setStatus(selected, s.id)}>{s.label}</Button>)}</div></section>
           <Button disabled title="Coming with the quoting engine">Draft a quote · coming soon</Button>

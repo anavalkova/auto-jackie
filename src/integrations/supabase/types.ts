@@ -55,6 +55,9 @@ export type Database = {
       }
       inquiries: {
         Row: {
+          booked_at: string | null
+          contact_channel: Database["public"]["Enums"]["contact_channel"]
+          contact_email: string
           contact_name: string
           contact_phone: string
           created_at: string
@@ -63,6 +66,7 @@ export type Database = {
           issue: string
           message: string
           note: string
+          preferred_slots: string[]
           price_high_sek: number | null
           price_low_sek: number | null
           status: Database["public"]["Enums"]["inquiry_status"]
@@ -72,6 +76,9 @@ export type Database = {
           workshop_id: string
         }
         Insert: {
+          booked_at?: string | null
+          contact_channel?: Database["public"]["Enums"]["contact_channel"]
+          contact_email?: string
           contact_name: string
           contact_phone: string
           created_at?: string
@@ -80,6 +87,7 @@ export type Database = {
           issue: string
           message?: string
           note?: string
+          preferred_slots?: string[]
           price_high_sek?: number | null
           price_low_sek?: number | null
           status?: Database["public"]["Enums"]["inquiry_status"]
@@ -89,6 +97,9 @@ export type Database = {
           workshop_id: string
         }
         Update: {
+          booked_at?: string | null
+          contact_channel?: Database["public"]["Enums"]["contact_channel"]
+          contact_email?: string
           contact_name?: string
           contact_phone?: string
           created_at?: string
@@ -97,6 +108,7 @@ export type Database = {
           issue?: string
           message?: string
           note?: string
+          preferred_slots?: string[]
           price_high_sek?: number | null
           price_low_sek?: number | null
           status?: Database["public"]["Enums"]["inquiry_status"]
@@ -295,6 +307,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin"
+      contact_channel: "email" | "sms" | "whatsapp"
       inquiry_status: "new" | "contacted" | "quoted" | "booked" | "closed"
       workshop_role: "owner" | "staff"
     }
@@ -425,6 +438,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin"],
+      contact_channel: ["email", "sms", "whatsapp"],
       inquiry_status: ["new", "contacted", "quoted", "booked", "closed"],
       workshop_role: ["owner", "staff"],
     },

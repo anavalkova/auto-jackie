@@ -8,6 +8,10 @@ import { SignInDialog } from "@/components/sign-in-dialog";
 import { useSessionUser } from "@/hooks/use-session-user";
 import { WhyNote } from "@/components/why-note";
 import { supabase } from "@/integrations/supabase/client";
+import { MAX_PICKS, slotLabel, upcomingDays } from "@/lib/booking";
+
+type Channel = "sms" | "whatsapp" | "email";
+const CHANNELS: { id: Channel; label: string }[] = [{ id: "sms", label: "SMS" }, { id: "whatsapp", label: "WhatsApp" }, { id: "email", label: "Email" }];
 
 export type VisitCard = { issue: string; urgency?: string | undefined; priceLowSek?: number | undefined; priceHighSek?: number | undefined; note?: string | undefined };
 type Shop = { id: string; name: string; city: string };
@@ -20,22 +24,29 @@ export function RequestVisitDialog({ card, vehicleLabel, onClose }: { card: Visi
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
+  const [email, setEmail] = useState("");
+  const [channel, setChannel] = useState<Channel>("sms");
+  const [picks, setPicks] = useState<string[]>([]);
+  const [days] = useState(() => upcomingDays(new Date(), 6));
+  const toggle = (iso: string) => setPicks(p => p.includes(iso) ? p.filter(x => x !== iso) : p.length >= MAX_PICKS ? p : [...p, iso]);
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [signIn, setSignIn] = useState(false);
 
   useEffect(() => {
     if (!card) return;
-    setState("idle");
+    setState("idle"); setPicks([]);
+    if (user?.email) setEmail(e => e || user.email || "");
     supabase.from("workshops").select("id,name,city").order("name").then(({ data }) => { setShops(data ?? []); if (data?.[0]) { const first = data[0].id; setShopId(s => s || first); }; });
   }, [card]);
 
   const send = async () => {
-    if (!card || !user || !shopId) return;
+    if (!card || !user || !shopId || picks.length === 0) return;
     setState("sending");
     const { error } = await supabase.from("inquiries").insert({
       workshop_id: shopId, driver_id: user.id, issue: card.issue.slice(0, 200), urgency: card.urgency ?? "soon",
       price_low_sek: card.priceLowSek ?? null, price_high_sek: card.priceHighSek ?? null, note: (card.note ?? "").slice(0, 1000),
       vehicle_label: vehicleLabel.slice(0, 120), message: message.trim(), contact_name: name.trim(), contact_phone: phone.trim(),
+      preferred_slots: [...picks].sort(), contact_channel: channel, contact_email: email.trim(),
     });
     setState(error ? "error" : "sent");
   };
@@ -44,8 +55,8 @@ export function RequestVisitDialog({ card, vehicleLabel, onClose }: { card: Visi
     <Dialog open={card !== null} onOpenChange={o => { if (!o) onClose(); }}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{state === "sent" ? "Sent. You're in good hands" : "Ask a workshop to take a look"}</DialogTitle>
-          <DialogDescription>{state === "sent" ? "The workshop sees Jackie's summary and will contact you to agree a time and confirm the price." : `They'll see “${card?.issue ?? ""}”, Jackie's rough price and your contact details. Nothing else from your chat.`}</DialogDescription>
+          <DialogTitle>{state === "sent" ? "Request sent. You're in good hands" : "Book a workshop visit"}</DialogTitle>
+          <DialogDescription>{state === "sent" ? `The workshop picks one of your times and confirms by ${CHANNELS.find(c => c.id === channel)?.label}.` : `They'll see “${card?.issue ?? ""}”, Jackie's rough price and your contact details. Nothing else from your chat.`}</DialogDescription>
         </DialogHeader>
         {state === "sent" ? <Button onClick={onClose}>Done</Button>
           : !ready ? null
@@ -56,12 +67,16 @@ export function RequestVisitDialog({ card, vehicleLabel, onClose }: { card: Visi
               <select id="v-shop" className="native-select" value={shopId} onChange={e => setShopId(e.target.value)}>{shops.map(s => <option key={s.id} value={s.id}>{s.name}{s.city ? ` · ${s.city}` : ""}</option>)}</select></div>
             <div><Label htmlFor="v-name">Your name</Label><Input id="v-name" required maxLength={80} value={name} onChange={e => setName(e.target.value)}/></div>
             <div><Label htmlFor="v-phone">Phone</Label><Input id="v-phone" required type="tel" minLength={5} maxLength={30} placeholder="070 123 45 67" value={phone} onChange={e => setPhone(e.target.value)}/></div>
+            <div className="ws-span"><Label>When can you drop the car off? Pick up to {MAX_PICKS}</Label>
+              <div className="slot-grid">{days.map(d => <div key={d.key} className="slot-day"><span className="slot-day-name">{slotLabel(d.slots[0]!).split(",")[0]}</span>{d.slots.map(sl => { const iso = sl.toISOString(); const on = picks.includes(iso); return <button key={iso} type="button" className={"slot" + (on ? " is-on" : "")} aria-pressed={on} disabled={!on && picks.length >= MAX_PICKS} onClick={() => toggle(iso)}>{sl.toLocaleTimeString("en-GB", { timeZone: "Europe/Stockholm", hour: "2-digit", minute: "2-digit" })}</button>; })}</div>)}</div></div>
+            <div><Label>Confirm by</Label><div className="channel-row" role="radiogroup">{CHANNELS.map(c => <button key={c.id} type="button" role="radio" aria-checked={channel === c.id} className={"slot" + (channel === c.id ? " is-on" : "")} onClick={() => setChannel(c.id)}>{c.label}</button>)}</div></div>
+            {channel === "email" && <div><Label htmlFor="v-email">Email</Label><Input id="v-email" type="email" required maxLength={120} value={email} onChange={e => setEmail(e.target.value)}/></div>}
             <div><Label htmlFor="v-msg">Anything else? (optional)</Label><Textarea id="v-msg" maxLength={1000} value={message} onChange={e => setMessage(e.target.value)} placeholder="When suits you, how the car feels…"/></div>
             <WhyNote id="visit" title="No phone queue, no explaining the noise twice." stats={[
               { value: "1 in 5", text: "calls to auto service businesses go unanswered. Your request arrives in writing instead, with Jackie's diagnosis and rough price attached.", source: { label: "Marchex", url: "https://www.marchex.com/up-to-21-percent-of-automotive-service-customer-calls-go-unanswered-creating-significant-revenue-leakage/" } },
             ]}/>
             {state === "error" && <p className="chat-error" role="alert">Couldn't send it. Please try again.</p>}
-            <Button type="submit" disabled={state === "sending"}>{state === "sending" ? "Sending…" : "Send request"}</Button>
+            <Button type="submit" disabled={state === "sending" || picks.length === 0}>{state === "sending" ? "Sending…" : picks.length === 0 ? "Pick at least one time" : `Request ${picks.length === 1 ? "this time" : `these ${picks.length} times`}`}</Button>
           </form>}
       </DialogContent>
     </Dialog>
