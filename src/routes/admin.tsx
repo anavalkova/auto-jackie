@@ -41,7 +41,7 @@ function AdminPage() {
       supabase.from("workshops").select("id,name,city,created_at").order("created_at", { ascending: false }),
       supabase.from("workshop_invites").select("workshop_id,email,claimed_at"),
     ]);
-    setRows((ws ?? []).map(w => { const i = inv?.find(x => x.workshop_id === w.id); return { ...w, email: i?.email ?? "—", claimed: !!i?.claimed_at }; }));
+    setRows((ws ?? []).map(w => { const i = inv?.find(x => x.workshop_id === w.id); return { ...w, email: i?.email ?? "No invite", claimed: !!i?.claimed_at }; }));
   }, []);
   useEffect(() => { if (isAdmin) void load(); }, [isAdmin, load]);
 
@@ -49,7 +49,7 @@ function AdminPage() {
     setBusy(true); setMsg("");
     const { error } = await supabase.rpc("admin_onboard_workshop", { _name: name, _email: email, _city: city });
     setBusy(false);
-    if (error) return setMsg("Couldn't onboard — check the name and email.");
+    if (error) return setMsg("Couldn't onboard. Check the name and email.");
     setMsg(`${name} is ready. When ${email} signs in, they'll land in their dashboard.`);
     setName(""); setEmail(""); setCity(""); void load();
   };
@@ -71,9 +71,9 @@ function AdminPage() {
         : <>
           <div className="ws-title"><div><span className="eyebrow">OPERATIONS</span><h1>Onboard a workshop</h1><p className="history-note">Each workshop gets its own space, started from the standard template (rates, opening hours, services).</p></div></div>
           <WhyNote id="admin" title="The business case in one glance." stats={[
-            { value: "36%", text: "of privately owned cars in Sweden are registered to women — a huge customer group the industry's jargon-heavy booking flow underserves.", source: { label: "Trafikanalys, 2022", url: "https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" } },
+            { value: "36%", text: "of privately owned cars in Sweden are registered to women. A huge customer group the industry's jargon-heavy booking flow underserves.", source: { label: "Trafikanalys, 2022", url: "https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" } },
             { value: "$108k", text: "estimated revenue a single auto service location loses per year to poor call handling. Jackie captures that demand in writing instead.", source: { label: "Marchex via Auto Service World", url: "https://www.autoserviceworld.com/phone-fails-lead-to-missed-automotive-service-revenue-report/" } },
-            { value: "2 models", text: "a lightweight everyday model for chat, a stronger one only for price estimates — keeping cost per conversation low enough for workshop monetization." },
+            { value: "2 models", text: "a lightweight everyday model for chat, a stronger one only for price estimates. That keeps cost per conversation low enough for workshop monetization." },
           ]} footer="Onboarding stays manual on purpose: we verify each workshop before drivers can send them requests."/>
           <form className="admin-form" onSubmit={e => { e.preventDefault(); void onboard(); }}>
             <div><Label htmlFor="a-name">Workshop name</Label><Input id="a-name" required minLength={2} maxLength={80} value={name} onChange={e => setName(e.target.value)}/></div>
@@ -84,7 +84,7 @@ function AdminPage() {
           {msg && <p className="history-note" role="status">{msg}</p>}
 
           <div className="ws-title admin-demo"><div><span className="eyebrow">DEMO</span><h2>Demo Verkstad for judges</h2><p className="history-note">Creates the demo workshop with sample requests the first time. Each click issues a new password.</p></div><Button variant="outline" onClick={() => void makeDemo()} disabled={busy}>Set up / reset demo login</Button></div>
-          {demo && <div className="offer-card"><span className="eyebrow">DEMO LOGIN — COPY IT NOW</span><p>Email: <strong>{demo.email}</strong></p><p>Password: <strong>{demo.password}</strong></p></div>}
+          {demo && <div className="offer-card"><span className="eyebrow">DEMO LOGIN · COPY IT NOW</span><p>Email: <strong>{demo.email}</strong></p><p>Password: <strong>{demo.password}</strong></p></div>}
 
           <h2 className="admin-h2">Workshops ({rows.length})</h2>
           <ul className="ws-list">{rows.map(r => <li key={r.id} className="admin-row"><strong>{r.name}</strong><span>{r.city}</span><span>{r.email}</span><span className={`ws-status ${r.claimed ? "s-booked" : ""}`}>{r.claimed ? "Signed in" : "Invited"}</span></li>)}</ul>
