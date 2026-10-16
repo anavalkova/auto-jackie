@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SignInDialog } from "@/components/sign-in-dialog";
-import { useSessionUser } from "@/hooks/use-session-user";
+import { useAccess } from "@/hooks/use-access";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -23,7 +23,8 @@ const when = (d: string) => new Date(d).toLocaleString("en-GB", { timeZone: "Eur
 const mid = (i: Inquiry) => i.price_low_sek != null && i.price_high_sek != null ? (i.price_low_sek + i.price_high_sek) / 2 : 0;
 
 export function WorkshopDashboard() {
-  const { user, ready } = useSessionUser();
+  const { user, ready, isAdmin } = useAccess();
+  const [tab, setTab] = useState<"requests" | "settings">("requests");
   const [shop, setShop] = useState<Shop | null | undefined>(undefined);
   const [items, setItems] = useState<Inquiry[]>([]);
   const [filter, setFilter] = useState<Status | "open">("open");
@@ -65,15 +66,16 @@ export function WorkshopDashboard() {
 
   const header = <header className="site-header">
     <Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span><span className="brand-sub">for workshops</span></Link>
-    <nav aria-label="Workshop navigation"><Button variant="ghost" asChild><Link to="/">Driver view</Link></Button></nav>
+    <nav aria-label="Workshop navigation">{isAdmin && <Button variant="outline" asChild><Link to="/admin">Operations</Link></Button>}<Button variant="ghost" asChild><Link to="/">Driver view</Link></Button></nav>
   </header>;
 
   let body;
   if (!ready || (user && shop === undefined)) body = <p className="history-note" role="status">Loading…</p>;
   else if (!user) body = <div className="ws-empty"><Wrench/><h1>Your workshop, with Jackie on the front desk.</h1><p>Drivers explain their trouble to Jackie. You get a clear summary, a rough price and their phone number — ready to call.</p><Button onClick={() => setSignIn(true)}>Sign in to open your workshop</Button></div>;
-  else if (!shop) body = <CreateWorkshop onCreated={loadShop}/>;
+  else if (!shop) body = <div className="ws-empty"><Wrench/><h1>Your workshop isn't set up yet</h1><p>AutoJackie's team sets up each workshop personally. If we've onboarded you, sign in with the email you gave us{user.email ? ` (you're signed in as ${user.email})` : ""}.</p>{isAdmin && <Button asChild><Link to="/admin">Go to operations</Link></Button>}</div>;
   else body = <>
-    <div className="ws-title"><div><span className="eyebrow">WORKSHOP DASHBOARD</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div><Button variant="outline" onClick={() => void loadItems()}>Refresh</Button></div>
+    <div className="ws-title"><div><span className="eyebrow">WORKSHOP DASHBOARD</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div><div className="ws-filters"><Button variant={tab === "requests" ? "default" : "outline"} onClick={() => setTab("requests")}>Requests</Button><Button variant={tab === "settings" ? "default" : "outline"} onClick={() => setTab("settings")}>Settings</Button></div></div>
+    {tab === "settings" ? <WorkshopSettings workshopId={shop.id} canEdit={shop.role === "owner"}/> : <>
     <div className="ws-kpis">
       <Kpi icon={<Inbox/>} label="New requests" value={String(kpis.fresh)}/>
       <Kpi icon={<CalendarClock/>} label="Need you this week" value={String(kpis.urgent)}/>
@@ -92,6 +94,7 @@ export function WorkshopDashboard() {
         <span className="ws-price">{i.price_low_sek != null && i.price_high_sek != null ? `${kr(i.price_low_sek)}–${kr(i.price_high_sek)}` : "—"}</span>
         <time dateTime={i.created_at}>{when(i.created_at)}</time>
       </button></li>)}</ul>}
+    </>}
   </>;
 
   return <div className="app-frame">
@@ -118,18 +121,30 @@ function Kpi({ icon, label, value, hint }: { icon: React.ReactNode; label: strin
   return <div className="ws-kpi" title={hint}>{icon}<span className="eyebrow">{label.toUpperCase()}</span><strong>{value}</strong>{hint && <small>{hint}</small>}</div>;
 }
 
-function CreateWorkshop({ onCreated }: { onCreated: () => void }) {
-  const [name, setName] = useState(""); const [city, setCity] = useState(""); const [busy, setBusy] = useState(false); const [err, setErr] = useState(false);
-  const create = async () => {
-    setBusy(true);
-    const { error } = await supabase.from("workshops").insert({ name: name.trim(), city: city.trim() });
-    setBusy(false); setErr(!!error); if (!error) onCreated();
+function WorkshopSettings({ workshopId, canEdit }: { workshopId: string; canEdit: boolean }) {
+  const [f, setF] = useState<{ hourly_rate_sek: number; opening_hours: string; phone: string; address: string; services: string } | null>(null);
+  const [state, setState] = useState("");
+  useEffect(() => {
+    supabase.from("workshop_settings").select("*").eq("workshop_id", workshopId).maybeSingle().then(({ data }) => {
+      if (data) setF({ hourly_rate_sek: data.hourly_rate_sek, opening_hours: data.opening_hours, phone: data.phone, address: data.address, services: (data.services as string[]).join("\n") });
+    });
+  }, [workshopId]);
+  if (!f) return <p className="history-note" role="status">Loading settings…</p>;
+  const save = async () => {
+    setState("Saving…");
+    const { error } = await supabase.from("workshop_settings").update({ hourly_rate_sek: f.hourly_rate_sek, opening_hours: f.opening_hours, phone: f.phone, address: f.address, services: f.services.split("\n").map(x => x.trim()).filter(Boolean), updated_at: new Date().toISOString() }).eq("workshop_id", workshopId);
+    setState(error ? "Couldn't save. Please try again." : "Saved.");
   };
-  return <form className="ws-empty" onSubmit={e => { e.preventDefault(); void create(); }}>
-    <Wrench/><h1>Set up your workshop</h1><p>Two details to start. Prices, services and opening hours come next.</p>
-    <div className="visit-form ws-create"><div><Label htmlFor="w-name">Workshop name</Label><Input id="w-name" required minLength={2} maxLength={80} value={name} onChange={e => setName(e.target.value)} placeholder="Södermalm Bilservice"/></div>
-      <div><Label htmlFor="w-city">City</Label><Input id="w-city" maxLength={60} value={city} onChange={e => setCity(e.target.value)} placeholder="Stockholm"/></div>
-      {err && <p className="chat-error" role="alert">Couldn't create the workshop. Please try again.</p>}
-      <Button type="submit" disabled={busy}>{busy ? "Creating…" : "Create workshop"}</Button></div>
+  return <form className="visit-form ws-settings" onSubmit={e => { e.preventDefault(); void save(); }}>
+    <fieldset disabled={!canEdit} className="visit-form">
+      <div><Label htmlFor="s-rate">Hourly labour rate (kr, incl. VAT)</Label><Input id="s-rate" type="number" min={0} max={10000} value={f.hourly_rate_sek} onChange={e => setF({ ...f, hourly_rate_sek: Number(e.target.value) })}/></div>
+      <div><Label htmlFor="s-hours">Opening hours</Label><Input id="s-hours" maxLength={200} value={f.opening_hours} onChange={e => setF({ ...f, opening_hours: e.target.value })}/></div>
+      <div><Label htmlFor="s-phone">Phone</Label><Input id="s-phone" maxLength={30} value={f.phone} onChange={e => setF({ ...f, phone: e.target.value })}/></div>
+      <div><Label htmlFor="s-addr">Address</Label><Input id="s-addr" maxLength={200} value={f.address} onChange={e => setF({ ...f, address: e.target.value })}/></div>
+      <div><Label htmlFor="s-serv">Services you offer (one per line)</Label><textarea id="s-serv" className="native-select ws-textarea" value={f.services} onChange={e => setF({ ...f, services: e.target.value })}/></div>
+      {canEdit && <Button type="submit">Save settings</Button>}
+    </fieldset>
+    {!canEdit && <p className="history-note">Only the workshop owner can change these.</p>}
+    {state && <p className="history-note" role="status">{state}</p>}
   </form>;
 }
