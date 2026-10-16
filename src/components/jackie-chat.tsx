@@ -60,7 +60,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
             {m.parts.map((part, i) => {
               if (part.type === "text") return m.role === "user" ? <p key={i}>{part.text}</p> : <MessageResponse key={i}>{part.text}</MessageResponse>;
               if (isToolUIPart(part) && getToolName(part) === "suggestWorkshopVisit") {
-                const o = (part.state === "output-available" ? part.output : part.input) as { issue?: string; urgency?: string; priceLowSek?: number; priceHighSek?: number; note?: string } | undefined;
+                const o = (part.state === "output-available" ? part.output : part.input) as { issue?: string; service?: string; urgency?: string; priceLowSek?: number; priceHighSek?: number; note?: string } | undefined;
                 if (!o?.issue) return null;
                 return <div key={i} className="offer-card">
                   <span className="eyebrow">{t.whatsNext}</span>
