@@ -431,3 +431,4 @@
 .why-points { margin: 6px 0 0; padding-left: 18px; font-size: 13px; display: grid; gap: 4px; }
 .ws-soon-head { display: flex; justify-content: space-between; align-items: center; }
 .ws-soon { border-style: dashed; }
+.why-points { list-style: disc; } .why-points li::marker { color: var(--primary); }
