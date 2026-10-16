@@ -55,6 +55,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
   const [info, setInfo] = useState<"about" | "privacy" | null>(null);
   const [initial, setInitial] = useState<UIMessage[] | null>(chatId ? null : readGuestChat());
   const [missing, setMissing] = useState(false);
+  const [chatEmpty, setChatEmpty] = useState(true);
 
   // Older versions kept the car in this browser; guests are now private by default.
   useEffect(() => { try { localStorage.removeItem("autojackie.vehicle"); } catch { /* ignore */ } }, []);
@@ -182,7 +183,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
         </section>
 
         <section className="chat-history" aria-label="Chat history">
-          <div className="history-heading"><h2>{t.myChats}</h2><Button variant="ghost" size="icon" onClick={onReset} aria-label={t.newChat} title={t.newChat}><Plus/></Button></div>
+          <div className="history-heading"><h2>{t.myChats}</h2><Button variant="ghost" size="icon" onClick={onReset} disabled={isFreshChat} aria-label={t.newChat} title={t.newChat}><Plus/></Button></div>
           {!ready || chatsLoading ? <p className="history-note" role="status">{t.loadingChats}</p>
             : !user ? <div className="history-guest"><p className="history-note">{t.privateNotSaved}</p><Button variant="outline" size="sm" onClick={() => setSignInOpen(true)}><UserRound/> {t.signInChats}</Button></div>
             : chatsError ? <div><p className="history-note" role="alert">{t.chatsError}</p><Button variant="ghost" size="sm" onClick={() => void loadChats()}>{t.tryAgain}</Button></div>
@@ -195,7 +196,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
       </aside>
 
       <section className="assistant-area" aria-label="Chat with Jackie">
-        <div className="assistant-top">{workshop?.greeting ? <span className="shop-greeting">{workshop.greeting}</span> : <span/>}<div className="assistant-top-right"><Button variant="ghost" size="icon" className="assistant-new-chat" onClick={onReset} aria-label={t.newChat} title={t.newChat}><Plus/></Button><WhyNote id="driver" overlay autoOpen={false} label={t.whyChip} title={t.whyTitle} pitch={t.whyPitch} stats={[
+        <div className="assistant-top">{workshop?.greeting ? <span className="shop-greeting">{workshop.greeting}</span> : <span/>}<div className="assistant-top-right"><Button variant="ghost" size="icon" className="assistant-new-chat" onClick={onReset} disabled={isFreshChat} aria-label={t.newChat} title={t.newChat}><Plus/></Button><WhyNote id="driver" overlay autoOpen={false} label={t.whyChip} title={t.whyTitle} pitch={t.whyPitch} stats={[
           { value: "36%", text: t.why1, source: { label: "Trafikanalys, 2022", url: "https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" } },
           { value: "P0301?", text: t.why2 },
         ]}/></div></div>
@@ -203,7 +204,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
         <div className="chat-slot" hidden={!!directBooking}>
         {missing ? <div className="chat-empty"><h1>{t.missingTitle}</h1><p>{user ? t.missingDeleted : t.missingSignIn}</p><div className="starter-grid">{!user && <Button onClick={() => setSignInOpen(true)}>{t.signIn}</Button>}<Button variant="outline" asChild><Link to="/">{t.startNew}</Link></Button></div></div>
           : initial === null ? <div className="chat-empty"><p>{t.opening}</p></div>
-          : <JackieChat key={chatId ?? `new-${newChatKey}`} chatId={chatId} initialMessages={initial} vehicle={vehicle} pending={null} onPendingSent={() => {}} onTurnFinished={onTurnFinished} onReset={onReset} saving={!!user && !!chatId} workshopId={workshop?.id} onSignIn={() => setSignInOpen(true)} onBook={setDirectBooking}/>}
+          : <JackieChat key={chatId ?? `new-${newChatKey}`} chatId={chatId} initialMessages={initial} vehicle={vehicle} pending={null} onPendingSent={() => {}} onTurnFinished={onTurnFinished} onReset={onReset} saving={!!user && !!chatId} workshopId={workshop?.id} onSignIn={() => setSignInOpen(true)} onBook={setDirectBooking} onEmptyChange={setChatEmpty}/>}
         </div>
         <div className="assistant-bottom"><span className="swedish-flag"/><span><strong>{t.madeForSweden}</strong> · {t.bottom}</span></div>
       </section>
