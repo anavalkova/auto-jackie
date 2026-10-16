@@ -328,7 +328,7 @@ function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
   const holidays = [...swedishHolidays(y), ...swedishHolidays(y + 1)].filter(([k]) => k >= today).slice(0, 6);
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); void save({ booking_days: s.booking_days, slot_hours: s.slot_hours, min_notice_days: s.min_notice_days, max_ahead_days: s.max_ahead_days, close_holidays: s.close_holidays, closed_slots: closed }); }}>
     <fieldset disabled={!canEdit} className="ws-grid2" style={{ border: 0, padding: 0, margin: 0 }}>
-      <section className="ws-card"><h2 className="ws-label-row">Your normal week<Tip><p>The days and drop-off times drivers can pick. How long each job takes is set in Pricing engine.</p></Tip></h2>
+      <section className="ws-card"><h2 className="ws-label-row"><Tip><p>The days and drop-off times drivers can pick. How long each job takes is set in Pricing engine.</p></Tip>Your normal week</h2>
         <Label>Days</Label><div className="ws-chips">{WEEKDAYS.map(w => <Button key={w.d} type="button" size="sm" variant={s.booking_days.includes(w.d) ? "default" : "outline"} onClick={() => setS({ ...s, booking_days: flip(s.booking_days, w.d) })}>{w.l}</Button>)}</div>
         <Label>Drop-off times</Label><div className="ws-chips">{HOURS.map(h => <Button key={h} type="button" size="sm" variant={s.slot_hours.includes(h) ? "default" : "outline"} onClick={() => setS({ ...s, slot_hours: flip(s.slot_hours, h) })}>{String(h).padStart(2, "0")}:00</Button>)}</div>
         <div className="ws-grid2">
@@ -338,7 +338,7 @@ function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
             <select id="b-ahead" className="native-select" value={s.max_ahead_days} onChange={e => setS({ ...s, max_ahead_days: Number(e.target.value) })}>{AHEAD.map(a => <option key={a.d} value={a.d}>Up to {a.l} ahead</option>)}</select></div>
         </div>
       </section>
-      <section className="ws-card"><h2 className="ws-label-row">Days off<Tip><p>Close a whole day (vacation, inventory) or a single drop-off time. Drivers simply won't see it.</p></Tip></h2>
+      <section className="ws-card"><h2 className="ws-label-row"><Tip><p>Close a whole day (vacation, inventory) or a single drop-off time. Drivers simply won't see it.</p></Tip>Days off</h2>
         <label className="ws-label-row"><input type="checkbox" checked={s.close_holidays} onChange={e => setS({ ...s, close_holidays: e.target.checked })}/> Closed on Swedish public holidays<Tip><p>Built into AutoJackie, no calendar needed. Includes Midsummer Eve, Christmas Eve and New Year's Eve. Next up: {holidays.map(([k, n]) => `${n} (${k.slice(5)})`).join(", ")}.</p></Tip></label>
         <div className="ws-chips">
           <Input aria-label="Date" type="date" min={today} value={date} onChange={e => setDate(e.target.value)} style={{ width: 160 }}/>
@@ -392,7 +392,7 @@ function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
   return <form className="ws-section ws-wizard" onSubmit={e => { e.preventDefault(); void save({ ai_chat_tier: s.ai_chat_tier, ai_quote_tier: s.ai_quote_tier, services: (s.services as string[]).map(x => x.trim()).filter(Boolean), specialties: s.specialties, jackie_context: s.jackie_context }); }}>
     <Stepper steps={CONTEXT_STEPS} step={step} setStep={setStep}/>
     <section className="ws-card">
-      <div className="ws-step-head"><h2 className="ws-label-row">{step + 1}. {cur.title}<Tip><p><b>Drivers see:</b> {cur.sees}</p></Tip></h2></div>
+      <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>Drivers see:</b> {cur.sees}</p></Tip>{step + 1}. {cur.title}</h2></div>
       <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0, display: "grid", gap: 10 }}>
         {step === 0 && <>
           <Label htmlFor="c-serv">Services you offer (one per line)</Label><textarea id="c-serv" className="native-select ws-textarea" value={services} onChange={e => setS({ ...s, services: e.target.value.split("\n") })}/>
@@ -403,7 +403,7 @@ function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
           <textarea id="c-ctx" className="native-select ws-textarea ws-textarea-tall" maxLength={3000} placeholder="E.g. We use OEM brake parts only. We always replace pads and discs together. Diagnostics fee is deducted if you repair with us." value={s.jackie_context} onChange={e => setS({ ...s, jackie_context: e.target.value })}/>
         </>}
         {step === 2 && <>
-          <div className="ws-label-row history-note">How smart should Jackie be?<Tip><p>Pick a level for each group of jobs Jackie does. Smarter means better answers but higher running costs, which may change your AutoJackie price. ★ is our recommendation.</p></Tip></div>
+          <div className="ws-label-row history-note"><Tip><p>Pick a level for each group of jobs Jackie does. Smarter means better answers but higher running costs, which may change your AutoJackie price. ★ is our recommendation.</p></Tip>How smart should Jackie be?</div>
           <div className="ws-tiers">
             <TierRow title="Everyday chat" hint="Listening, explaining, fault codes and manual lookups. Most of the volume, so cost adds up here." value={s.ai_chat_tier as Tier} recommended={DEFAULT_TIERS.chat} onChange={v => setS({ ...s, ai_chat_tier: v })}/>
             <TierRow title="Rough quotes" hint="Drafting the price range a driver sees, using your price list. Rare, but accuracy builds trust." value={s.ai_quote_tier as Tier} recommended={DEFAULT_TIERS.quote} onChange={v => setS({ ...s, ai_quote_tier: v })}/>
@@ -423,7 +423,7 @@ function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
 function TierRow({ title, hint, value, recommended, onChange }: { title: string; hint: string; value: Tier; recommended: Tier; onChange: (t: Tier) => void }) {
   const diff = TIER_INFO[value].costFactor / TIER_INFO[recommended].costFactor;
   return <div className="ws-tier-row">
-    <div><h3 className="ws-label-row">{title}<Tip><p>{hint}</p></Tip></h3></div>
+    <div><h3 className="ws-label-row"><Tip><p>{hint}</p></Tip>{title}</h3></div>
     <div>
       <div className="ws-tier-options" role="group" aria-label={title}>{TIERS.map(t => <button key={t} type="button" className="ws-tier-opt" aria-pressed={value === t} onClick={() => onChange(t)}>
         <strong><span>{TIER_INFO[t].label}{t === recommended ? " ★" : ""}</span><span>{TIER_INFO[t].cost}</span></strong>{TIER_INFO[t].text}</button>)}</div>
@@ -455,7 +455,7 @@ function PricingView({ workshopId, canEdit }: { workshopId: string; canEdit: boo
   };
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); submit(); }}>
     <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0 }}>
-      <section className="ws-card"><h2 className="ws-label-row">Services, prices and times (incl. VAT)<Hint controls="every rough quote Jackie gives (the “What's next” card) and how long a booking blocks your calendar." shows="prices to drivers on your Jackie page, labelled as an estimate. Times only to you."/></h2>
+      <section className="ws-card"><h2 className="ws-label-row"><Hint controls="every rough quote Jackie gives (the “What's next” card) and how long a booking blocks your calendar." shows="prices to drivers on your Jackie page, labelled as an estimate. Times only to you."/>Services, prices and times (incl. VAT)</h2>
         <Label htmlFor="c-rate">Hourly labour rate (kr)</Label><Input id="c-rate" type="number" min={0} max={10000} value={s.hourly_rate_sek} onChange={e => setS({ ...s, hourly_rate_sek: Number(e.target.value) })}/>
         <table className="ws-table"><thead><tr><th>Service</th><th>Price (kr)</th><th>Time (min)</th><th/></tr></thead><tbody>
           {prices.map((p, i) => p.task === OTHER ? <tr key={i} className="ws-other-row"><td><strong>Other</strong><small className="history-note"> Anything Jackie can't match. You price it after a look.</small></td><td><Input aria-label="Price" type="number" min={0} max={200000} value={p.price_sek} title="0 = evaluated by you" onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></td><td><Input aria-label="Minutes" type="number" min={5} max={2880} step={5} value={p.minutes} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, minutes: Number(e.target.value) } : x))}/></td><td/></tr> : <tr key={i}><td><Input aria-label="Service" maxLength={80} value={p.task} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, task: e.target.value } : x))}/></td><td><Input aria-label="Price" type="number" min={0} max={200000} value={p.price_sek} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></td><td><Input aria-label="Minutes" type="number" min={5} max={2880} step={5} value={p.minutes} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, minutes: Number(e.target.value) } : x))}/></td><td><Button type="button" size="sm" variant="ghost" aria-label="Remove" onClick={() => setP(prices.filter((_, j) => j !== i))}>×</Button></td></tr>)}
@@ -487,7 +487,7 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); void submit(); }}>
     <Stepper steps={PROFILE_STEPS} step={step} setStep={setStep}/>
     <section className="ws-card">
-    <div className="ws-step-head"><h2 className="ws-label-row">{step + 1}. {PROFILE_STEPS[step]!.title}<Tip><p><b>Drivers see:</b> {PROFILE_STEPS[step]!.sees}</p></Tip></h2></div>
+    <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>Drivers see:</b> {PROFILE_STEPS[step]!.sees}</p></Tip>{step + 1}. {PROFILE_STEPS[step]!.title}</h2></div>
     <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0 }}>
       {step === 0 && <div className="ws-form-card ws-grid2">
         <div><div className="ws-label-row"><Label>Company name</Label><Hint controls="your name in the booking list and on your Jackie page." shows="to drivers. Managed by AutoJackie."/></div><div className="ws-readonly">{shop.name}</div></div>
