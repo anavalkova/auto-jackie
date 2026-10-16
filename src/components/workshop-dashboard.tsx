@@ -495,6 +495,24 @@ function PricingView({ workshopId, canEdit }: { workshopId: string; canEdit: boo
   </form>;
 }
 
+export const LOGO_TYPES = ["image/png", "image/jpeg", "image/webp"];
+export const LOGO_MAX_BYTES = 2 * 1024 * 1024;
+export function logoError(f: { type: string; size: number }): string | null {
+  if (!LOGO_TYPES.includes(f.type)) return "Please use a PNG, JPEG or WebP image (SVG isn't allowed).";
+  if (f.size > LOGO_MAX_BYTES) return "That image is over 2 MB. Please pick a smaller one.";
+  return null;
+}
+// Re-draw on a canvas: drops metadata/embedded payloads and caps size at 256px.
+async function shrinkLogo(f: File): Promise<string> {
+  const bmp = await createImageBitmap(f);
+  const k = Math.min(1, 256 / Math.max(bmp.width, bmp.height));
+  const c = document.createElement("canvas");
+  c.width = Math.max(1, Math.round(bmp.width * k)); c.height = Math.max(1, Math.round(bmp.height * k));
+  c.getContext("2d")!.drawImage(bmp, 0, 0, c.width, c.height);
+  const url = c.toDataURL("image/webp", 0.85);
+  return url.startsWith("data:image/webp") ? url : c.toDataURL("image/png");
+}
+
 function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean; onSaved: () => void }) {
   const { s, setS, save, state } = useSettings(shop.id);
   const [city, setCity] = useState(shop.city);
@@ -503,8 +521,9 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
   const link = shop.slug && typeof window !== "undefined" ? `${window.location.origin}/w/${shop.slug}` : "";
   const submit = async () => {
     if (city !== shop.city) { await supabase.from("workshops").update({ city }).eq("id", shop.id); onSaved(); }
-    await save({ phone: s.phone, address: s.address, opening_hours: s.opening_hours, contact_email: s.contact_email, website: s.website,
-      brand_accent: /^#[0-9a-fA-F]{6}$/.test(s.brand_accent) ? s.brand_accent : "", brand_logo_url: /^https:\/\//.test(s.brand_logo_url) ? s.brand_logo_url : "", brand_greeting: s.brand_greeting });
+    await save({ phone: s.phone, address: s.address, opening_hours: s.opening_hours, contact_email: s.contact_email,
+      brand_accent: /^#[0-9a-fA-F]{6}$/.test(s.brand_accent) ? s.brand_accent : "", brand_logo_url: s.brand_logo_url.startsWith("data:image/") ? s.brand_logo_url : "", brand_greeting: s.brand_greeting,
+      website: /^https?:\/\//i.test(s.website) ? s.website : "" });
   };
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); void submit(); }}>
     <Stepper steps={PROFILE_STEPS} step={step} setStep={setStep}/>
@@ -524,7 +543,17 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
       {step === 1 && <div className="ws-form-card">
         <div><div className="ws-label-row"><Label>Your Jackie page</Label><Hint controls="the page where drivers chat with Jackie as your workshop." shows="wherever you share it: website, Google profile, SMS."/></div>{link && <div className="ws-chips"><a href={link} target="_blank" rel="noreferrer" className="text-link">{link}</a><Button type="button" size="sm" variant="outline" onClick={() => void navigator.clipboard?.writeText(link)}>Copy</Button></div>}</div>
         <div><div className="ws-label-row"><Label htmlFor="b-accent">Accent color</Label><Hint controls="buttons, highlights and links." shows="on your Jackie page."/></div><div className="ws-chips"><input id="b-accent" type="color" value={s.brand_accent || "#f2711c"} onChange={e => setS({ ...s, brand_accent: e.target.value })}/>{s.brand_accent && <Button type="button" size="sm" variant="ghost" onClick={() => setS({ ...s, brand_accent: "" })}>Use AutoJackie orange</Button>}</div></div>
-        <div><div className="ws-label-row"><Label htmlFor="b-logo">Logo link (https)</Label><Hint controls="the small logo next to your name." shows="in the top bar of your Jackie page."/></div><Input id="b-logo" maxLength={500} placeholder="https://yourworkshop.se/logo.png" value={s.brand_logo_url} onChange={e => setS({ ...s, brand_logo_url: e.target.value })}/></div>
+        <div><div className="ws-label-row"><Label htmlFor="b-logo">Logo</Label><Hint controls="the small logo next to your name. PNG, JPEG or WebP, max 2 MB. We shrink it to 256 px and re-save it, so nothing hidden in the file survives." shows="in the top bar of your Jackie page."/></div>
+          <div className="ws-chips">
+            <span className="shop-badge">{s.brand_logo_url && <img src={s.brand_logo_url} alt="Logo preview" className="shop-logo"/>}<span>{shop.name}</span></span>
+            <Input id="b-logo" type="file" accept="image/png,image/jpeg,image/webp" style={{ maxWidth: 240 }} onChange={async e => {
+              const f = e.target.files?.[0]; e.target.value = "";
+              if (!f) return;
+              const err = logoError(f); if (err) return alert(err);
+              try { setS({ ...s, brand_logo_url: await shrinkLogo(f) }); } catch { alert("That image couldn't be read. Try another PNG, JPEG or WebP."); }
+            }}/>
+            {s.brand_logo_url && <Button type="button" size="sm" variant="ghost" onClick={() => setS({ ...s, brand_logo_url: "" })}>Remove logo</Button>}
+          </div></div>
         <div><div className="ws-label-row"><Label htmlFor="b-greet">Greeting line</Label><Hint controls="the welcome line above the chat." shows="on your Jackie page, before drivers type."/></div><Input id="b-greet" maxLength={160} placeholder="Welcome to Demo Verkstad. Tell Jackie what's up." value={s.brand_greeting} onChange={e => setS({ ...s, brand_greeting: e.target.value })}/></div>
       </div>}
     </fieldset>
