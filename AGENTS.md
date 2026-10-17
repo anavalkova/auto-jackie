@@ -15,6 +15,7 @@
 - Vehicle lookup accepts guests and signed-in drivers alike with input validation and server-only registry credentials; plate context responses are not cached, and lookup does not consume chat-question quota.
 - Accounts are optional (Google / Lovable sign-in). Guests: car and chat live only in React state, nothing persisted. Signed-in: car in saved_vehicles, chats in chats (UIMessage[] jsonb) via the browser client under owner-only RLS; saved chats open at /c/$chatId.
 - Define AutoJackie visual styling in src/styles.css and use shared design-system controls so future screens inherit the same brand.
+- Driver and workshop phone headers share MobileHeaderMenu for navigation, account and language actions, preventing duplicated mobile layout fixes.
 - The shared chat screen loads saved conversations into an always-visible sidebar and refreshes it after completed turns; keep history navigation in sync with saved chats.
 - On phones, driver chats use document scrolling and an inline expandable history row; avoid nested fixed-height transcript scrollers so older messages and history remain reachable.
 - Driver history uses counted database pagination through chat-history helpers rather than a capped list or nested sidebar scroller; registry privacy is normalized by vehicles helpers for legacy records and model payloads.

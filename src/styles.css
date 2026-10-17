@@ -795,6 +795,18 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
 
 /* Phone driver screen: give the chat the room. No portrait, no intro line,
    car + chats side by side, examples behind one tap, one-row header. */
+.mobile-header-trigger { display: none; }
+.mobile-header-menu { width: 240px; max-width: calc(100vw - 32px); }
+.mobile-header-menu [role="menuitem"] { min-height: 44px; }
+@media (max-width: 760px) {
+  .site-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  .site-header .desktop-header-nav { display: none; }
+  .site-header .mobile-header-trigger { display: inline-flex; width: 40px; height: 40px; flex-shrink: 0; }
+  .site-header .tenant-brand { width: auto; max-width: 100%; min-width: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+  .site-header .tenant-brand-name { flex-basis: 100%; border: 0; padding: 0; font-size: 12px; }
+  .site-header .brand-sub { display: none; }
+  .site-header .brand { min-width: 0; }
+}
 .try-toggle { display: none; }
 @media (max-width: 760px) {
   .site-header { flex-wrap: nowrap; min-height: 56px; padding: 8px 0; gap: 8px; }
@@ -819,7 +831,7 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
 }
 @media (max-width: 760px) {
   .site-header .brand { flex-shrink: 0; }
-  .site-header .brand-word { display: none; }
+  .site-header .brand-word { display: inline; }
   .site-header .brand-mark { width: 33px; height: 36px; font-size: 26px; }
   .site-header nav > * { flex-shrink: 0; }
   .site-header nav .nav-control.nav-signin { width: 36px; min-width: 36px; flex: 0 0 36px; padding: 0; font-size: 0; gap: 0; }

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { UIMessage } from "ai";
 import { ArrowUpRight, CalendarPlus, Car, ChevronDown, ChevronLeft, ChevronRight, Globe2, LockKeyhole, LogOut, MessageSquare, Plus, Trash2, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { MobileHeaderMenu } from "@/components/mobile-header-menu";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { GarageDialog } from "@/components/garage-dialog";
@@ -196,7 +197,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
   return <div className="app-frame" style={workshop?.accent ? { ["--primary" as string]: workshop.accent } : undefined}>
     <header className="site-header">
       <div className="tenant-brand"><Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span className="brand-word">Auto<span className="brand-orange">Jackie</span></span></Link>{headerWorkshop && <strong className="tenant-brand-name">{headerWorkshop.name}</strong>}</div>
-      <nav aria-label="Main navigation">
+      <nav className="desktop-header-nav" aria-label="Main navigation">
         {(!workshop || user) && <Button variant="ghost" asChild className="workshop-link"><Link to="/workshop">{t.forWorkshops} <ArrowUpRight/></Link></Button>}
         <span className="nav-divider" aria-hidden="true"/>
         {ready && (user ? <>
@@ -212,6 +213,10 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
         <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="nav-control language-control" aria-label="Language"><Globe2/> {LANGS.find(l => l.code === lang)?.short} <ChevronDown/></Button></DropdownMenuTrigger><DropdownMenuContent align="end">{LANGS.map(l => <DropdownMenuItem key={l.code} onSelect={() => setLang(l.code)} aria-current={l.code === lang ? "true" : undefined}>{l.short} · {l.label}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>
         <Button className="nav-cta" onClick={() => setDirectBooking({ issue: "" })}><CalendarPlus/> {t.bookVisit}</Button>
       </nav>
+      <MobileHeaderMenu email={user?.email} onSignIn={() => setSignInOpen(true)} onSignOut={() => void signOut()}>
+        {(!workshop || user) && <DropdownMenuItem asChild><Link to="/workshop"><ArrowUpRight/>{t.forWorkshops}</Link></DropdownMenuItem>}
+        <DropdownMenuItem onSelect={() => setDirectBooking({ issue: "" })}><CalendarPlus/>{t.bookVisit}</DropdownMenuItem>
+      </MobileHeaderMenu>
     </header>
 
     <main className="workspace">
