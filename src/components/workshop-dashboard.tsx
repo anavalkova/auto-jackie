@@ -2,6 +2,7 @@ import { holidayName, slotLabel, swedishHolidays } from "@/lib/booking";
 import { tr } from "@/lib/tr";
 import { saveWorkshopConfiguration } from "@/lib/configuration-save";
 import { shouldExploreDemo } from "@/lib/workshop-access";
+import { demoInquiries, demoSettings, DEMO_TEAM } from "@/lib/workshop-demo";
 import { readWorkshopSelection, rememberWorkshopSelection, selectWorkshop } from "@/lib/workshop-selection";
 import { getLang } from "@/lib/i18n";
 const loc = () => ({ en: "en-GB", sv: "sv-SE", de: "de-DE" } as const)[getLang()];
@@ -104,9 +105,10 @@ export function WorkshopDashboard() {
 
   const loadItems = useCallback(async () => {
     if (!shop) return;
+    if (demo) { setError(false); setItems(demoInquiries(shop.id, lang)); return; }
     const { data, error } = await supabase.from("inquiries").select("*").eq("workshop_id", shop.id).order("created_at", { ascending: false }).limit(200);
     setError(!!error); setItems(data ?? []);
-  }, [shop?.id]);
+  }, [shop?.id, demo, lang]);
   useEffect(() => { void loadItems(); }, [loadItems]);
 
   const kpis = useMemo(() => {
@@ -204,7 +206,7 @@ export function WorkshopDashboard() {
       <Kpi icon={<TrendingUp/>} label={tr("Open pipeline (est.)")} value={kr(kpis.pipeline)} hint={tr("Midpoint of Jackie's rough ranges, incl. VAT")}/>
       <Kpi icon={<Moon/>} label={tr("After hours")} value={kpis.afterHours} hint={tr("Requests that came in evenings or weekends, when you were closed")}/>
     </div>
-    <InsightsView items={items} workshopId={shop.id} canEdit={shop.role === "owner"}/>
+    <InsightsView items={items} workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo}/>
     </>}
     </div>
     </div>
@@ -284,9 +286,15 @@ type Duration = { job: string; minutes: number };
 type PriceItem = { task: string; price_sek: number; minutes?: number };
 
 function useSettings(workshopId: string, canEdit = true, demo = false) {
+  const { lang } = useT();
   const [s, setS] = useState<Settings | null>(null);
   const [state, setState] = useState("");
-  useEffect(() => { void supabase.from("workshop_settings").select("*").eq("workshop_id", workshopId).maybeSingle().then(({ data }) => setS(data)); }, [workshopId]);
+  useEffect(() => {
+    if (demo) { setS(demoSettings(workshopId, lang)); return; }
+    let active = true;
+    void supabase.from("workshop_settings").select("*").eq("workshop_id", workshopId).maybeSingle().then(({ data }) => { if (active) setS(data); });
+    return () => { active = false; };
+  }, [workshopId, demo, lang]);
   const save = async (patch: Partial<Settings>) => saveWorkshopConfiguration(canEdit, demo, async () => {
     setState(tr("Saving…"));
     const { error } = await supabase.from("workshop_settings").update({ ...patch, updated_at: new Date().toISOString() }).eq("workshop_id", workshopId);
@@ -315,8 +323,8 @@ function isAfterHours(i: Inquiry) {
   return wd === "Sat" || wd === "Sun" || h < 8 || h >= 17;
 }
 
-function InsightsView({ items, workshopId, canEdit }: { items: Inquiry[]; workshopId: string; canEdit: boolean }) {
-  const { s, setS, save } = useSettings(workshopId, canEdit);
+function InsightsView({ items, workshopId, canEdit, demo = false }: { items: Inquiry[]; workshopId: string; canEdit: boolean; demo?: boolean }) {
+  const { s, setS, save } = useSettings(workshopId, canEdit, demo);
   const n = items.length;
   const reached = items.filter(i => i.status !== "new").length;
   const quoted = items.filter(i => ["quoted", "booked"].includes(i.status) || (i.status === "closed" && i.booked_at)).length;
@@ -578,7 +586,7 @@ function TeamSection({ workshopId, demo = false }: { workshopId: string; demo?: 
   const [role, setRole] = useState<"owner" | "staff">("staff");
   const [msg, setMsg] = useState("");
   const load = useCallback(async () => {
-    if (demo) { setTeam([]); return; }
+    if (demo) { setTeam(DEMO_TEAM.map(m => ({ ...m }))); return; }
     const { data } = await supabase.rpc("workshop_team", { _workshop: workshopId });
     setTeam((data ?? []) as Member[]);
   }, [workshopId, demo]);
@@ -639,7 +647,7 @@ function ProfileView({ shop, canEdit, demo = false, onSaved, sub }: { shop: Shop
     <fieldset disabled={!canEdit && !demo} style={{ border: 0, padding: 0, margin: 0 }}>
       {step === 0 && <div className="ws-form-card ws-grid2">
         <div><div className="ws-label-row"><Label>{tr("Company name")}</Label><Hint controls={tr("your name in the booking list and on your Jackie page.")} shows={tr("to drivers. Managed by AutoJackie.")}/></div><div className="ws-readonly">{shop.name}</div></div>
-        <div><div className="ws-label-row"><Label>{tr("VAT number")}</Label><Hint controls={tr("invoicing between you and AutoJackie.")} shows={tr("nowhere to drivers. Managed by AutoJackie.")}/></div><div className="ws-readonly">{shop.vat_number || tr("Not set")}</div></div>
+        <div><div className="ws-label-row"><Label>{tr("VAT number")}</Label><Hint controls={tr("invoicing between you and AutoJackie.")} shows={tr("nowhere to drivers. Managed by AutoJackie.")}/></div><div className="ws-readonly">{demo ? "SE000000000001" : shop.vat_number || tr("Not set")}</div></div>
         <div><div className="ws-label-row"><Label htmlFor="p-phone">{tr("Phone")}</Label><Hint controls={tr("how drivers can call you.")} shows={tr("to drivers after they book.")}/></div><Input id="p-phone" maxLength={30} value={s.phone} onChange={e => setS({ ...s, phone: e.target.value })}/></div>
         <div><div className="ws-label-row"><Label htmlFor="p-email">{tr("Contact email")}</Label><Hint controls={tr("where booking updates are sent.")} shows={tr("only to AutoJackie and you.")}/></div><Input id="p-email" type="email" maxLength={120} value={s.contact_email} onChange={e => setS({ ...s, contact_email: e.target.value })}/></div>
         <div><div className="ws-label-row"><Label htmlFor="p-addr">{tr("Address")}</Label><Hint controls={tr("where drivers drop off their car.")} shows={tr("to drivers after they book.")}/></div><Input id="p-addr" maxLength={200} value={s.address} onChange={e => setS({ ...s, address: e.target.value })}/></div>
