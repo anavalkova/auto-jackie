@@ -59,7 +59,7 @@
 .site-header { height: 112px; display: flex; justify-content: space-between; align-items: center; }
 .brand { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-heading); font-size: 25px; font-weight: 800; text-decoration: none; color: var(--foreground); }
 .brand-orange { color: var(--primary); }
-.brand-mark { position: relative; display: grid; place-items: center; width: 37px; height: 40px; background: var(--primary); color: var(--primary-foreground); border-radius: 10px 10px 10px 3px; font-size: 31px; font-weight: 800; line-height: 1; }
+.brand-mark { position: relative; display: grid; place-items: center; flex-shrink: 0; width: 37px; height: 40px; background: var(--primary); color: var(--primary-foreground); border-radius: 10px 10px 10px 3px; font-size: 31px; font-weight: 800; line-height: 1; }
 .brand-mark-dot { position: absolute; width: 5px; height: 5px; top: 7px; right: 6px; background: var(--primary-foreground); border-radius: 50%; }
 .site-header nav { display: flex; align-items: center; gap: 8px; }
 .site-header nav .nav-control, .site-header nav .nav-cta, .site-header nav .workshop-link { height: 36px; border-radius: 10px; font-size: 13px; }
@@ -687,6 +687,7 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
   .jackie-panel .portrait-wrap.compact { height: 96px; border-radius: 8px 8px 0 0; }
   .tenant-brand { max-width: 100%; width: 100%; }
   .tenant-brand { gap: 12px; }
+  .brand-mark-dot { width: 3px; height: 3px; top: 4px; right: 4px; }
   .tenant-brand-name { padding-left: 12px; font-size: 15px; }
   .portrait-wrap.compact > img { width: 96px; object-fit: cover; object-position: center 20%; }
   .portrait-wrap.compact .portrait-label { left: 106px; right: 10px; bottom: auto; top: 50%; transform: translateY(-50%); padding: 6px; font-size: 10px; }
@@ -712,8 +713,9 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
   .assistant-summary { font-size: 12px; line-height: 1.5; }
   .chat-shell { flex: none; height: auto; min-height: 0; padding: 0 12px 12px; }
   .chat-shell .try-row { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; column-gap: 10px; row-gap: 0; padding-top: 12px; margin-bottom: 4px; font-size: 12px; line-height: 1.45; }
-  .chat-shell .try-row > span { grid-row: 1 / 4; padding-top: 7px; }
-  .chat-shell .try-row > button { grid-column: 2; min-width: 0; min-height: 32px; padding-block: 6px; border-bottom: 0; }
+  .chat-shell .try-row > span { grid-row: 1; padding-top: 5px; }
+  .chat-shell .try-row > button { grid-column: 2; box-sizing: border-box; min-width: 0; min-height: 28px; padding-block: 5px; border-bottom: 0; }
+  .chat-shell .try-row > button:first-of-type { grid-row: 1; }
   .chat-empty { flex: none; padding-block: 12px; }
   .chat-empty h1 { font-size: 28px; margin-top: 4px; }
   .chat-log { flex: none; overflow: visible; }
