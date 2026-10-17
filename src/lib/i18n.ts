@@ -11,6 +11,8 @@ const KEY = "autojackie.lang";
 let current: Lang = "en";
 const subs = new Set<() => void>();
 
+export const getLang = (): Lang => current;
+
 export function setLang(l: Lang) {
   current = l;
   try { localStorage.setItem(KEY, l); document.documentElement.lang = l; } catch { /* ignore */ }

@@ -1,4 +1,7 @@
 import { holidayName, slotLabel, swedishHolidays } from "@/lib/booking";
+import { tr } from "@/lib/tr";
+import { getLang } from "@/lib/i18n";
+const loc = () => ({ en: "en-GB", sv: "sv-SE", de: "de-DE" } as const)[getLang()];
 import { Link } from "@tanstack/react-router";
 import { useWebMCP } from "use-webmcp-tool";
 import { runWebMCPTool } from "@/lib/webmcp-telemetry";
@@ -57,7 +60,7 @@ const WHY: Record<Tab, { id: string; title: string; pitch: string; stats: WhySta
 };
 const OPEN: Status[] = ["new", "contacted", "quoted", "booked"];
 const kr = (n: number) => `${Math.round(n).toLocaleString("sv-SE")} kr`;
-const when = (d: string) => new Date(d).toLocaleString("en-GB", { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+const when = (d: string) => new Date(d).toLocaleString(loc(), { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 const mid = (i: Inquiry) => i.price_low_sek != null && i.price_high_sek != null ? (i.price_low_sek + i.price_high_sek) / 2 : 0;
 
 export function WorkshopDashboard() {
@@ -129,29 +132,29 @@ export function WorkshopDashboard() {
     setItems(xs => xs.map(x => x.id === data.id ? data : x)); setSelected(data);
   };
   const header = <header className="site-header">
-    <Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span><span className="brand-sub">for workshops</span></Link>
-    <nav aria-label="Workshop navigation">{isAdmin && <Button variant="outline" asChild><Link to="/admin">Operations</Link></Button>}<DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="sm" className="language-control" aria-label="Language"><Globe2/> {LANGS.find(l => l.code === lang)?.short} <ChevronDown/></Button></DropdownMenuTrigger><DropdownMenuContent align="end">{LANGS.map(l => <DropdownMenuItem key={l.code} onSelect={() => setLang(l.code)} aria-current={l.code === lang ? "true" : undefined}>{l.short} · {l.label}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu><Button variant="ghost" asChild><Link to="/">Driver view</Link></Button>{user && <Button variant="ghost" onClick={async () => { await supabase.auth.signOut(); window.location.assign("/workshop"); }}>Sign out</Button>}</nav>
+    <Link to="/" className="brand" aria-label={tr("AutoJackie home")}><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span><span className="brand-sub">{tr("for workshops")}</span></Link>
+    <nav aria-label={tr("Workshop navigation")}>{isAdmin && <Button variant="outline" asChild><Link to="/admin">{tr("Operations")}</Link></Button>}<DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="sm" className="language-control" aria-label={tr("Language")}><Globe2/> {LANGS.find(l => l.code === lang)?.short} <ChevronDown/></Button></DropdownMenuTrigger><DropdownMenuContent align="end">{LANGS.map(l => <DropdownMenuItem key={l.code} onSelect={() => setLang(l.code)} aria-current={l.code === lang ? "true" : undefined}>{l.short} · {l.label}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu><Button variant="ghost" asChild><Link to="/">{tr("Driver view")}</Link></Button>{user && <Button variant="ghost" onClick={async () => { await supabase.auth.signOut(); window.location.assign("/workshop"); }}>{tr("Sign out")}</Button>}</nav>
   </header>;
 
   let body;
-  if (!ready || (user && shop === undefined)) body = <p className="history-note" role="status">Loading…</p>;
+  if (!ready || (user && shop === undefined)) body = <p className="history-note" role="status">{tr("Loading…")}</p>;
   else if (!user) body = <WorkshopPitch onSignIn={() => setSignIn(true)}/>;
   else if (!shop) body = <WorkshopPitch onSignIn={() => setSignIn(true)} signedIn onOpenDemo={() => void openDemo()}/>;
   else body = <>
     {demo && <p className="demo-banner" role="note"><Sparkles aria-hidden/> {t.pitch.demoBanner}</p>}
-    <div className="ws-title"><div><span className="eyebrow">WORKSHOP DASHBOARD</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div></div>
-    <div className="ws-tabs" role="tablist" aria-label="Dashboard sections">{TABS.map(t => <Button key={t.id} variant={tab === t.id ? "default" : "outline"} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</Button>)}<WhyNote key={tab} overlay {...WHY[tab]}/></div>
+    <div className="ws-title"><div><span className="eyebrow">{tr("WORKSHOP DASHBOARD")}</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div></div>
+    <div className="ws-tabs" role="tablist" aria-label={tr("Dashboard sections")}>{TABS.map(t => <Button key={t.id} variant={tab === t.id ? "default" : "outline"} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{tr(t.label)}</Button>)}<WhyNote key={tab} overlay {...WHY[tab]}/></div>
     {tab === "booking" ? <BookingTab requests={<>
-    <div className="ws-filters" role="tablist" aria-label="Filter requests">
-      {([{ id: "open", label: "All open" }, ...STATUSES] as { id: Status | "open"; label: string }[]).map(s => <Button key={s.id} size="sm" variant={filter === s.id ? "default" : "outline"} role="tab" aria-selected={filter === s.id} onClick={() => changeFilter(s.id)}>{s.label}</Button>)}
+    <div className="ws-filters" role="tablist" aria-label={tr("Filter requests")}>
+      {([{ id: "open", label: "All open" }, ...STATUSES] as { id: Status | "open"; label: string }[]).map(s => <Button key={s.id} size="sm" variant={filter === s.id ? "default" : "outline"} role="tab" aria-selected={filter === s.id} onClick={() => changeFilter(s.id)}>{tr(s.label)}</Button>)}
     </div>
-    {error && <p className="chat-error" role="alert">Couldn't load or update requests.</p>}
-    {shown.length === 0 ? <div className="ws-list-empty"><p>No requests here yet.</p><p className="history-note">When a driver books {shop.name}, directly or from one of Jackie's cards, it lands here.</p></div>
+    {error && <p className="chat-error" role="alert">{tr("Couldn't load or update requests.")}</p>}
+    {shown.length === 0 ? <div className="ws-list-empty"><p>{tr("No requests here yet.")}</p><p className="history-note">{tr("When a driver books {w}, directly or from one of Jackie's cards, it lands here.", { w: shop.name })}</p></div>
       : <ul className="ws-list">{shown.slice(page * PAGE, (page + 1) * PAGE).map(i => <li key={i.id}><button type="button" className="ws-row" onClick={() => setSelected(i)}>
-        <span className={`ws-status s-${i.status}`}>{STATUSES.find(s => s.id === i.status)?.label}</span>
+        <span className={`ws-status s-${i.status}`}>{tr(STATUSES.find(s => s.id === i.status)?.label ?? "")}</span>
         <span className="ws-row-main"><strong>{i.issue}</strong><span>{i.contact_name}{i.vehicle_label ? ` · ${i.vehicle_label}` : ""}</span></span>
-        <span className={`ws-urgency u-${i.urgency.replace(" ", "-")}`}>{i.urgency}</span>
-        <span className="ws-price">{i.price_low_sek != null && i.price_high_sek != null ? `${kr(i.price_low_sek)} to ${kr(i.price_high_sek)}` : "No price"}</span>
+        <span className={`ws-urgency u-${i.urgency.replace(" ", "-")}`}>{tr(i.urgency)}</span>
+        <span className="ws-price">{i.price_low_sek != null && i.price_high_sek != null ? `${kr(i.price_low_sek)} ${tr("to")} ${kr(i.price_high_sek)}` : tr("No price")}</span>
         <time dateTime={i.created_at}>{when(i.created_at)}</time>
       </button></li>)}</ul>}
     {shown.length > 0 && <Pager page={page} pages={Math.max(1, Math.ceil(shown.length / PAGE))} onPage={setPage}/>}
@@ -160,10 +163,10 @@ export function WorkshopDashboard() {
     : tab === "pricing" ? <PricingView workshopId={shop.id} canEdit={shop.role === "owner"}/>
     : tab === "profile" ? <ProfileView shop={shop} canEdit={shop.role === "owner"} onSaved={loadShop}/> : <>
     <div className="ws-kpis">
-      <Kpi icon={<Inbox/>} label="New requests" value={String(kpis.fresh)}/>
-      <Kpi icon={<CalendarClock/>} label="Need you this week" value={String(kpis.urgent)}/>
-      <Kpi icon={<TrendingUp/>} label="Open pipeline (est.)" value={kr(kpis.pipeline)} hint="Midpoint of Jackie's rough ranges, incl. VAT"/>
-      <Kpi icon={<Moon/>} label="After hours" value={kpis.afterHours} hint="Requests that came in evenings or weekends, when you were closed"/>
+      <Kpi icon={<Inbox/>} label={tr("New requests")} value={String(kpis.fresh)}/>
+      <Kpi icon={<CalendarClock/>} label={tr("Need you this week")} value={String(kpis.urgent)}/>
+      <Kpi icon={<TrendingUp/>} label={tr("Open pipeline (est.)")} value={kr(kpis.pipeline)} hint={tr("Midpoint of Jackie's rough ranges, incl. VAT")}/>
+      <Kpi icon={<Moon/>} label={tr("After hours")} value={kpis.afterHours} hint={tr("Requests that came in evenings or weekends, when you were closed")}/>
     </div>
     <InsightsView items={items} workshopId={shop.id} canEdit={shop.role === "owner"}/>
     </>}
@@ -174,25 +177,25 @@ export function WorkshopDashboard() {
     <main className="ws-main">{body}</main>
     <Sheet open={selected !== null} onOpenChange={o => { if (!o) setSelected(null); }}>
       <SheetContent className="ws-sheet">{selected && <>
-        <SheetHeader><SheetTitle>{selected.issue}</SheetTitle><SheetDescription>Received {when(selected.created_at)} · get it looked at: {selected.urgency}</SheetDescription></SheetHeader>
+        <SheetHeader><SheetTitle>{selected.issue}</SheetTitle><SheetDescription>{tr("Received {d} · get it looked at: {u}", { d: when(selected.created_at), u: tr(selected.urgency) })}</SheetDescription></SheetHeader>
         <div className="ws-detail">
-          <section><span className="eyebrow">THE VISIT</span>
+          <section><span className="eyebrow">{tr("THE VISIT")}</span>
             <dl className="ws-dl">
-              {selected.vehicle_label && <><dt>Car</dt><dd>{selected.vehicle_label}</dd></>}
-              <dt>Service</dt><dd>{selected.service ?? OTHER}</dd>
-              <dt>Time</dt><dd>{selected.booked_at ? <><strong>{slotLabel(selected.booked_at)}</strong> <Button variant="link" size="sm" onClick={() => void book(selected, null)}>Change</Button></>
-                : selected.preferred_slots.length === 0 ? "No time chosen yet"
-                : <div className="ws-filters">{selected.preferred_slots.map(t => <Button key={t} size="sm" variant="outline" onClick={() => void book(selected, t)}>Book {slotLabel(t)}</Button>)}</div>}</dd>
+              {selected.vehicle_label && <><dt>{tr("Car")}</dt><dd>{selected.vehicle_label}</dd></>}
+              <dt>{tr("Service")}</dt><dd>{selected.service ?? OTHER}</dd>
+              <dt>{tr("Time")}</dt><dd>{selected.booked_at ? <><strong>{slotLabel(selected.booked_at, loc())}</strong> <Button variant="link" size="sm" onClick={() => void book(selected, null)}>{tr("Change")}</Button></>
+                : selected.preferred_slots.length === 0 ? tr("No time chosen yet")
+                : <div className="ws-filters">{selected.preferred_slots.map(t => <Button key={t} size="sm" variant="outline" onClick={() => void book(selected, t)}>{tr("Book {t}", { t: slotLabel(t, loc()) })}</Button>)}</div>}</dd>
             </dl>
             {selected.message && <p className="ws-quote-note">“{selected.message}”</p>}
           </section>
           <QuoteSection item={selected}/>
-          <section><span className="eyebrow">CUSTOMER</span>
+          <section><span className="eyebrow">{tr("CUSTOMER")}</span>
             <dl className="ws-dl">
-              <dt>Name</dt><dd>{selected.contact_name}</dd>
-              <dt>Phone</dt><dd>{selected.contact_phone}</dd>
-              {selected.contact_email && <><dt>Email</dt><dd>{selected.contact_email}</dd></>}
-              <dt>Prefers</dt><dd>{selected.contact_channel === "email" ? "Email" : selected.contact_channel === "whatsapp" ? "WhatsApp" : "SMS"}</dd>
+              <dt>{tr("Name")}</dt><dd>{selected.contact_name}</dd>
+              <dt>{tr("Phone")}</dt><dd>{selected.contact_phone}</dd>
+              {selected.contact_email && <><dt>{tr("Email")}</dt><dd>{selected.contact_email}</dd></>}
+              <dt>{tr("Prefers")}</dt><dd>{selected.contact_channel === "email" ? tr("Email") : selected.contact_channel === "whatsapp" ? "WhatsApp" : "SMS"}</dd>
             </dl>
           </section>
         </div>
@@ -204,13 +207,13 @@ export function WorkshopDashboard() {
 
 const PAGE = 10;
 function Pager({ page, pages, onPage }: { page: number; pages: number; onPage: (p: number) => void }) {
-  return <div className="ws-pager"><Button type="button" size="sm" variant="outline" disabled={page === 0} onClick={() => onPage(page - 1)}>Previous</Button><span className="history-note">Page {page + 1} of {pages}</span><Button type="button" size="sm" variant="outline" disabled={page >= pages - 1} onClick={() => onPage(page + 1)}>Next</Button></div>;
+  return <div className="ws-pager"><Button type="button" size="sm" variant="outline" disabled={page === 0} onClick={() => onPage(page - 1)}>{tr("Previous")}</Button><span className="history-note">{tr("Page {a} of {b}", { a: page + 1, b: pages })}</span><Button type="button" size="sm" variant="outline" disabled={page >= pages - 1} onClick={() => onPage(page + 1)}>{tr("Next")}</Button></div>;
 }
 
 const BOOKING_STEPS = [{ title: "Requests" }, { title: "Booking settings" }];
 function BookingTab({ requests, settings }: { requests: React.ReactNode; settings: React.ReactNode }) {
   const [step, setStep] = useState(0);
-  return <div className="ws-section"><Stepper steps={BOOKING_STEPS} step={step} setStep={setStep}/>{step === 0 ? <Collapsible title="Requests" tip="Everything drivers sent you, newest first. Click a request to see the visit, the quote Jackie sent and how to reach the driver. Filter with the buttons above."><div className="ws-section">{requests}</div></Collapsible> : settings}</div>;
+  return <div className="ws-section"><Stepper steps={BOOKING_STEPS} step={step} setStep={setStep}/>{step === 0 ? <Collapsible title={tr("Requests")} tip={tr("Everything drivers sent you, newest first. Click a request to see the visit, the quote Jackie sent and how to reach the driver. Filter with the buttons above.")}><div className="ws-section">{requests}</div></Collapsible> : settings}</div>;
 }
 
 function Collapsible({ title, tip, children, defaultOpen = true }: { title: string; tip?: string; children: React.ReactNode; defaultOpen?: boolean }) {
@@ -218,12 +221,12 @@ function Collapsible({ title, tip, children, defaultOpen = true }: { title: stri
 }
 
 function QuoteSection({ item }: { item: Inquiry }) {
-  const jackie = item.price_low_sek != null && item.price_high_sek != null ? `${kr(item.price_low_sek)} to ${kr(item.price_high_sek)}` : null;
-  return <section><span className="eyebrow">WHAT JACKIE TOLD THE DRIVER</span>
+  const jackie = item.price_low_sek != null && item.price_high_sek != null ? `${kr(item.price_low_sek)} ${tr("to")} ${kr(item.price_high_sek)}` : null;
+  return <section><span className="eyebrow">{tr("WHAT JACKIE TOLD THE DRIVER")}</span>
     {jackie ? <div className="ws-quote">
-      <strong className="ws-quote-price">{jackie}</strong><span className="history-note">Rough estimate incl. VAT</span>
+      <strong className="ws-quote-price">{jackie}</strong><span className="history-note">{tr("Rough estimate incl. VAT")}</span>
       {item.note && <p className="ws-quote-note">“{item.note}”</p>}
-    </div> : <p className="history-note">No estimate. The driver booked directly.</p>}
+    </div> : <p className="history-note">{tr("No estimate. The driver booked directly.")}</p>}
   </section>;
 }
 
@@ -240,15 +243,15 @@ function useSettings(workshopId: string) {
   const [state, setState] = useState("");
   useEffect(() => { void supabase.from("workshop_settings").select("*").eq("workshop_id", workshopId).maybeSingle().then(({ data }) => setS(data)); }, [workshopId]);
   const save = async (patch: Partial<Settings>) => {
-    setState("Saving…");
+    setState(tr("Saving…"));
     const { error } = await supabase.from("workshop_settings").update({ ...patch, updated_at: new Date().toISOString() }).eq("workshop_id", workshopId);
-    setState(error ? "Couldn't save. Please try again." : "Saved.");
+    setState(error ? tr("Couldn't save. Please try again.") : tr("Saved."));
   };
   return { s, setS, save, state };
 }
 
 function SaveRow({ canEdit, state }: { canEdit: boolean; state: string }) {
-  return <div className="ws-span">{canEdit ? <Button type="submit">Save</Button> : <p className="history-note">Only the workshop owner can change these.</p>}{state && <p className="history-note" role="status">{state}</p>}</div>;
+  return <div className="ws-span">{canEdit ? <Button type="submit">{tr("Save")}</Button> : <p className="history-note">{tr("Only the workshop owner can change these.")}</p>}{state && <p className="history-note" role="status">{state}</p>}</div>;
 }
 
 function isAfterHours(i: Inquiry) {
@@ -286,26 +289,26 @@ function InsightsView({ items, workshopId, canEdit }: { items: Inquiry[]; worksh
     await save({ price_list: next, job_durations: next.map(x => ({ job: x.task, minutes: x.minutes ?? 60 })) });
   };
   const channels = (["sms", "whatsapp", "email"] as const).map(c => ({
-    label: c === "sms" ? "SMS" : c === "whatsapp" ? "WhatsApp" : "Email",
+    label: c === "sms" ? "SMS" : c === "whatsapp" ? "WhatsApp" : tr("Email"),
     v: items.filter(i => i.contact_channel === c).length,
   }));
   return <div className="ws-section ws-tight">
-    <h2 className="ws-h2">Insights</h2>
+    <h2 className="ws-h2">{tr("Insights")}</h2>
     <div className="ws-insights">
-      <Collapsible title="From request to booking" tip="How many requests moved from new to quoted to booked."><div className="ws-funnel">{funnel.map(f => <div key={f.label} className="ws-funnel-row"><span>{f.label}</span><span className="ws-bar"><span style={{ width: n ? `${(f.v / n) * 100}%` : 0 }}/></span><strong>{f.v}</strong></div>)}</div></Collapsible>
-      <Collapsible title="How drivers want to be reached" tip="The channel each driver picked for confirmation. Automatic messages come in phase 2.">
+      <Collapsible title={tr("From request to booking")} tip={tr("How many requests moved from new to quoted to booked.")}><div className="ws-funnel">{funnel.map(f => <div key={f.label} className="ws-funnel-row"><span>{tr(f.label)}</span><span className="ws-bar"><span style={{ width: n ? `${(f.v / n) * 100}%` : 0 }}/></span><strong>{f.v}</strong></div>)}</div></Collapsible>
+      <Collapsible title={tr("How drivers want to be reached")} tip={tr("The channel each driver picked for confirmation. Automatic messages come in phase 2.")}>
         <div className="ws-funnel">{channels.map(c => <div key={c.label} className="ws-funnel-row"><span>{c.label}</span><span className="ws-bar"><span style={{ width: n ? `${(c.v / n) * 100}%` : 0 }}/></span><strong>{c.v}</strong></div>)}</div>
       </Collapsible>
-      <Collapsible title="Your services" tip="Requests matched to your Pricing engine. Value = bookings × your price.">
-        <table className="ws-table"><thead><tr><th>Service</th><th>Requests</th><th>Booked</th><th>Value</th></tr></thead><tbody>
+      <Collapsible title={tr("Your services")} tip={tr("Requests matched to your Pricing engine. Value = bookings × your price.")}>
+        <table className="ws-table"><thead><tr><th>{tr("Service")}</th><th>{tr("Requests")}</th><th>{tr("Booked")}</th><th>{tr("Value")}</th></tr></thead><tbody>
           {rows.slice(sp * PAGE, (sp + 1) * PAGE).map(r => <tr key={r.task}><td>{r.task}</td><td><strong>{r.req}</strong></td><td>{r.booked}</td><td>{r.value ? kr(r.value) : "–"}</td></tr>)}
-          <tr><td>Other <small className="history-note">(you price these)</small></td><td><strong>{otherCount}</strong></td><td>{items.filter(i => (!i.service || i.service === OTHER) && isBooked(i)).length}</td><td>–</td></tr>
+          <tr><td>{tr("Other")} <small className="history-note">{tr("(you price these)")}</small></td><td><strong>{otherCount}</strong></td><td>{items.filter(i => (!i.service || i.service === OTHER) && isBooked(i)).length}</td><td>–</td></tr>
         </tbody></table>
         {rows.length > 0 && <Pager page={sp} pages={Math.max(1, Math.ceil(rows.length / PAGE))} onPage={setSp}/>}
       </Collapsible>
-      <Collapsible title="Drivers asked, you don't offer yet" tip="Requests that landed in Other. Add the common ones to your Pricing engine so Jackie can quote them next time.">
-        {missing.length === 0 ? <p className="history-note">Nothing yet. Every request matched one of your services.</p>
-          : <table className="ws-table"><tbody>{missing.slice(mp * PAGE, (mp + 1) * PAGE).map(([k, v]) => <tr key={k}><td>{k}</td><td><strong>{v}</strong></td><td style={{ textAlign: "right" }}>{added.includes(k) ? <span className="history-note">Added. Set its price in Pricing engine.</span> : canEdit && <Button type="button" size="sm" variant="outline" onClick={() => void addService(k)}>Add to Pricing engine</Button>}</td></tr>)}</tbody></table>}
+      <Collapsible title={tr("Drivers asked, you don't offer yet")} tip={tr("Requests that landed in Other. Add the common ones to your Pricing engine so Jackie can quote them next time.")}>
+        {missing.length === 0 ? <p className="history-note">{tr("Nothing yet. Every request matched one of your services.")}</p>
+          : <table className="ws-table"><tbody>{missing.slice(mp * PAGE, (mp + 1) * PAGE).map(([k, v]) => <tr key={k}><td>{k}</td><td><strong>{v}</strong></td><td style={{ textAlign: "right" }}>{added.includes(k) ? <span className="history-note">{tr("Added. Set its price in Pricing engine.")}</span> : canEdit && <Button type="button" size="sm" variant="outline" onClick={() => void addService(k)}>{tr("Add to Pricing engine")}</Button>}</td></tr>)}</tbody></table>}
         {missing.length > 0 && <Pager page={mp} pages={Math.max(1, Math.ceil(missing.length / PAGE))} onPage={setMp}/>}
       </Collapsible>
     </div>
@@ -319,7 +322,7 @@ const AHEAD = [{ d: 30, l: "1 month" }, { d: 60, l: "2 months" }, { d: 90, l: "3
 
 
 function dayLabel(d: string) {
-  return new Date(`${d}T12:00:00Z`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+  return new Date(`${d}T12:00:00Z`).toLocaleDateString(loc(), { weekday: "short", day: "numeric", month: "short", year: "numeric" });
 }
 const OFF_PAGE = 5;
 
@@ -327,7 +330,7 @@ function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
   const { s, setS, save, state } = useSettings(workshopId);
   const [date, setDate] = useState("");
   const [offPage, setOffPage] = useState(0);
-  if (!s) return <p className="history-note" role="status">Loading…</p>;
+  if (!s) return <p className="history-note" role="status">{tr("Loading…")}</p>;
   const flip = (arr: number[], v: number) => arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v].sort((a, b) => a - b);
   const today = new Date().toISOString().slice(0, 10);
   const closed = (s.closed_slots as string[]).filter(k => k.slice(0, 10) >= today);
@@ -348,31 +351,31 @@ function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
   const holidays = [...swedishHolidays(y), ...swedishHolidays(y + 1)].filter(([k]) => k >= today).slice(0, 6);
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); void save({ booking_days: s.booking_days, slot_hours: s.slot_hours, min_notice_days: s.min_notice_days, max_ahead_days: s.max_ahead_days, close_holidays: s.close_holidays, closed_slots: closed }); }}>
     <fieldset disabled={!canEdit} className="ws-grid2" style={{ border: 0, padding: 0, margin: 0 }}>
-      <section className="ws-card"><h2 className="ws-label-row"><Tip><p>The days and drop-off times drivers can pick. How long each job takes is set in Pricing engine.</p></Tip>Your normal week</h2>
-        <div className="ws-field"><Label>Days</Label><div className="ws-chips">{WEEKDAYS.map(w => <Button key={w.d} type="button" size="sm" variant={s.booking_days.includes(w.d) ? "default" : "outline"} onClick={() => setS({ ...s, booking_days: flip(s.booking_days, w.d) })}>{w.l}</Button>)}</div></div>
-        <div className="ws-field"><Label>Drop-off times</Label><div className="ws-chips">{HOURS.map(h => <Button key={h} type="button" size="sm" variant={s.slot_hours.includes(h) ? "default" : "outline"} onClick={() => setS({ ...s, slot_hours: flip(s.slot_hours, h) })}>{String(h).padStart(2, "0")}:00</Button>)}</div></div>
+      <section className="ws-card"><h2 className="ws-label-row"><Tip><p>{tr("The days and drop-off times drivers can pick. How long each job takes is set in Pricing engine.")}</p></Tip>{tr("Your normal week")}</h2>
+        <div className="ws-field"><Label>{tr("Days")}</Label><div className="ws-chips">{WEEKDAYS.map(w => <Button key={w.d} type="button" size="sm" variant={s.booking_days.includes(w.d) ? "default" : "outline"} onClick={() => setS({ ...s, booking_days: flip(s.booking_days, w.d) })}>{tr(w.l)}</Button>)}</div></div>
+        <div className="ws-field"><Label>{tr("Drop-off times")}</Label><div className="ws-chips">{HOURS.map(h => <Button key={h} type="button" size="sm" variant={s.slot_hours.includes(h) ? "default" : "outline"} onClick={() => setS({ ...s, slot_hours: flip(s.slot_hours, h) })}>{String(h).padStart(2, "0")}:00</Button>)}</div></div>
         <div className="ws-grid2">
-          <div className="ws-field"><Label htmlFor="b-notice">Earliest booking</Label>
-            <select id="b-notice" className="native-select" value={s.min_notice_days} onChange={e => setS({ ...s, min_notice_days: Number(e.target.value) })}>{[1, 2, 3, 5, 7].map(d => <option key={d} value={d}>{d === 1 ? "Next day" : `${d} days ahead`}</option>)}</select></div>
-          <div className="ws-field"><Label htmlFor="b-ahead">Latest booking</Label>
-            <select id="b-ahead" className="native-select" value={s.max_ahead_days} onChange={e => setS({ ...s, max_ahead_days: Number(e.target.value) })}>{AHEAD.map(a => <option key={a.d} value={a.d}>Up to {a.l} ahead</option>)}</select></div>
+          <div className="ws-field"><Label htmlFor="b-notice">{tr("Earliest booking")}</Label>
+            <select id="b-notice" className="native-select" value={s.min_notice_days} onChange={e => setS({ ...s, min_notice_days: Number(e.target.value) })}>{[1, 2, 3, 5, 7].map(d => <option key={d} value={d}>{d === 1 ? tr("Next day") : tr("{n} days ahead", { n: d })}</option>)}</select></div>
+          <div className="ws-field"><Label htmlFor="b-ahead">{tr("Latest booking")}</Label>
+            <select id="b-ahead" className="native-select" value={s.max_ahead_days} onChange={e => setS({ ...s, max_ahead_days: Number(e.target.value) })}>{AHEAD.map(a => <option key={a.d} value={a.d}>{tr("Up to {x} ahead", { x: tr(a.l) })}</option>)}</select></div>
         </div>
       </section>
-      <section className="ws-card"><h2 className="ws-label-row"><Tip><p>Pick a date, then close the whole day or cross out single drop-off times. Drivers simply won't see them.</p></Tip>Days off</h2>
-        <label className="ws-label-row"><input type="checkbox" checked={s.close_holidays} onChange={e => setS({ ...s, close_holidays: e.target.checked })}/><Tip><p>Built into AutoJackie, no calendar needed. Includes Midsummer Eve, Christmas Eve and New Year's Eve. Next up: {holidays.map(([k, n]) => `${n} (${k.slice(5)})`).join(", ")}.</p></Tip><span>Closed on Swedish public holidays</span></label>
-        <div className="ws-field"><Label htmlFor="b-off">Date</Label>
+      <section className="ws-card"><h2 className="ws-label-row"><Tip><p>{tr("Pick a date, then close the whole day or cross out single drop-off times. Drivers simply won't see them.")}</p></Tip>{tr("Days off")}</h2>
+        <label className="ws-label-row"><input type="checkbox" checked={s.close_holidays} onChange={e => setS({ ...s, close_holidays: e.target.checked })}/><Tip><p>{tr("Built into AutoJackie, no calendar needed. Includes Midsummer Eve, Christmas Eve and New Year's Eve.")} {tr("Next up:")} {holidays.map(([k, n]) => `${tr(n)} (${k.slice(5)})`).join(", ")}.</p></Tip><span>{tr("Closed on Swedish public holidays")}</span></label>
+        <div className="ws-field"><Label htmlFor="b-off">{tr("Date")}</Label>
           <Input id="b-off" type="date" min={today} value={date} onChange={e => setDate(e.target.value)} style={{ width: 180 }}/></div>
         {date && (s.close_holidays && holidayName(date)
-          ? <p className="history-note">That's {holidayName(date)}, already closed.</p>
+          ? <p className="history-note">{tr("That's {h}, already closed.", { h: tr(holidayName(date) ?? "") })}</p>
           : <div className="ws-chips">
-              <Button type="button" size="sm" variant={dayClosed(date) ? "default" : "outline"} onClick={() => toggleDay(date)}>Whole day</Button>
+              <Button type="button" size="sm" variant={dayClosed(date) ? "default" : "outline"} onClick={() => toggleDay(date)}>{tr("Whole day")}</Button>
               {s.slot_hours.map(h => { const off = dayClosed(date) || closed.includes(hourKey(date, h)); return <Button key={h} type="button" size="sm" variant="outline" aria-pressed={off} className={off ? "ws-crossed" : undefined} disabled={dayClosed(date)} onClick={() => toggleHour(date, h)}>{String(h).padStart(2, "0")}:00</Button>; })}
             </div>)}
-        {days.length === 0 ? <p className="history-note">No days off planned.</p>
+        {days.length === 0 ? <p className="history-note">{tr("No days off planned.")}</p>
           : <><ul className="ws-off-list">{days.slice(pg * OFF_PAGE, (pg + 1) * OFF_PAGE).map(([d, hrs]) => <li key={d}>
               <button type="button" className="ws-off-day" onClick={() => setDate(d)}>{dayLabel(d)}</button>
-              <span className="history-note">{hrs.length ? hrs.join(", ") : "All day"}</span>
-              <button type="button" className="ws-off-x" aria-label={`Reopen ${dayLabel(d)}`} onClick={() => setClosed(closed.filter(k => k.slice(0, 10) !== d))}>×</button>
+              <span className="history-note">{hrs.length ? hrs.join(", ") : tr("All day")}</span>
+              <button type="button" className="ws-off-x" aria-label={`${tr("Reopen")} ${dayLabel(d)}`} onClick={() => setClosed(closed.filter(k => k.slice(0, 10) !== d))}>×</button>
             </li>)}</ul>
             {<Pager page={pg} pages={pages} onPage={setOffPage}/>}</>}
       </section>
@@ -393,53 +396,53 @@ const PROFILE_STEPS = [
 ];
 
 function Stepper({ steps, step, setStep }: { steps: { title: string }[]; step: number; setStep: (n: number) => void }) {
-  return <ol className="ws-stepper">{steps.map((st, i) => <li key={st.title}><button type="button" aria-current={i === step ? "step" : undefined} data-done={i < step || undefined} onClick={() => setStep(i)}><span className="ws-step-num">{i + 1}</span>{st.title}</button></li>)}</ol>;
+  return <ol className="ws-stepper">{steps.map((st, i) => <li key={st.title}><button type="button" aria-current={i === step ? "step" : undefined} data-done={i < step || undefined} onClick={() => setStep(i)}><span className="ws-step-num">{i + 1}</span>{tr(st.title)}</button></li>)}</ol>;
 }
 
 function WizardActions({ canEdit, last, next }: { canEdit: boolean; last: boolean; next: () => void }) {
-  return <div className="ws-chips">{canEdit ? <Button type="submit" variant={last ? "default" : "outline"}>Save this step</Button> : <span className="history-note">Only the workshop owner can change these.</span>}{!last && <Button type="button" onClick={next}>Next</Button>}</div>;
+  return <div className="ws-chips">{canEdit ? <Button type="submit" variant={last ? "default" : "outline"}>{tr("Save this step")}</Button> : <span className="history-note">{tr("Only the workshop owner can change these.")}</span>}{!last && <Button type="button" onClick={next}>{tr("Next")}</Button>}</div>;
 }
 
-function Tip({ children, label = "What is this?" }: { children: React.ReactNode; label?: string }) {
-  return <Popover><PopoverTrigger asChild><button type="button" className="ws-tip" aria-label={label}><CircleHelp/></button></PopoverTrigger>
+function Tip({ children, label }: { children: React.ReactNode; label?: string }) {
+  return <Popover><PopoverTrigger asChild><button type="button" className="ws-tip" aria-label={label ?? tr("What is this?")}><CircleHelp/></button></PopoverTrigger>
     <PopoverContent className="ws-tip-body" side="top" align="start">{children}</PopoverContent></Popover>;
 }
 
 function Hint({ controls, shows }: { controls: string; shows: string }) {
-  return <Tip><p><b>Controls:</b> {controls}</p><p><b>Shows:</b> {shows}</p></Tip>;
+  return <Tip><p><b>{tr("Controls:")}</b> {controls}</p><p><b>{tr("Shows:")}</b> {shows}</p></Tip>;
 }
 
 function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit: boolean }) {
   const { s, setS, save, state } = useSettings(workshopId);
   const [step, setStep] = useState(0);
-  if (!s) return <p className="history-note" role="status">Loading…</p>;
+  if (!s) return <p className="history-note" role="status">{tr("Loading…")}</p>;
   const services = (s.services as string[]).join("\n");
   const last = step === CONTEXT_STEPS.length - 1;
   const cur = CONTEXT_STEPS[step]!;
   return <form className="ws-section ws-wizard" onSubmit={e => { e.preventDefault(); void save({ ai_chat_tier: s.ai_chat_tier, ai_quote_tier: s.ai_quote_tier, services: (s.services as string[]).map(x => x.trim()).filter(Boolean), specialties: s.specialties, jackie_context: s.jackie_context }); }}>
     <Stepper steps={CONTEXT_STEPS} step={step} setStep={setStep}/>
     <section className="ws-card">
-      <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>Drivers see:</b> {cur.sees}</p></Tip>{step + 1}. {cur.title}</h2></div>
+      <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>{tr("Drivers see:")}</b> {tr(cur.sees)}</p></Tip>{step + 1}. {tr(cur.title)}</h2></div>
       <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0, display: "grid", gap: 10 }}>
         {step === 0 && <>
-          <Label htmlFor="c-serv">Services you offer (one per line)</Label><textarea id="c-serv" className="native-select ws-textarea" value={services} onChange={e => setS({ ...s, services: e.target.value.split("\n") })}/>
-          <Label htmlFor="c-spec">Specialties and brands</Label><textarea id="c-spec" className="native-select ws-textarea" maxLength={1000} placeholder="E.g. Volvo and VW specialists, EV certified, own tyre hotel" value={s.specialties} onChange={e => setS({ ...s, specialties: e.target.value })}/>
+          <Label htmlFor="c-serv">{tr("Services you offer (one per line)")}</Label><textarea id="c-serv" className="native-select ws-textarea" value={services} onChange={e => setS({ ...s, services: e.target.value.split("\n") })}/>
+          <Label htmlFor="c-spec">{tr("Specialties and brands")}</Label><textarea id="c-spec" className="native-select ws-textarea" maxLength={1000} placeholder={tr("E.g. Volvo and VW specialists, EV certified, own tyre hotel")} value={s.specialties} onChange={e => setS({ ...s, specialties: e.target.value })}/>
         </>}
         {step === 1 && <>
-          <Label htmlFor="c-ctx">Preferred parts and materials, order of operations, what you always check</Label>
-          <textarea id="c-ctx" className="native-select ws-textarea ws-textarea-tall" maxLength={3000} placeholder="E.g. We use OEM brake parts only. We always replace pads and discs together. Diagnostics fee is deducted if you repair with us." value={s.jackie_context} onChange={e => setS({ ...s, jackie_context: e.target.value })}/>
+          <Label htmlFor="c-ctx">{tr("Preferred parts and materials, order of operations, what you always check")}</Label>
+          <textarea id="c-ctx" className="native-select ws-textarea ws-textarea-tall" maxLength={3000} placeholder={tr("E.g. We use OEM brake parts only. We always replace pads and discs together. Diagnostics fee is deducted if you repair with us.")} value={s.jackie_context} onChange={e => setS({ ...s, jackie_context: e.target.value })}/>
         </>}
         {step === 2 && <>
-          <p className="history-note" style={{ margin: 0 }}>How smart should Jackie be? Pick a level per job. Smarter means better answers but higher running costs. ★ is our recommendation.</p>
+          <p className="history-note" style={{ margin: 0 }}>{tr("How smart should Jackie be? Pick a level per job. Smarter means better answers but higher running costs. ★ is our recommendation.")}</p>
           <div className="ws-tiers">
-            <TierRow title="Everyday chat" hint="Listening, explaining, fault codes and manual lookups. Most of the volume, so cost adds up here." value={s.ai_chat_tier as Tier} recommended={DEFAULT_TIERS.chat} onChange={v => setS({ ...s, ai_chat_tier: v })}/>
-            <TierRow title="Rough quotes" hint="Drafting the price range a driver sees, using your price list. Rare, but accuracy builds trust." value={s.ai_quote_tier as Tier} recommended={DEFAULT_TIERS.quote} onChange={v => setS({ ...s, ai_quote_tier: v })}/>
+            <TierRow title={tr("Everyday chat")} hint={tr("Listening, explaining, fault codes and manual lookups. Most of the volume, so cost adds up here.")} value={s.ai_chat_tier as Tier} recommended={DEFAULT_TIERS.chat} onChange={v => setS({ ...s, ai_chat_tier: v })}/>
+            <TierRow title={tr("Rough quotes")} hint={tr("Drafting the price range a driver sees, using your price list. Rare, but accuracy builds trust.")} value={s.ai_quote_tier as Tier} recommended={DEFAULT_TIERS.quote} onChange={v => setS({ ...s, ai_quote_tier: v })}/>
           </div>
-          <div><Button type="button" size="sm" variant="outline" onClick={() => setS({ ...s, ai_chat_tier: DEFAULT_TIERS.chat, ai_quote_tier: DEFAULT_TIERS.quote })}>Reset to recommended</Button></div>
+          <div><Button type="button" size="sm" variant="outline" onClick={() => setS({ ...s, ai_chat_tier: DEFAULT_TIERS.chat, ai_quote_tier: DEFAULT_TIERS.quote })}>{tr("Reset to recommended")}</Button></div>
         </>}
       </fieldset>
       <div className="ws-wizard-nav">
-        <Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>Back</Button>
+        <Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>{tr("Back")}</Button>
         <WizardActions canEdit={canEdit} last={last} next={() => setStep(step + 1)}/>
       </div>
       {state && <p className="history-note" role="status">{state}</p>}
@@ -453,8 +456,8 @@ function TierRow({ title, hint, value, recommended, onChange }: { title: string;
     <div><h3 className="ws-label-row"><Tip><p>{hint}</p></Tip>{title}</h3></div>
     <div>
       <div className="ws-tier-options" role="group" aria-label={title}>{TIERS.map(t => <button key={t} type="button" className="ws-tier-opt" aria-pressed={value === t} onClick={() => onChange(t)}>
-        <strong><span>{TIER_INFO[t].label}{t === recommended ? " ★" : ""}</span><span>{TIER_INFO[t].cost}</span></strong>{TIER_INFO[t].text}</button>)}</div>
-      {value !== recommended && <p className="ws-tier-warn">{diff > 1 ? `About ${Math.round(diff)}× the running cost of the recommended setting. This may raise your monthly price.` : "Cheaper, but answers may be less careful. Recommended (★) is the best balance."}</p>}
+        <strong><span>{tr(TIER_INFO[t].label)}{t === recommended ? " ★" : ""}</span><span>{tr(TIER_INFO[t].cost)}</span></strong>{tr(TIER_INFO[t].text)}</button>)}</div>
+      {value !== recommended && <p className="ws-tier-warn">{diff > 1 ? tr("About {n}× the running cost of the recommended setting. This may raise your monthly price.", { n: Math.round(diff) }) : tr("Cheaper, but answers may be less careful. Recommended (★) is the best balance.")}</p>}
     </div>
   </div>;
 }
@@ -472,7 +475,7 @@ const PREDEFINED_SERVICES: { task: string; price_sek: number; minutes: number }[
 function PricingView({ workshopId, canEdit }: { workshopId: string; canEdit: boolean }) {
   const { s, setS, save, state } = useSettings(workshopId);
   const [pp, setPp] = useState(0);
-  if (!s) return <p className="history-note" role="status">Loading…</p>;
+  if (!s) return <p className="history-note" role="status">{tr("Loading…")}</p>;
   const durations = s.job_durations as Duration[];
   const prices = ensureOther(s.price_list as PriceItem[]).map(p => ({ ...p, minutes: p.minutes ?? durations.find(d => d.job === p.task)?.minutes ?? 60 }));
   const pPages = Math.max(1, Math.ceil(prices.length / PAGE));
@@ -485,17 +488,17 @@ function PricingView({ workshopId, canEdit }: { workshopId: string; canEdit: boo
   };
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); submit(); }}>
     <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0 }}>
-      <section className="ws-card"><h2 className="ws-label-row"><Hint controls="every rough quote Jackie gives (the “What's next” card) and how long a booking blocks your calendar." shows="prices to drivers on your Jackie page, labelled as an estimate. Times only to you."/>Services, prices and times (incl. VAT)</h2>
-        <Label htmlFor="c-rate">Hourly labour rate (kr)</Label><Input id="c-rate" type="number" min={0} max={10000} value={s.hourly_rate_sek} onChange={e => setS({ ...s, hourly_rate_sek: Number(e.target.value) })}/>
-        <table className="ws-table"><thead><tr><th>Service</th><th>Price (kr)</th><th>Time (min)</th><th/></tr></thead><tbody>
-          {prices.map((p, i) => ({ p, i })).slice(pPg * PAGE, (pPg + 1) * PAGE).map(({ p, i }) => p.task === OTHER ? <tr key={i} className="ws-other-row"><td><strong>Other</strong><small className="history-note"> Anything Jackie can't match. You price it after a look.</small></td><td><Input aria-label="Price" type="number" min={0} max={200000} value={p.price_sek} title="0 = evaluated by you" onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></td><td><Input aria-label="Minutes" type="number" min={5} max={2880} step={5} value={p.minutes} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, minutes: Number(e.target.value) } : x))}/></td><td/></tr> : <tr key={i}><td><Input aria-label="Service" maxLength={80} value={p.task} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, task: e.target.value } : x))}/></td><td><Input aria-label="Price" type="number" min={0} max={200000} value={p.price_sek} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></td><td><Input aria-label="Minutes" type="number" min={5} max={2880} step={5} value={p.minutes} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, minutes: Number(e.target.value) } : x))}/></td><td><Button type="button" size="sm" variant="ghost" aria-label="Remove" onClick={() => setP(prices.filter((_, j) => j !== i))}>×</Button></td></tr>)}
+      <section className="ws-card"><h2 className="ws-label-row"><Hint controls={tr("every rough quote Jackie gives (the “What's next” card) and how long a booking blocks your calendar.")} shows={tr("prices to drivers on your Jackie page, labelled as an estimate. Times only to you.")}/>{tr("Services, prices and times (incl. VAT)")}</h2>
+        <Label htmlFor="c-rate">{tr("Hourly labour rate (kr)")}</Label><Input id="c-rate" type="number" min={0} max={10000} value={s.hourly_rate_sek} onChange={e => setS({ ...s, hourly_rate_sek: Number(e.target.value) })}/>
+        <table className="ws-table"><thead><tr><th>{tr("Service")}</th><th>{tr("Price (kr)")}</th><th>{tr("Time (min)")}</th><th/></tr></thead><tbody>
+          {prices.map((p, i) => ({ p, i })).slice(pPg * PAGE, (pPg + 1) * PAGE).map(({ p, i }) => p.task === OTHER ? <tr key={i} className="ws-other-row"><td><strong>{tr("Other")}</strong><small className="history-note"> {tr("Anything Jackie can't match. You price it after a look.")}</small></td><td><Input aria-label={tr("Price")} type="number" min={0} max={200000} value={p.price_sek} title={tr("0 = evaluated by you")} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></td><td><Input aria-label={tr("Minutes")} type="number" min={5} max={2880} step={5} value={p.minutes} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, minutes: Number(e.target.value) } : x))}/></td><td/></tr> : <tr key={i}><td><Input aria-label={tr("Service")} maxLength={80} value={p.task} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, task: e.target.value } : x))}/></td><td><Input aria-label={tr("Price")} type="number" min={0} max={200000} value={p.price_sek} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></td><td><Input aria-label={tr("Minutes")} type="number" min={5} max={2880} step={5} value={p.minutes} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, minutes: Number(e.target.value) } : x))}/></td><td><Button type="button" size="sm" variant="ghost" aria-label={tr("Remove")} onClick={() => setP(prices.filter((_, j) => j !== i))}>×</Button></td></tr>)}
         </tbody></table>
         <Pager page={pPg} pages={pPages} onPage={setPp}/>
         <div className="ws-chips">
-          <select aria-label="Add a service" className="native-select" value="" onChange={e => { const v = e.target.value; const idx = prices.filter(p => p.task !== OTHER).length; if (v === "__custom") { setP([...prices.filter(p => p.task !== OTHER), { task: "", price_sek: 0, minutes: 60 }, ...prices.filter(p => p.task === OTHER)]); setPp(Math.floor(idx / PAGE)); } else { const x = PREDEFINED_SERVICES.find(o => o.task === v); if (x) { setP([...prices.filter(p => p.task !== OTHER), { ...x }, ...prices.filter(p => p.task === OTHER)]); setPp(Math.floor(idx / PAGE)); } } }}>
-            <option value="">Add a service…</option>
+          <select aria-label={tr("Add a service")} className="native-select" value="" onChange={e => { const v = e.target.value; const idx = prices.filter(p => p.task !== OTHER).length; if (v === "__custom") { setP([...prices.filter(p => p.task !== OTHER), { task: "", price_sek: 0, minutes: 60 }, ...prices.filter(p => p.task === OTHER)]); setPp(Math.floor(idx / PAGE)); } else { const x = PREDEFINED_SERVICES.find(o => o.task === v); if (x) { setP([...prices.filter(p => p.task !== OTHER), { ...x }, ...prices.filter(p => p.task === OTHER)]); setPp(Math.floor(idx / PAGE)); } } }}>
+            <option value="">{tr("Add a service…")}</option>
             {available.map(o => <option key={o.task} value={o.task}>{o.task}</option>)}
-            <option value="__custom">Custom service…</option>
+            <option value="__custom">{tr("Custom service…")}</option>
           </select>
         </div>
       </section>
@@ -507,8 +510,8 @@ function PricingView({ workshopId, canEdit }: { workshopId: string; canEdit: boo
 export const LOGO_TYPES = ["image/png", "image/jpeg", "image/webp"];
 export const LOGO_MAX_BYTES = 2 * 1024 * 1024;
 export function logoError(f: { type: string; size: number }): string | null {
-  if (!LOGO_TYPES.includes(f.type)) return "Please use a PNG, JPEG or WebP image (SVG isn't allowed).";
-  if (f.size > LOGO_MAX_BYTES) return "That image is over 2 MB. Please pick a smaller one.";
+  if (!LOGO_TYPES.includes(f.type)) return tr("Please use a PNG, JPEG or WebP image (SVG isn't allowed).");
+  if (f.size > LOGO_MAX_BYTES) return tr("That image is over 2 MB. Please pick a smaller one.");
   return null;
 }
 // Re-draw on a canvas: drops metadata/embedded payloads and caps size at 256px.
@@ -526,7 +529,7 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
   const { s, setS, save, state } = useSettings(shop.id);
   const [city, setCity] = useState(shop.city);
   const [step, setStep] = useState(0);
-  if (!s) return <p className="history-note" role="status">Loading…</p>;
+  if (!s) return <p className="history-note" role="status">{tr("Loading…")}</p>;
   const link = shop.slug && typeof window !== "undefined" ? `${window.location.origin}/w/${shop.slug}` : "";
   const submit = async () => {
     if (city !== shop.city) { await supabase.from("workshops").update({ city }).eq("id", shop.id); onSaved(); }
@@ -537,36 +540,36 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); void submit(); }}>
     <Stepper steps={PROFILE_STEPS} step={step} setStep={setStep}/>
     <section className="ws-card">
-    <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>Drivers see:</b> {PROFILE_STEPS[step]!.sees}</p></Tip>{step + 1}. {PROFILE_STEPS[step]!.title}</h2></div>
+    <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>{tr("Drivers see:")}</b> {tr(PROFILE_STEPS[step]!.sees)}</p></Tip>{step + 1}. {tr(PROFILE_STEPS[step]!.title)}</h2></div>
     <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0 }}>
       {step === 0 && <div className="ws-form-card ws-grid2">
-        <div><div className="ws-label-row"><Label>Company name</Label><Hint controls="your name in the booking list and on your Jackie page." shows="to drivers. Managed by AutoJackie."/></div><div className="ws-readonly">{shop.name}</div></div>
-        <div><div className="ws-label-row"><Label>VAT number</Label><Hint controls="invoicing between you and AutoJackie." shows="nowhere to drivers. Managed by AutoJackie."/></div><div className="ws-readonly">{shop.vat_number || "Not set"}</div></div>
-        <div><div className="ws-label-row"><Label htmlFor="p-phone">Phone</Label><Hint controls="how drivers can call you." shows="to drivers after they book."/></div><Input id="p-phone" maxLength={30} value={s.phone} onChange={e => setS({ ...s, phone: e.target.value })}/></div>
-        <div><div className="ws-label-row"><Label htmlFor="p-email">Contact email</Label><Hint controls="where booking updates are sent." shows="only to AutoJackie and you."/></div><Input id="p-email" type="email" maxLength={120} value={s.contact_email} onChange={e => setS({ ...s, contact_email: e.target.value })}/></div>
-        <div><div className="ws-label-row"><Label htmlFor="p-addr">Address</Label><Hint controls="where drivers drop off their car." shows="to drivers after they book."/></div><Input id="p-addr" maxLength={200} value={s.address} onChange={e => setS({ ...s, address: e.target.value })}/></div>
-        <div><div className="ws-label-row"><Label htmlFor="p-city">City</Label><Hint controls="which drivers see you when picking a workshop." shows="in the workshop list when booking."/></div><Input id="p-city" maxLength={60} value={city} onChange={e => setCity(e.target.value)}/></div>
-        <div><div className="ws-label-row"><Label htmlFor="p-hours">Opening hours</Label><Hint controls="what Jackie says when drivers ask when you're open." shows="in Jackie's answers on your page."/></div><Input id="p-hours" maxLength={200} value={s.opening_hours} onChange={e => setS({ ...s, opening_hours: e.target.value })}/></div>
-        <div><div className="ws-label-row"><Label htmlFor="p-web">Website</Label><Hint controls="a link back to your own site." shows="to drivers after they book."/></div><Input id="p-web" maxLength={200} value={s.website} onChange={e => setS({ ...s, website: e.target.value })}/></div>
+        <div><div className="ws-label-row"><Label>{tr("Company name")}</Label><Hint controls={tr("your name in the booking list and on your Jackie page.")} shows={tr("to drivers. Managed by AutoJackie.")}/></div><div className="ws-readonly">{shop.name}</div></div>
+        <div><div className="ws-label-row"><Label>{tr("VAT number")}</Label><Hint controls={tr("invoicing between you and AutoJackie.")} shows={tr("nowhere to drivers. Managed by AutoJackie.")}/></div><div className="ws-readonly">{shop.vat_number || tr("Not set")}</div></div>
+        <div><div className="ws-label-row"><Label htmlFor="p-phone">{tr("Phone")}</Label><Hint controls={tr("how drivers can call you.")} shows={tr("to drivers after they book.")}/></div><Input id="p-phone" maxLength={30} value={s.phone} onChange={e => setS({ ...s, phone: e.target.value })}/></div>
+        <div><div className="ws-label-row"><Label htmlFor="p-email">{tr("Contact email")}</Label><Hint controls={tr("where booking updates are sent.")} shows={tr("only to AutoJackie and you.")}/></div><Input id="p-email" type="email" maxLength={120} value={s.contact_email} onChange={e => setS({ ...s, contact_email: e.target.value })}/></div>
+        <div><div className="ws-label-row"><Label htmlFor="p-addr">{tr("Address")}</Label><Hint controls={tr("where drivers drop off their car.")} shows={tr("to drivers after they book.")}/></div><Input id="p-addr" maxLength={200} value={s.address} onChange={e => setS({ ...s, address: e.target.value })}/></div>
+        <div><div className="ws-label-row"><Label htmlFor="p-city">{tr("City")}</Label><Hint controls={tr("which drivers see you when picking a workshop.")} shows={tr("in the workshop list when booking.")}/></div><Input id="p-city" maxLength={60} value={city} onChange={e => setCity(e.target.value)}/></div>
+        <div><div className="ws-label-row"><Label htmlFor="p-hours">{tr("Opening hours")}</Label><Hint controls={tr("what Jackie says when drivers ask when you're open.")} shows={tr("in Jackie's answers on your page.")}/></div><Input id="p-hours" maxLength={200} value={s.opening_hours} onChange={e => setS({ ...s, opening_hours: e.target.value })}/></div>
+        <div><div className="ws-label-row"><Label htmlFor="p-web">{tr("Website")}</Label><Hint controls={tr("a link back to your own site.")} shows={tr("to drivers after they book.")}/></div><Input id="p-web" maxLength={200} value={s.website} onChange={e => setS({ ...s, website: e.target.value })}/></div>
       </div>}
       {step === 1 && <div className="ws-form-card">
-        <div><div className="ws-label-row"><Label>Your Jackie page</Label><Hint controls="the page where drivers chat with Jackie as your workshop." shows="wherever you share it: website, Google profile, SMS."/></div>{link && <div className="ws-chips"><a href={link} target="_blank" rel="noreferrer" className="text-link">{link}</a><Button type="button" size="sm" variant="outline" onClick={() => void navigator.clipboard?.writeText(link)}>Copy</Button></div>}</div>
-        <div><div className="ws-label-row"><Label htmlFor="b-accent">Accent color</Label><Hint controls="buttons, highlights and links." shows="on your Jackie page."/></div><div className="ws-chips"><input id="b-accent" type="color" value={s.brand_accent || "#f2711c"} onChange={e => setS({ ...s, brand_accent: e.target.value })}/>{s.brand_accent && <Button type="button" size="sm" variant="ghost" onClick={() => setS({ ...s, brand_accent: "" })}>Use AutoJackie orange</Button>}</div></div>
-        <div><div className="ws-label-row"><Label htmlFor="b-logo">Logo</Label><Hint controls="the small logo next to your name. PNG, JPEG or WebP, max 2 MB. We shrink it to 256 px and re-save it, so nothing hidden in the file survives." shows="in the top bar of your Jackie page."/></div>
+        <div><div className="ws-label-row"><Label>{tr("Your Jackie page")}</Label><Hint controls={tr("the page where drivers chat with Jackie as your workshop.")} shows={tr("wherever you share it: website, Google profile, SMS.")}/></div>{link && <div className="ws-chips"><a href={link} target="_blank" rel="noreferrer" className="text-link">{link}</a><Button type="button" size="sm" variant="outline" onClick={() => void navigator.clipboard?.writeText(link)}>{tr("Copy")}</Button></div>}</div>
+        <div><div className="ws-label-row"><Label htmlFor="b-accent">{tr("Accent color")}</Label><Hint controls={tr("buttons, highlights and links.")} shows={tr("on your Jackie page.")}/></div><div className="ws-chips"><input id="b-accent" type="color" value={s.brand_accent || "#f2711c"} onChange={e => setS({ ...s, brand_accent: e.target.value })}/>{s.brand_accent && <Button type="button" size="sm" variant="ghost" onClick={() => setS({ ...s, brand_accent: "" })}>{tr("Use AutoJackie orange")}</Button>}</div></div>
+        <div><div className="ws-label-row"><Label htmlFor="b-logo">{tr("Logo")}</Label><Hint controls={tr("the small logo next to your name. PNG, JPEG or WebP, max 2 MB. We shrink it to 256 px and re-save it, so nothing hidden in the file survives.")} shows={tr("in the top bar of your Jackie page.")}/></div>
           <div className="ws-chips">
-            <span className="shop-badge">{s.brand_logo_url && <img src={s.brand_logo_url} alt="Logo preview" className="shop-logo"/>}<span>{shop.name}</span></span>
+            <span className="shop-badge">{s.brand_logo_url && <img src={s.brand_logo_url} alt={tr("Logo preview")} className="shop-logo"/>}<span>{shop.name}</span></span>
             <Input id="b-logo" type="file" accept="image/png,image/jpeg,image/webp" style={{ maxWidth: 240 }} onChange={async e => {
               const f = e.target.files?.[0]; e.target.value = "";
               if (!f) return;
               const err = logoError(f); if (err) return alert(err);
-              try { setS({ ...s, brand_logo_url: await shrinkLogo(f) }); } catch { alert("That image couldn't be read. Try another PNG, JPEG or WebP."); }
+              try { setS({ ...s, brand_logo_url: await shrinkLogo(f) }); } catch { alert(tr("That image couldn't be read. Try another PNG, JPEG or WebP.")); }
             }}/>
-            {s.brand_logo_url && <Button type="button" size="sm" variant="ghost" onClick={() => setS({ ...s, brand_logo_url: "" })}>Remove logo</Button>}
+            {s.brand_logo_url && <Button type="button" size="sm" variant="ghost" onClick={() => setS({ ...s, brand_logo_url: "" })}>{tr("Remove logo")}</Button>}
           </div></div>
-        <div><div className="ws-label-row"><Label htmlFor="b-greet">Greeting line</Label><Hint controls="the welcome line above the chat." shows="on your Jackie page, before drivers type."/></div><Input id="b-greet" maxLength={160} placeholder="Welcome to Demo Verkstad. Tell Jackie what's up." value={s.brand_greeting} onChange={e => setS({ ...s, brand_greeting: e.target.value })}/></div>
+        <div><div className="ws-label-row"><Label htmlFor="b-greet">{tr("Greeting line")}</Label><Hint controls={tr("the welcome line above the chat.")} shows={tr("on your Jackie page, before drivers type.")}/></div><Input id="b-greet" maxLength={160} placeholder={tr("Welcome to Demo Verkstad. Tell Jackie what's up.")} value={s.brand_greeting} onChange={e => setS({ ...s, brand_greeting: e.target.value })}/></div>
       </div>}
     </fieldset>
-    <div className="ws-wizard-nav"><Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>Back</Button><WizardActions canEdit={canEdit} last={step === PROFILE_STEPS.length - 1} next={() => setStep(step + 1)}/></div>
+    <div className="ws-wizard-nav"><Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>{tr("Back")}</Button><WizardActions canEdit={canEdit} last={step === PROFILE_STEPS.length - 1} next={() => setStep(step + 1)}/></div>
     {state && <p className="history-note" role="status">{state}</p>}
     </section>
   </form>;
@@ -590,13 +593,13 @@ function WorkshopPitch({ onSignIn, signedIn, onOpenDemo }: { onSignIn: () => voi
       </div>
       <figure className="pitch-jackie"><img src={jackieImg} alt="Jackie, AutoJackie's assistant"/><figcaption>{p.jackieCaption}</figcaption></figure>
     </section>
-    <ol className="pitch-flow" aria-label="How it works">
+    <ol className="pitch-flow" aria-label={tr("How it works")}>
       {p.steps.map((s, i) => <li key={s.t}><span className="pitch-step">{i + 1}</span>{icons[i]}<strong>{s.t}</strong><span>{s.d}</span></li>)}
     </ol>
-    <ul className="pitch-gains-list" aria-label="What you get">
+    <ul className="pitch-gains-list" aria-label={tr("What you get")}>
       {p.gains.map(g => <li key={g}>{g}</li>)}
     </ul>
-    <section className="pitch-stats" aria-label="The problem in numbers">
+    <section className="pitch-stats" aria-label={tr("The problem in numbers")}>
       {p.stats.map(s => <div key={s.value}><strong>{s.value}</strong><span>{s.text}</span><a href={s.src.url} target="_blank" rel="noreferrer">{s.src.label}</a></div>)}
     </section>
   </div>;

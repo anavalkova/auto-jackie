@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { tr } from "@/lib/tr";
 import { ChevronDown, Lightbulb, X } from "lucide-react";
 
 export type WhyStat = { value: string; text: string; source?: { label: string; url: string } };
@@ -12,26 +13,26 @@ export function WhyNote(props: Props) {
 
 function WhyBody({ stats, footer, pitch, points }: Props) {
   return <>
-    {pitch && <p className="why-pitch">{pitch}</p>}
-    {points && points.length > 0 && <ul className="why-points">{points.map(p => <li key={p}>{p}</li>)}</ul>}
+    {pitch && <p className="why-pitch">{tr(pitch)}</p>}
+    {points && points.length > 0 && <ul className="why-points">{points.map(p => <li key={p}>{tr(p)}</li>)}</ul>}
     {stats.length > 0 && <ul className="why-stats">
       {stats.map(s => (
         <li key={s.value + s.text}>
-          <span className="why-value">{s.value}</span>
+          <span className="why-value">{tr(s.value)}</span>
           <span className="why-text">
-            {s.text}
+            {tr(s.text)}
             {s.source && <> <a href={s.source.url} target="_blank" rel="noreferrer">({s.source.label})</a></>}
           </span>
         </li>
       ))}
     </ul>}
-    {footer && <p className="why-footer">{footer}</p>}
+    {footer && <p className="why-footer">{tr(footer)}</p>}
   </>;
 }
 
 function WhyOverlay(props: Props) {
   const key = `autojackie.whyo.${props.id}`;
-  const label = props.label ?? "Why this exists";
+  const label = props.label ?? tr("Why this exists");
   const auto = props.autoOpen ?? true;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -47,7 +48,7 @@ function WhyOverlay(props: Props) {
   return <div className="why-overlay" ref={ref}>
     <button type="button" className="why-chip" aria-expanded={open} onClick={() => setOpen(o => !o)}><Lightbulb aria-hidden/> {label}</button>
     {open && <aside className="why-note why-pop" aria-label={label}>
-      <div className="why-pop-head"><strong className="why-title">{props.title}</strong><button type="button" className="why-close" aria-label="Close" onClick={() => setOpen(false)}><X/></button></div>
+      <div className="why-pop-head"><strong className="why-title">{tr(props.title)}</strong><button type="button" className="why-close" aria-label={tr("Close")} onClick={() => setOpen(false)}><X/></button></div>
       <WhyBody {...props}/>
     </aside>}
   </div>;
@@ -63,13 +64,13 @@ function WhyInline(props: Props) {
     try { localStorage.setItem(key, next ? "0" : "1"); } catch { /* ignore */ }
   };
   const first = stats[0];
-  const collapsedLine = summary ?? (first ? `${first.value} ${(first.text.split(".")[0] ?? "").toLowerCase()}` : title);
+  const collapsedLine = summary ?? (first ? `${first.value} ${(tr(first.text).split(".")[0] ?? "").toLowerCase()}` : tr(title));
   return (
-    <aside className="why-note" aria-label="Why this exists">
+    <aside className="why-note" aria-label={tr("Why this exists")}>
       <button type="button" className="why-toggle" aria-expanded={!collapsed} onClick={toggle}>
         <span className="why-toggle-label">
-          <span className="eyebrow">WHY THIS EXISTS</span>
-          <strong className="why-title">{collapsed ? collapsedLine : title}</strong>
+          <span className="eyebrow">{tr("WHY THIS EXISTS")}</span>
+          <strong className="why-title">{collapsed ? collapsedLine : tr(title)}</strong>
         </span>
         <ChevronDown className={"why-chevron" + (collapsed ? " is-collapsed" : "")} aria-hidden />
       </button>
