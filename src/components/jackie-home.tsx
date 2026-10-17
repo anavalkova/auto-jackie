@@ -16,7 +16,6 @@ import type { Json } from "@/integrations/supabase/types";
 import { kmToOdoUnit, nextService, type Vehicle } from "@/lib/vehicles";
 import jackie from "@/assets/jackie.jpg";
 import { LANGS, setLang, useT, odoUnitFor } from "@/lib/i18n";
-import { kmToOdoUnit } from "@/lib/vehicles";
 
 const fmt = (n: number) => n.toLocaleString("sv-SE");
 export type WorkshopBrand = { id: string; name: string; city: string; slug: string; accent: string; logo: string; greeting: string };
