@@ -19,6 +19,7 @@ import { Route as CChatIdRouteImport } from './routes/c.$chatId'
 import { Route as WSlugRouteImport } from './routes/w.$slug'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiVehiclesLookupRouteImport } from './routes/api/vehicles.lookup'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -71,6 +72,12 @@ const ApiVehiclesLookupRoute = ApiVehiclesLookupRouteImport.update({
   path: '/api/vehicles/lookup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/w/$slug': typeof WSlugRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/vehicles/lookup': typeof ApiVehiclesLookupRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -95,6 +103,7 @@ export interface FileRoutesByTo {
   '/w/$slug': typeof WSlugRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/vehicles/lookup': typeof ApiVehiclesLookupRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -108,6 +117,7 @@ export interface FileRoutesById {
   '/w/$slug': typeof WSlugRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/vehicles/lookup': typeof ApiVehiclesLookupRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
     | '/w/$slug'
     | '/.lovable/oauth/consent'
     | '/api/vehicles/lookup'
+    | '/lovable/email/transactional/preview'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -134,6 +145,7 @@ export interface FileRouteTypes {
     | '/w/$slug'
     | '/.lovable/oauth/consent'
     | '/api/vehicles/lookup'
+    | '/lovable/email/transactional/preview'
   id:
     | '__root__'
     | '/'
@@ -146,6 +158,7 @@ export interface FileRouteTypes {
     | '/w/$slug'
     | '/.lovable/oauth/consent'
     | '/api/vehicles/lookup'
+    | '/lovable/email/transactional/preview'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -159,6 +172,7 @@ export interface RootRouteChildren {
   WSlugRoute: typeof WSlugRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   ApiVehiclesLookupRoute: typeof ApiVehiclesLookupRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -233,6 +247,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiVehiclesLookupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -248,6 +269,7 @@ const rootRouteChildren: RootRouteChildren = {
   WSlugRoute: WSlugRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   ApiVehiclesLookupRoute: ApiVehiclesLookupRoute,
+  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
