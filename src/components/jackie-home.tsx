@@ -60,6 +60,18 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
   // Older versions kept the car in this browser; guests are now private by default.
   useEffect(() => { try { localStorage.removeItem("autojackie.vehicle"); } catch { /* ignore */ } }, []);
 
+  // Right after sign-in, workshop members land on their own Jackie's page instead of the generic one.
+  useEffect(() => {
+    if (workshop) return;
+    const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event !== "SIGNED_IN" || !session?.user) return;
+      const { data: m } = await supabase.from("workshop_members").select("workshops(slug)").eq("user_id", session.user.id).limit(1).maybeSingle();
+      const slug = (m?.workshops as { slug?: string } | null)?.slug;
+      if (slug) navigate({ to: "/w/$slug", params: { slug } });
+    });
+    return () => data.subscription.unsubscribe();
+  }, [workshop, navigate]);
+
   useEffect(() => {
     if (!ready) return;
     if (!user) { setVehicle(null); return; }
