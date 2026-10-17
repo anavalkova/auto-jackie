@@ -11,7 +11,7 @@ export function WhyNote(props: Props) {
   return props.overlay ? <WhyOverlay {...props}/> : <WhyInline {...props}/>;
 }
 
-function WhyBody({ stats, footer, pitch, points }: Props) {
+export function WhyBody({ stats, footer, pitch, points }: Props) {
   return <>
     {pitch && <p className="why-pitch">{tr(pitch)}</p>}
     {points && points.length > 0 && <ul className="why-points">{points.map(p => <li key={p}>{tr(p)}</li>)}</ul>}
