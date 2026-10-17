@@ -170,7 +170,7 @@ export function WorkshopDashboard() {
   else body = <>
     {demo && <p className="demo-banner" role="note"><Sparkles aria-hidden/> {t.pitch.demoBanner} <Button variant="outline" size="sm" className="demo-tour-btn" onClick={() => tourStep(0)}>{tr("Guided tour")}</Button></p>}
     {demo && tour !== null && <DemoTour step={tour} onStep={tourStep} onClose={closeTour}/>}
-    <div className="ws-title"><div><span className="eyebrow">{tr("WORKSHOP DASHBOARD")}</span><div className="ws-title-name"><h1>{shop.name}</h1><WhyNote key={tab} overlay {...WHY[tab]}/></div></div>
+    <div className="ws-title"><div><span className="eyebrow">{tr("WORKSHOP DASHBOARD")}</span><div className="ws-title-name"><h1>{shop.name}</h1><WhyNote key={tab} overlay autoOpen={tour === null} {...WHY[tab]}/></div></div>
       {!demo && shops.length > 1 && <div className="ws-field" style={{ margin: 0 }}><Label htmlFor="ws-switch">{tr("Your workshops")}</Label>
         <select id="ws-switch" className="native-select" value={shop.id} onChange={e => { const w = shops.find(x => x.id === e.target.value); if (w) { setShop(w); setTab("overview"); setSelected(null); setPage(0); } }}>
           {shops.map(w => <option key={w.id} value={w.id}>{w.name}{w.city ? ` · ${w.city}` : ""}</option>)}
