@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { tr } from "@/lib/tr";
+import { useLang } from "@/lib/i18n";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useState } from "react";
 import { ShieldCheck } from "lucide-react";
@@ -29,6 +30,7 @@ export const Route = createFileRoute("/admin")({
 type Row = { id: string; name: string; city: string; created_at: string; email: string; claimed: boolean };
 
 function AdminPage() {
+  useLang();
   const { user, ready, isAdmin } = useAccess();
   const [rows, setRows] = useState<Row[]>([]);
   const [name, setName] = useState(""); const [email, setEmail] = useState(""); const [city, setCity] = useState("");
@@ -43,7 +45,7 @@ function AdminPage() {
       supabase.from("workshops").select("id,name,city,created_at").order("created_at", { ascending: false }),
       supabase.from("workshop_invites").select("workshop_id,email,claimed_at"),
     ]);
-    setRows((ws ?? []).map(w => { const i = inv?.find(x => x.workshop_id === w.id); return { ...w, email: i?.email ?? "No invite", claimed: !!i?.claimed_at }; }));
+    setRows((ws ?? []).map(w => { const i = inv?.find(x => x.workshop_id === w.id); return { ...w, email: i?.email ?? tr("No invite"), claimed: !!i?.claimed_at }; }));
   }, []);
   useEffect(() => { if (isAdmin) void load(); }, [isAdmin, load]);
 
@@ -52,13 +54,13 @@ function AdminPage() {
     const { data: id, error } = await supabase.rpc("admin_onboard_workshop", { _name: name, _email: email, _city: city });
     if (!error && id) await supabase.rpc("admin_set_workshop_profile", { _workshop: id as string, _vat: vat, _phone: phone, _address: address });
     setBusy(false);
-    if (error) return setMsg("Couldn't onboard. Check the name and email.");
-    setMsg(`${name} is ready. When ${email} signs in, they'll land in their dashboard.`);
+    if (error) return setMsg(tr("Couldn't onboard. Check the name and email."));
+    setMsg(tr("{n} is ready. When {e} signs in, they'll land in their dashboard.", { n: name, e: email }));
     setName(""); setEmail(""); setCity(""); setVat(""); setPhone(""); setAddress(""); void load();
   };
   const makeDemo = async () => {
     setBusy(true); setMsg("");
-    try { setDemo(await demoFn()); void load(); } catch { setMsg("Couldn't set up the demo workshop."); }
+    try { setDemo(await demoFn()); void load(); } catch { setMsg(tr("Couldn't set up the demo workshop.")); }
     setBusy(false);
   };
 
@@ -92,9 +94,9 @@ function AdminPage() {
           <div className="ws-title admin-demo"><div><span className="eyebrow">{tr("DEMO")}</span><h2>{tr("Demo Verkstad for judges")}</h2><p className="history-note">{tr("Creates the demo workshop with sample requests the first time. Each click issues a new password.")}</p></div><Button variant="outline" onClick={() => void makeDemo()} disabled={busy}>{tr("Set up / reset demo login")}</Button></div>
           {demo && <div className="offer-card"><span className="eyebrow">{tr("DEMO LOGIN · COPY IT NOW")}</span><p>{tr("Email:")} <strong>{demo.email}</strong></p><p>{tr("Password:")} <strong>{demo.password}</strong></p></div>}
 
-          <h2 className="admin-h2">Workshops ({rows.length})</h2>
+          <h2 className="admin-h2">{tr("Workshops")} ({rows.length})</h2>
           <p className="history-note"><span className="preview-badge">{tr("Coming soon")}</span> {tr("Multiple branches per owner: one account running several workshop locations, each with its own Jackie, prices and booking calendar.")}</p>
-          <ul className="ws-list">{rows.map(r => <li key={r.id} className="admin-row"><strong>{r.name}</strong><span>{r.city}</span><span>{r.email}</span><span className={`ws-status ${r.claimed ? "s-booked" : ""}`}>{r.claimed ? "Signed in" : "Invited"}</span></li>)}</ul>
+          <ul className="ws-list">{rows.map(r => <li key={r.id} className="admin-row"><strong>{r.name}</strong><span>{r.city}</span><span>{r.email}</span><span className={`ws-status ${r.claimed ? "s-booked" : ""}`}>{r.claimed ? tr("Signed in") : tr("Invited")}</span></li>)}</ul>
         </>}
     </main>
     <SignInDialog open={signIn} onOpenChange={setSignIn}/>

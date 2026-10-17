@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { tr } from "@/lib/tr";
+import { useLang } from "@/lib/i18n";
 import "@lovable.dev/cloud-auth-js/styles.css";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,19 +11,20 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 
 /** returnTo: same-origin path to come back to after sign-in (e.g. an assistant connection request). */
 export function SignInDialog({ open, onOpenChange, returnTo }: { open: boolean; onOpenChange: (o: boolean) => void; returnTo?: string }) {
+  useLang();
   const [error, setError] = useState("");
   
   const [email, setEmail] = useState(""); const [password, setPassword] = useState("");
   const go = async (provider: "google" | "lovable") => {
     setError("");
     const r = await lovable.auth.signInWithOAuth(provider, { redirect_uri: returnTo ? new URL(oauthReturnPath(returnTo), window.location.origin).href : window.location.origin });
-    if (r.error) return setError("Sign-in didn't go through. Please try again.");
+    if (r.error) return setError(tr("Sign-in didn't go through. Please try again."));
     if (!r.redirected) onOpenChange(false);
   };
   const passwordSignIn = async () => {
     setError("");
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    if (error) return setError("That email and password didn't match.");
+    if (error) return setError(tr("That email and password didn't match."));
     onOpenChange(false);
   };
   return <Dialog open={open} onOpenChange={onOpenChange}>
