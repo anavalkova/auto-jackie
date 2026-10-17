@@ -28,3 +28,5 @@
 - Workshop configuration separates local field interaction from persistence; shared configuration-save guards block demo and non-owner writes, while demo team experiments stay local, so trying controls cannot alter stored workshop data.
 - Read-only workshop exploration uses localized fictional fixtures from workshop-demo, with relative visit dates and example.com contacts; never mix real inquiries or memberships into judging screens or persist/send fixture data.
 - Agent integrations: MCP at /mcp (OAuth, read-only driver + workshop tools), consent page, WebMCP on workshop requests.
+
+- Pricing service fields share one editor, presented as a table on desktop and stacked labeled rows on phones, so mobile edits retain the same validation and save behavior.

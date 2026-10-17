@@ -12,7 +12,7 @@ import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 import { ensureOther, OTHER } from "@/lib/services";
 import { TIERS, TIER_INFO, DEFAULT_TIERS, type Tier } from "@/lib/ai-tiers";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, LockKeyhole, LogOut, Settings2, UserRound, CircleHelp, CalendarCheck, CalendarClock, Car, ChevronDown, Globe2, Inbox, MessageCircle, Moon, Sparkles, TrendingUp, Wrench } from "lucide-react";
+import { ArrowUpRight, LockKeyhole, LogOut, Settings2, UserRound, CircleHelp, CalendarCheck, CalendarClock, Car, ChevronDown, Globe2, Inbox, MessageCircle, Moon, Sparkles, TrendingUp, Trash2, Wrench } from "lucide-react";
 import { SectionHint } from "@/components/demo-tour";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { LANGS, setLang, useT } from "@/lib/i18n";
@@ -20,6 +20,7 @@ import jackieImg from "@/assets/jackie.jpg";
 import { Button } from "@/components/ui/button";
 import { MobileHeaderMenu } from "@/components/mobile-header-menu";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -566,8 +567,13 @@ function PricingView({ workshopId, canEdit, demo = false }: { workshopId: string
     <fieldset disabled={!canEdit && !demo} style={{ border: 0, padding: 0, margin: 0 }}>
       <section className="ws-card"><h2 className="ws-label-row"><Hint controls={tr("every rough quote Jackie gives (the “What's next” card) and how long a booking blocks your calendar.")} shows={tr("prices to drivers on your Jackie page, labelled as an estimate. Times only to you.")}/>{tr("Services, prices and times (incl. VAT)")}</h2>
         <Label htmlFor="c-rate">{tr("Hourly labour rate (kr)")}</Label><Input id="c-rate" type="number" min={0} max={10000} value={s.hourly_rate_sek} onChange={e => setS({ ...s, hourly_rate_sek: Number(e.target.value) })}/>
-        <table className="ws-table"><thead><tr><th>{tr("Service")}</th><th>{tr("Price (kr)")}</th><th>{tr("Time (min)")}</th><th/></tr></thead><tbody>
-          {prices.map((p, i) => ({ p, i })).slice(pPg * PAGE, (pPg + 1) * PAGE).map(({ p, i }) => p.task === OTHER ? <tr key={i} className="ws-other-row"><td><strong>{tr("Other")}</strong><small className="history-note"> {tr("Anything Jackie can't match. You price it after a look.")}</small></td><td><Input aria-label={tr("Price")} type="number" min={0} max={200000} value={p.price_sek} title={tr("0 = evaluated by you")} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></td><td><Input aria-label={tr("Minutes")} type="number" min={5} max={2880} step={5} value={p.minutes} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, minutes: Number(e.target.value) } : x))}/></td><td/></tr> : <tr key={i}><td><Input aria-label={tr("Service")} maxLength={80} value={p.task} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, task: e.target.value } : x))}/></td><td><Input aria-label={tr("Price")} type="number" min={0} max={200000} value={p.price_sek} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></td><td><Input aria-label={tr("Minutes")} type="number" min={5} max={2880} step={5} value={p.minutes} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, minutes: Number(e.target.value) } : x))}/></td><td><Button type="button" size="sm" variant="ghost" aria-label={tr("Remove")} onClick={() => setP(prices.filter((_, j) => j !== i))}>×</Button></td></tr>)}
+        <table className="ws-table ws-pricing-table"><thead><tr><th>{tr("Service")}</th><th>{tr("Price (kr)")}</th><th>{tr("Time (min)")}</th><th/></tr></thead><tbody>
+          {prices.map((p, i) => ({ p, i })).slice(pPg * PAGE, (pPg + 1) * PAGE).map(({ p, i }) => <tr key={i} className={p.task === OTHER ? "ws-other-row" : undefined}>
+            <td className="ws-service-name">{p.task === OTHER ? <><strong>{tr("Other")}</strong><small className="history-note">{tr("Anything Jackie can't match. You price it after a look.")}</small></> : <Textarea rows={2} aria-label={tr("Service")} maxLength={80} value={p.task} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, task: e.target.value } : x))}/>}</td>
+            <td className="ws-service-price"><label><span className="ws-pricing-mobile-label">{tr("Price (kr)")}</span><Input aria-label={tr("Price")} type="number" min={0} max={200000} value={p.price_sek} title={p.task === OTHER ? tr("0 = evaluated by you") : undefined} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, price_sek: Number(e.target.value) } : x))}/></label></td>
+            <td className="ws-service-time"><label><span className="ws-pricing-mobile-label">{tr("Time (min)")}</span><Input aria-label={tr("Minutes")} type="number" min={5} max={2880} step={5} value={p.minutes} onChange={e => setP(prices.map((x, j) => j === i ? { ...x, minutes: Number(e.target.value) } : x))}/></label></td>
+            <td className="ws-service-remove">{p.task !== OTHER && <Button type="button" size="icon" variant="ghost" aria-label={tr("Remove")} title={tr("Remove")} onClick={() => setP(prices.filter((_, j) => j !== i))}><Trash2/></Button>}</td>
+          </tr>)}
         </tbody></table>
         <Pager page={pPg} pages={pPages} onPage={setPp}/>
         <div className="ws-chips">
