@@ -406,6 +406,10 @@ export type Database = {
           name: string
         }[]
       }
+      reschedule_my_visit: {
+        Args: { _id: string; _slot: string }
+        Returns: undefined
+      }
       workshop_add_member: {
         Args: {
           _email: string
