@@ -705,7 +705,7 @@
 .vehicle-empty > svg { display: block; width: 16px; height: 16px; flex-shrink: 0; }
 button.vehicle-empty { width: 100%; min-width: 0; height: auto; cursor: pointer; font: inherit; font-size: 14px; color: inherit; text-align: left; white-space: normal; transition: border-color .15s, color .15s; }
 button.vehicle-empty:hover, button.vehicle-empty:focus-visible { border-color: var(--primary); color: var(--primary); }
-.vehicle-empty-action { display: block; min-width: 0; flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vehicle-empty-action { display: block; min-width: 0; flex: 1; font-weight: 500; line-height: 1.3; overflow-wrap: anywhere; }
 .vehicle-empty-go { margin-left: auto; width: 14px; height: 14px; color: var(--muted-foreground); opacity: .55; flex-shrink: 0; }
 button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary); }
 .field-tip { display: flex; align-items: center; gap: 6px; }
