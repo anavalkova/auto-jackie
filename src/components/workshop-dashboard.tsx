@@ -18,6 +18,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { LANGS, setLang, useT } from "@/lib/i18n";
 import jackieImg from "@/assets/jackie.jpg";
 import { Button } from "@/components/ui/button";
+import { MobileHeaderMenu } from "@/components/mobile-header-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -146,8 +147,8 @@ export function WorkshopDashboard() {
     setItems(xs => xs.map(x => x.id === data.id ? data : x)); setSelected(data);
   };
   const header = <header className="site-header">
-    <Link to="/" className="brand" aria-label={tr("AutoJackie home")}><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span><span className="brand-sub">{tr("for workshops")}</span></Link>
-    <nav aria-label={tr("Workshop navigation")}>
+    <Link to="/" className="brand" aria-label={tr("AutoJackie home")}><span className="brand-mark">J<span className="brand-mark-dot"/></span><span className="brand-word">Auto<span className="brand-orange">Jackie</span></span><span className="brand-sub">{tr("for workshops")}</span></Link>
+    <nav className="desktop-header-nav" aria-label={tr("Workshop navigation")}>
       <Button variant="ghost" asChild className="workshop-link">{!demo && shop?.slug
         ? <Link to="/w/$slug" params={{ slug: shop.slug }}>{tr("Driver view")} <ArrowUpRight/></Link>
         : <Link to="/">{tr("Driver view")} <ArrowUpRight/></Link>}</Button>
@@ -163,6 +164,10 @@ export function WorkshopDashboard() {
       </DropdownMenu>}
       <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="nav-control language-control" aria-label={tr("Language")}><Globe2/> {LANGS.find(l => l.code === lang)?.short} <ChevronDown/></Button></DropdownMenuTrigger><DropdownMenuContent align="end">{LANGS.map(l => <DropdownMenuItem key={l.code} onSelect={() => setLang(l.code)} aria-current={l.code === lang ? "true" : undefined}>{l.short} · {l.label}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>
     </nav>
+    <MobileHeaderMenu email={user?.email} onSignIn={() => setSignIn(true)} onSignOut={() => { void supabase.auth.signOut().then(() => window.location.assign("/workshop")); }}>
+      <DropdownMenuItem asChild>{!demo && shop?.slug ? <Link to="/w/$slug" params={{ slug: shop.slug }}><ArrowUpRight/>{tr("Driver view")}</Link> : <Link to="/"><ArrowUpRight/>{tr("Driver view")}</Link>}</DropdownMenuItem>
+      {isAdmin && <DropdownMenuItem asChild><Link to="/admin"><Settings2/>{tr("Operations")}</Link></DropdownMenuItem>}
+    </MobileHeaderMenu>
   </header>;
 
   let body;
