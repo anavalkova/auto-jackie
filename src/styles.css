@@ -524,6 +524,10 @@
 .ws-team-add { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; }
 .ws-team-add .native-select, .ws-team-add input, .ws-team-add button { height: 40px; min-width: 0; }
 @media (max-width: 640px) {
+  .ws-team-row { grid-template-columns: minmax(0, 1fr) 36px; row-gap: 4px; }
+  .ws-team-email { grid-column: 1; grid-row: 1; }
+  .ws-team-role { grid-column: 1; grid-row: 2; justify-self: start; }
+  .ws-team-remove { grid-column: 2; grid-row: 1 / span 2; }
   .ws-team-add { grid-template-columns: minmax(0, 1fr) auto; }
   .ws-team-add input { grid-column: 1 / -1; height: 44px; font-size: 16px; }
   .ws-team-add .native-select { width: 100%; height: 44px; font-size: 16px; }
