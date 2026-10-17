@@ -233,6 +233,7 @@ export const WS: Record<string, [string, string]> = {
   "Registry details stay private. Jackie uses them for context, not a visible car profile.": ["Registeruppgifterna förblir privata. Jackie använder dem som underlag, inte i en synlig bilprofil.", "Registerdaten bleiben privat. Jackie nutzt sie als Kontext, nicht in einem sichtbaren Fahrzeugprofil."],
   "Step {a} of {b}": ["Steg {a} av {b}", "Schritt {a} von {b}"],
   "Finish tour": ["Avsluta turen", "Tour beenden"],
+  "What you can do here": ["Det här kan du göra", "Das können Sie hier tun"],
   "Your business at a glance": ["Din verksamhet i korthet", "Ihr Geschäft auf einen Blick"],
   "New requests, this week's urgent jobs, estimated pipeline and after-hours demand — the numbers that usually live in your head, in one place. Try collapsing a panel.": ["Nya förfrågningar, veckans brådskande jobb, uppskattad pipeline och efterfrågan efter stängning — siffrorna som annars bara finns i huvudet, samlade på ett ställe. Prova att fälla ihop en panel.", "Neue Anfragen, dringende Jobs dieser Woche, geschätzte Pipeline und Nachfrage außerhalb der Öffnungszeiten — die Zahlen, die sonst nur in Ihrem Kopf sind, an einem Ort. Klappen Sie ein Panel zu."],
   "Requests arrive pre-triaged": ["Förfrågningar kommer försorterade", "Anfragen kommen vorsortiert an"],

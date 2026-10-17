@@ -28,7 +28,7 @@ export function SignInDialog({ open, onOpenChange, returnTo }: { open: boolean; 
     onOpenChange(false);
   };
   return <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="signin-dialog">
+    <DialogContent className="app-sheet signin-dialog">
       <DialogHeader>
         <DialogTitle>{tr("Sign in to AutoJackie")}</DialogTitle>
         <DialogDescription>{tr("Drivers: optional. It saves your car and chats. Workshops: use the email we set you up with.")}</DialogDescription>

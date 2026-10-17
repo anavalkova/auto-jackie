@@ -67,7 +67,7 @@ export function GarageDialog({ open, onOpenChange, vehicle, onSave, signedIn }: 
   const entry = make && model ? catalog[make]?.[model] : undefined;
 
   return <Dialog open={open} onOpenChange={o => { onOpenChange(o); setError(""); setPlateDone(false); }}>
-    <DialogContent className="garage-dialog">
+    <DialogContent className="app-sheet garage-dialog">
       <DialogHeader><DialogTitle>{vehicle ? "Change your car" : "Tell Jackie about your car"}</DialogTitle><DialogDescription>{signedIn ? "Saved to your account so Jackie remembers it next time. Remove it any time." : "Used for this chat only. Nothing is saved. Start a new chat or close the tab and it's gone."}</DialogDescription></DialogHeader>
       <Tabs defaultValue="plate" onValueChange={() => setError("")}>
         <TabsList className="garage-tabs"><TabsTrigger value="plate">Swedish plate</TabsTrigger><TabsTrigger value="hsn">German HSN/TSN</TabsTrigger><TabsTrigger value="manual">Pick manually</TabsTrigger></TabsList>

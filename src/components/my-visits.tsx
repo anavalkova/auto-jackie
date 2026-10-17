@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { CalendarCheck, CalendarClock, CalendarSync, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AppSheet } from "@/components/app-sheet";
 import { Tip } from "@/components/request-visit-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { slotLabel } from "@/lib/booking";
@@ -74,22 +74,19 @@ export function MyVisits({ userId, refreshKey, onReschedule }: { userId: string 
           {all.length > 0 && <div className="history-pager"><Button variant="ghost" size="icon" aria-label={tr("Previous page")} disabled={cur === 0} onClick={() => setPage(cur - 1)}><ChevronLeft/></Button><span>{cur + 1} / {pages}</span><Button variant="ghost" size="icon" aria-label={tr("Next page")} disabled={cur >= pages - 1} onClick={() => setPage(cur + 1)}><ChevronRight/></Button></div>}
         </>}
     </div>
-    <Dialog open={!!detail} onOpenChange={o => { if (!o) setDetail(null); }}>
-      <DialogContent className="garage-dialog visit-dialog">
-        {detail && <>
-          <DialogHeader><DialogTitle>{t.visitDetails}</DialogTitle><DialogDescription>{detail.v.workshopName}</DialogDescription></DialogHeader>
-          <dl className="visit-dl">
-            <dt>{t.visitJob}</dt><dd>{detail.v.service || detail.v.issue}</dd>
-            {detail.v.service && detail.v.issue && detail.v.issue !== detail.v.service && <><dt></dt><dd className="history-note">{detail.v.issue}</dd></>}
-            <dt>{t.visitTime}</dt><dd>{detail.v.bookedAt ? slotLabel(detail.v.bookedAt, locale) : "–"}</dd>
-            <dt>{t.visitStatus}</dt><dd><span className={`visit-status${detail.v.status === "closed" ? "" : " is-booked"}`}>{detail.v.status === "closed" ? tr("Closed") : tr("Booked")}</span></dd>
-          </dl>
-          {detail.up && onReschedule && <div className="visit-dialog-actions">
-            <p className="garage-note">{t.rescheduleNote}</p>
-            <Button onClick={() => { const v = detail.v; setDetail(null); onReschedule({ id: v.id, workshopId: v.workshopId, job: v.service || v.issue }); }}><CalendarSync/>{t.reschedule}</Button>
-          </div>}
-        </>}
-      </DialogContent>
-    </Dialog>
+    <AppSheet open={!!detail} onOpenChange={o => { if (!o) setDetail(null); }} className="visit-dialog" title={t.visitDetails} description={detail?.v.workshopName}>
+      {detail && <>
+        <dl className="visit-dl">
+          <dt>{t.visitJob}</dt><dd>{detail.v.service || detail.v.issue}</dd>
+          {detail.v.service && detail.v.issue && detail.v.issue !== detail.v.service && <><dt></dt><dd className="history-note">{detail.v.issue}</dd></>}
+          <dt>{t.visitTime}</dt><dd>{detail.v.bookedAt ? slotLabel(detail.v.bookedAt, locale) : "–"}</dd>
+          <dt>{t.visitStatus}</dt><dd><span className={`visit-status${detail.v.status === "closed" ? "" : " is-booked"}`}>{detail.v.status === "closed" ? tr("Closed") : tr("Booked")}</span></dd>
+        </dl>
+        {detail.up && onReschedule && <div className="visit-dialog-actions">
+          <p className="garage-note">{t.rescheduleNote}</p>
+          <Button onClick={() => { const v = detail.v; setDetail(null); onReschedule({ id: v.id, workshopId: v.workshopId, job: v.service || v.issue }); }}><CalendarSync/>{t.reschedule}</Button>
+        </div>}
+      </>}
+    </AppSheet>
   </section>;
 }

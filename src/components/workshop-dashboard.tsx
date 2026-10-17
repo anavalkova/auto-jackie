@@ -85,6 +85,7 @@ export function WorkshopDashboard() {
   const closeTour = useCallback(() => { setTour(null); try { localStorage.setItem("autojackie_tour_done", "1"); } catch { /* private mode */ } }, []);
   const tourStep = useCallback((s: number) => { setTour(s); const t = TOUR_STEPS[s]; if (t) setTab(t.tab); }, []);
   useEffect(() => { if (demo && !tourDone()) setTour(0); }, [demo]);
+  const tourSub = demo && tour !== null ? TOUR_STEPS[tour]?.sub : undefined;
   const [shops, setShops] = useState<Shop[]>([]);
   const loadShop = useCallback(async () => {
     if (!user) return;
@@ -169,7 +170,7 @@ export function WorkshopDashboard() {
   else body = <>
     {demo && <p className="demo-banner" role="note"><Sparkles aria-hidden/> {t.pitch.demoBanner} <Button variant="outline" size="sm" className="demo-tour-btn" onClick={() => tourStep(0)}>{tr("Guided tour")}</Button></p>}
     {demo && tour !== null && <DemoTour step={tour} onStep={tourStep} onClose={closeTour}/>}
-    <div className="ws-title"><div><span className="eyebrow">{tr("WORKSHOP DASHBOARD")}</span><div className="ws-title-name"><h1>{shop.name}</h1><WhyNote key={tab} overlay {...WHY[tab]}/></div></div>
+    <div className="ws-title"><div><span className="eyebrow">{tr("WORKSHOP DASHBOARD")}</span><div className="ws-title-name"><h1>{shop.name}</h1><WhyNote key={tab} overlay autoOpen={tour === null} {...WHY[tab]}/></div></div>
       {!demo && shops.length > 1 && <div className="ws-field" style={{ margin: 0 }}><Label htmlFor="ws-switch">{tr("Your workshops")}</Label>
         <select id="ws-switch" className="native-select" value={shop.id} onChange={e => { const w = shops.find(x => x.id === e.target.value); if (w) { setShop(w); setTab("overview"); setSelected(null); setPage(0); } }}>
           {shops.map(w => <option key={w.id} value={w.id}>{w.name}{w.city ? ` · ${w.city}` : ""}</option>)}
@@ -195,10 +196,10 @@ export function WorkshopDashboard() {
         <time dateTime={i.created_at}>{when(i.created_at)}</time>
       </button></li>)}</ul>}
     {shown.length > 0 && <Pager page={page} pages={Math.max(1, Math.ceil(shown.length / PAGE))} onPage={setPage}/>}
-    </>} settings={shop.role === "staff" ? null : <BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo}/>}/>
-    : tab === "context" ? <ContextSettings workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo}/>
+    </>} settings={shop.role === "staff" ? null : <BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo}/>} sub={tourSub}/>
+    : tab === "context" ? <ContextSettings workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo} sub={tourSub}/>
     : tab === "pricing" ? <PricingView workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo}/>
-    : tab === "profile" ? <ProfileView shop={shop} canEdit={shop.role === "owner"} demo={demo} onSaved={loadShop}/> : <>
+    : tab === "profile" ? <ProfileView shop={shop} canEdit={shop.role === "owner"} demo={demo} onSaved={loadShop} sub={tourSub}/> : <>
     <div className="ws-kpis">
       <Kpi icon={<Inbox/>} label={tr("New requests")} value={String(kpis.fresh)}/>
       <Kpi icon={<CalendarClock/>} label={tr("Need you this week")} value={String(kpis.urgent)}/>
@@ -250,8 +251,13 @@ function Pager({ page, pages, onPage }: { page: number; pages: number; onPage: (
 }
 
 const BOOKING_STEPS = [{ title: "Requests" }, { title: "Booking settings" }];
-function BookingTab({ requests, settings }: { requests: React.ReactNode; settings: React.ReactNode }) {
-  const [step, setStep] = useState(0);
+function useSubTab(sub?: number | undefined) {
+  const [step, setStep] = useState(sub ?? 0);
+  useEffect(() => { if (sub != null) setStep(sub); }, [sub]);
+  return [step, setStep] as const;
+}
+function BookingTab({ requests, settings, sub }: { requests: React.ReactNode; settings: React.ReactNode; sub?: number | undefined }) {
+  const [step, setStep] = useSubTab(sub);
   const list = <Collapsible title={tr("Requests")} tip={tr("Everything drivers sent you, newest first. Click a request to see the visit, the quote Jackie sent and how to reach the driver. Filter with the buttons above.")}><div className="ws-section">{requests}</div></Collapsible>;
   if (!settings) return <div className="ws-section">{list}</div>;
   return <div className="ws-section"><Stepper steps={BOOKING_STEPS} step={step} setStep={setStep}/>{step === 0 ? list : settings}</div>;
@@ -461,9 +467,9 @@ function Hint({ controls, shows }: { controls: string; shows: string }) {
   return <Tip><p><b>{tr("Controls:")}</b> {controls}</p><p><b>{tr("Shows:")}</b> {shows}</p></Tip>;
 }
 
-function ContextSettings({ workshopId, canEdit, demo = false }: { workshopId: string; canEdit: boolean; demo?: boolean }) {
+function ContextSettings({ workshopId, canEdit, demo = false, sub }: { workshopId: string; canEdit: boolean; demo?: boolean; sub?: number | undefined }) {
   const { s, setS, save, state } = useSettings(workshopId, canEdit, demo);
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useSubTab(sub);
   if (!s) return <p className="history-note" role="status">{tr("Loading…")}</p>;
   const storedServices = s.services as string[];
   const templateServices = ["Annual service", "Brake pads & discs", "Tyre change & storage", "Diagnostics (engine light)", "Timing belt", "Battery & electrics"];
@@ -612,10 +618,10 @@ function TeamSection({ workshopId, demo = false }: { workshopId: string; demo?: 
   </div>;
 }
 
-function ProfileView({ shop, canEdit, demo = false, onSaved }: { shop: Shop; canEdit: boolean; demo?: boolean; onSaved: () => void }) {
+function ProfileView({ shop, canEdit, demo = false, onSaved, sub }: { shop: Shop; canEdit: boolean; demo?: boolean; onSaved: () => void; sub?: number | undefined }) {
   const { s, setS, save, state } = useSettings(shop.id, canEdit, demo);
   const [city, setCity] = useState(shop.city);
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useSubTab(sub);
   if (!s) return <p className="history-note" role="status">{tr("Loading…")}</p>;
   const steps = canEdit || demo ? [...PROFILE_STEPS, { title: "Team", sees: "Who can open this dashboard and what they can change." }] : PROFILE_STEPS;
   const link = shop.slug && typeof window !== "undefined" ? `${window.location.origin}/w/${shop.slug}` : "";
