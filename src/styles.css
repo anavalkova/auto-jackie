@@ -819,7 +819,8 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
 }
 @media (max-width: 760px) {
   .site-header .brand { flex-shrink: 0; }
-  .site-header nav .nav-signin { width: 36px; padding: 0; font-size: 0; gap: 0; }
+  .site-header nav > * { flex-shrink: 0; }
+  .site-header nav .nav-signin { width: 36px; min-width: 36px; padding: 0; font-size: 0; gap: 0; }
   .site-header nav .workshop-link { font-size: 11px; padding: 0 2px; }
   .jackie-panel { align-items: stretch; }
   .jackie-panel > .vehicle-card { display: flex; }
