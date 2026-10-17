@@ -1,7 +1,7 @@
 import { useNavigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { UIMessage } from "ai";
-import { ArrowUpRight, CalendarPlus, Car, ChevronDown, ChevronRight, Gauge, Globe2, HelpCircle, LockKeyhole, LogOut, MessageSquare, Pencil, Plus, Trash2, UserRound } from "lucide-react";
+import { ArrowUpRight, CalendarPlus, Car, ChevronDown, ChevronLeft, ChevronRight, Globe2, LockKeyhole, LogOut, MessageSquare, Plus, Trash2, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -13,11 +13,12 @@ import { SignInDialog } from "@/components/sign-in-dialog";
 import { useSessionUser } from "@/hooks/use-session-user";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
-import { kmToOdoUnit, nextService, type Vehicle } from "@/lib/vehicles";
+import { isPrivateVehicle, type Vehicle } from "@/lib/vehicles";
+import { CHAT_HISTORY_PAGE_SIZE, chatHistoryRange } from "@/lib/chat-history";
+import { tr } from "@/lib/tr";
 import jackie from "@/assets/jackie.jpg";
-import { LANGS, setLang, useT, odoUnitFor } from "@/lib/i18n";
+import { LANGS, setLang, useT } from "@/lib/i18n";
 
-const fmt = (n: number) => n.toLocaleString("sv-SE");
 export type WorkshopBrand = { id: string; name: string; city: string; slug: string; accent: string; logo: string; greeting: string };
 type ChatRow = { id: string; title: string; updated_at: string };
 
@@ -57,6 +58,8 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
   const [missing, setMissing] = useState(false);
   const [chatEmpty, setChatEmpty] = useState(true);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyPage, setHistoryPage] = useState(0);
+  const [historyCount, setHistoryCount] = useState(0);
 
   // Older versions kept the car in this browser; guests are now private by default.
   useEffect(() => { try { localStorage.removeItem("autojackie.vehicle"); } catch { /* ignore */ } }, []);
@@ -105,11 +108,17 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
   const loadChats = useCallback(async () => {
     if (!user) return;
     setChatsLoading(true);
-    const { data, error } = await supabase.from("chats").select("id,title,updated_at").order("updated_at", { ascending: false }).limit(50);
+    const { from, to } = chatHistoryRange(historyPage);
+    const { data, error, count } = await supabase.from("chats").select("id,title,updated_at", { count: "exact" }).order("updated_at", { ascending: false }).order("id").range(from, to);
     setChatsError(!!error);
-    if (!error) setChats(data ?? []);
+    if (!error) {
+      setChats(data ?? []);
+      setHistoryCount(count ?? 0);
+      const lastPage = Math.max(0, Math.ceil((count ?? 0) / CHAT_HISTORY_PAGE_SIZE) - 1);
+      if (historyPage > lastPage) setHistoryPage(lastPage);
+    }
     setChatsLoading(false);
-  }, [user?.id]);
+  }, [user?.id, historyPage]);
   useEffect(() => {
     if (!ready) return;
     if (user) { void loadChats(); }
@@ -150,20 +159,17 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
   const deleteChat = async (id: string) => {
     const { error } = await supabase.from("chats").delete().eq("id", id);
     if (error) { setChatsError(true); return; }
-    setChats(c => c.filter(x => x.id !== id));
+    await loadChats();
     if (id === chatId) navigate({ to: "/" });
   };
 
   const signOut = async () => { await supabase.auth.signOut(); setVehicle(null); navigate({ to: "/", replace: true }); };
-  const service = vehicle ? nextService(vehicle) : null;
-  const odoUnit = odoUnitFor(lang);
   const [directBooking, setDirectBooking] = useState<VisitCard | null>(null);
 
   return <div className="app-frame" style={workshop?.accent ? { ["--primary" as string]: workshop.accent } : undefined}>
     <header className="site-header">
-      <Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span></Link>
+      {workshop ? <div className="tenant-brand"><div className="tenant-brand-name">{/^data:image\/(webp|png|jpeg);base64,/.test(workshop.logo) && <img src={workshop.logo} alt=""/>}<strong>{workshop.name}</strong></div><Link to="/" className="tenant-brand-credit">AutoJackie</Link></div> : <Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span></Link>}
       <nav aria-label="Main navigation">
-        {workshop && <span className="shop-badge">{/^data:image\/(webp|png|jpeg);base64,/.test(workshop.logo) && <img src={workshop.logo} alt="" className="shop-logo"/>}<span>{workshop.name}</span></span>}
         {(!workshop || user) && <Button variant="ghost" asChild className="workshop-link"><Link to="/workshop">{t.forWorkshops} <ArrowUpRight/></Link></Button>}
         <span className="nav-divider" aria-hidden="true"/>
         {ready && (user ? <>
@@ -186,15 +192,9 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
         <div className="portrait-wrap compact"><img src={jackie} alt="Jackie, a mechanic in an orange work jacket" width={1024} height={1024}/><span className="portrait-label field-tip"><Tip text={`${t.aboutTitle} ${t.aboutBody}`}/>{t.jackieNew}</span></div>
 
         <section className="vehicle-card" aria-label="Your car">
-          <div className="vehicle-head"><span className="eyebrow">{user ? t.yourSavedCar : t.carForChat}</span>{vehicle && <Button variant="ghost" size="sm" onClick={() => setGarageOpen(true)}><Pencil/> {t.change}</Button>}</div>
-          {!vehicle ? <button type="button" className="vehicle-empty" title={user ? t.noCarSaved : t.noCarGuest} onClick={() => setGarageOpen(true)}><Car/>
+          {!vehicle ? <Button variant="ghost" className="vehicle-empty" title={user ? t.noCarSaved : t.noCarGuest} onClick={() => setGarageOpen(true)}><Car/>
             <span className="vehicle-empty-action">{user ? t.addCar : t.tellCar}</span><ChevronRight className="vehicle-empty-go"/>
-          </button> : <>
-            <h2 className="vehicle-name">{vehicle.confidential ? <span className="plate-chip"><span className="plate-eu">S</span>{vehicle.label}</span> : vehicle.label}</h2>
-            <p className="vehicle-spec">{vehicle.confidential ? <><LockKeyhole/> {t.privateDetails}</> : vehicle.description}</p>
-            <div className="service-box"><Gauge/>{service ? <div><strong>{t.nextService(fmt(kmToOdoUnit(service.remaining, odoUnit)))}</strong><span>{t.estimatedAt(fmt(kmToOdoUnit(service.dueAt, odoUnit)), fmt(kmToOdoUnit(vehicle.serviceKm, odoUnit)))}</span><div className="service-bar"><span style={{ width: `${Math.round(service.progress * 100)}%` }}/></div></div> : <div><strong>{t.addOdo}</strong><span>{t.toEstimate}</span></div>}</div>
-            <p className="estimate-note">{user ? t.savedToAccount : t.notSaved} <button type="button" className="text-link" onClick={forgetVehicle}>{t.removeCar}</button></p>
-          </>}
+          </Button> : <div className="vehicle-context-row"><Button variant="ghost" className="vehicle-context-button" onClick={() => setGarageOpen(true)}>{isPrivateVehicle(vehicle) ? <LockKeyhole/> : <Car/>}<span>{isPrivateVehicle(vehicle) ? tr("Car context added") : vehicle.label}</span><ChevronRight/></Button><Button variant="ghost" size="icon" title={t.removeCar} aria-label={t.removeCar} onClick={forgetVehicle}><Trash2/></Button></div>}
         </section>
 
         <section className="chat-history" aria-label="Chat history">
@@ -208,6 +208,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
               <Link to="/c/$chatId" params={{ chatId: c.id }} className="history-item" aria-current={c.id === chatId ? "page" : undefined} title={c.title}><MessageSquare/><span className="history-item-copy"><span>{c.title}</span><time dateTime={c.updated_at}>{new Date(c.updated_at).toLocaleString(lang === "en" ? "en-GB" : lang, { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</time></span></Link>
               <Button variant="ghost" size="icon" className="history-delete" aria-label={`${t.deleteChat}: ${c.title}`} title={t.deleteChat} onClick={() => deleteChat(c.id)}><Trash2/></Button>
             </li>)}</ul>}
+          {user && <div className="history-pager"><Button variant="ghost" size="icon" aria-label={tr("Previous page")} disabled={historyPage === 0 || chatsLoading} onClick={() => setHistoryPage(p => p - 1)}><ChevronLeft/></Button><span>{historyPage + 1} / {Math.max(1, Math.ceil(historyCount / CHAT_HISTORY_PAGE_SIZE))}</span><Button variant="ghost" size="icon" aria-label={tr("Next page")} disabled={(historyPage + 1) * CHAT_HISTORY_PAGE_SIZE >= historyCount || chatsLoading} onClick={() => setHistoryPage(p => p + 1)}><ChevronRight/></Button></div>}
           </div>
         </section>
       </aside>
@@ -217,7 +218,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
           { value: "36%", text: t.why1, source: { label: "Trafikanalys, 2022", url: "https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" } },
           { value: "P0301?", text: t.why2 },
         ]}/></div></div>
-        {directBooking && <BookingPanel card={directBooking} vehicleLabel={vehicle && !vehicle.confidential ? vehicle.label : ""} onClose={() => setDirectBooking(null)} workshopId={workshop?.id}/>}
+        {directBooking && <BookingPanel card={directBooking} vehicleLabel={vehicle && !isPrivateVehicle(vehicle) ? vehicle.label : ""} onClose={() => setDirectBooking(null)} workshopId={workshop?.id}/>}
         <div className="chat-slot" hidden={!!directBooking}>
         {missing ? <div className="chat-empty"><h1>{t.missingTitle}</h1><p>{user ? t.missingDeleted : t.missingSignIn}</p><div className="starter-grid">{!user && <Button onClick={() => setSignInOpen(true)}>{t.signIn}</Button>}<Button variant="outline" asChild><Link to="/">{t.startNew}</Link></Button></div></div>
           : initial === null ? <div className="chat-empty"><p>{t.opening}</p></div>
