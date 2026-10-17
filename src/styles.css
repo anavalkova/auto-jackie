@@ -716,3 +716,13 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
   .assistant-bottom { padding: 10px 12px; align-items: flex-start; }
   .assistant-bottom .swedish-flag { margin-top: 3px; }
 }
+/* "Why this exists" beside the workshop name: chip hugs the name, layer opens to the right. */
+.ws-title-name .why-overlay { margin-left: 0; }
+.ws-title-name .why-pop { left: 0; right: auto; }
+@media (max-width: 760px) {
+  .ws-title { flex-direction: column; align-items: stretch; gap: 12px; }
+  .ws-title > div { min-width: 0; }
+  .ws-title h1 { font-size: 24px; line-height: 1.2; }
+  .ws-title-name { gap: 8px; }
+  .ws-title .ws-field, .ws-title .ws-field select { width: 100%; }
+}
