@@ -166,7 +166,10 @@ export function WorkshopDashboard() {
           {shops.map(w => <option key={w.id} value={w.id}>{w.name}{w.city ? ` · ${w.city}` : ""}</option>)}
         </select></div>}
     </div>
-    <div className="ws-tabs" role="tablist" aria-label={tr("Dashboard sections")}>{TABS.filter(tb => shop.role !== "staff" || STAFF_TABS.includes(tb.id)).map(t => <Button key={t.id} variant={tab === t.id ? "default" : "outline"} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{tr(t.label)}</Button>)}<WhyNote key={tab} overlay {...WHY[tab]}/></div>
+    <div className="ws-layout">
+    <nav className="ws-nav" role="tablist" aria-label={tr("Dashboard sections")}>{TABS.filter(tb => shop.role !== "staff" || STAFF_TABS.includes(tb.id)).map(t => <button key={t.id} type="button" className={`ws-nav-item${tab === t.id ? " active" : ""}`} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{tr(t.label)}</button>)}</nav>
+    <div className="ws-content">
+    <div className="ws-content-head"><WhyNote key={tab} overlay {...WHY[tab]}/></div>
     {tab === "booking" ? <BookingTab requests={<>
     <div className="ws-filters" role="tablist" aria-label={tr("Filter requests")}>
       {([{ id: "open", label: "All open" }, ...STATUSES] as { id: Status | "open"; label: string }[]).map(s => <Button key={s.id} size="sm" variant={filter === s.id ? "default" : "outline"} role="tab" aria-selected={filter === s.id} onClick={() => changeFilter(s.id)}>{tr(s.label)}</Button>)}
@@ -193,6 +196,8 @@ export function WorkshopDashboard() {
     </div>
     <InsightsView items={items} workshopId={shop.id} canEdit={shop.role === "owner"}/>
     </>}
+    </div>
+    </div>
   </>;
 
   return <div className="app-frame">
