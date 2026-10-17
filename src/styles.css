@@ -492,6 +492,31 @@
 .ws-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
 .ws-table td:last-child { width: 1%; }
 .ws-table input { height: 34px; }
+.ws-pricing-table { table-layout: fixed; }
+.ws-pricing-table th:first-child { width: 50%; }
+.ws-pricing-table th:last-child { width: 48px; }
+.ws-pricing-table textarea { min-height: 34px; height: 34px; resize: none; padding: 6px 10px; line-height: 20px; }
+.ws-pricing-table .ws-service-remove { width: 48px; }
+.ws-pricing-table .ws-service-remove button { width: 36px; height: 36px; }
+.ws-pricing-mobile-label { display: none; }
+@media (max-width: 640px) {
+  .ws-pricing-table, .ws-pricing-table tbody { display: block; }
+  .ws-pricing-table thead { display: none; }
+  .ws-pricing-table tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .ws-pricing-table td { min-width: 0; padding: 0; border: 0; }
+  .ws-pricing-table .ws-service-name { grid-column: 1 / -1; grid-row: 1; padding-right: 48px; }
+  .ws-pricing-table .ws-service-remove { grid-column: 2; grid-row: 1; width: 36px; justify-self: end; }
+  .ws-pricing-table .ws-service-price { grid-column: 1; grid-row: 2; }
+  .ws-pricing-table .ws-service-time { grid-column: 2; grid-row: 2; }
+  .ws-pricing-table textarea { height: 64px; min-height: 64px; padding: 10px; font-size: 16px; line-height: 21px; }
+  .ws-pricing-table input { height: 44px; font-size: 16px; width: 100%; min-width: 0; }
+  .ws-pricing-table label { display: grid; gap: 5px; }
+  .ws-pricing-mobile-label { display: block; font-size: 12px; color: var(--muted-foreground); }
+  .ws-pricing-table .ws-other-row .ws-service-name { padding-right: 0; }
+  .ws-pricing-table .history-note { display: block; margin: 4px 0 0; }
+  .ws-pricing-table ~ .ws-chips .native-select { width: 100%; min-width: 0; }
+}
+
 .ws-funnel { display: grid; gap: 8px; }
 .ws-funnel-row { display: grid; grid-template-columns: 110px 1fr 48px; gap: 10px; align-items: center; font-size: 14px; }
 .ws-bar { height: 10px; border-radius: 99px; background: var(--muted); overflow: hidden; }
