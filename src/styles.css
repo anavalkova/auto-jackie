@@ -502,10 +502,10 @@
 @media (max-width: 640px) {
   .ws-pricing-table, .ws-pricing-table tbody { display: block; }
   .ws-pricing-table thead { display: none; }
-  .ws-pricing-table tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .ws-pricing-table tr { display: grid; position: relative; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; padding: 14px 0; border-bottom: 1px solid var(--border); }
   .ws-pricing-table td { min-width: 0; padding: 0; border: 0; }
-  .ws-pricing-table .ws-service-name { grid-column: 1 / -1; grid-row: 1; padding-right: 48px; }
-  .ws-pricing-table .ws-service-remove { grid-column: 2; grid-row: 1; width: 36px; justify-self: end; }
+  .ws-pricing-table .ws-service-name { grid-column: 1 / -1; grid-row: 1; padding-right: 46px; }
+  .ws-pricing-table td.ws-service-remove { position: absolute; top: 28px; right: 0; width: 36px; min-width: 36px; display: flex; }
   .ws-pricing-table .ws-service-price { grid-column: 1; grid-row: 2; }
   .ws-pricing-table .ws-service-time { grid-column: 2; grid-row: 2; }
   .ws-pricing-table textarea { height: 64px; min-height: 64px; padding: 10px; font-size: 16px; line-height: 21px; }
@@ -513,6 +513,7 @@
   .ws-pricing-table label { display: grid; gap: 5px; }
   .ws-pricing-mobile-label { display: block; font-size: 12px; color: var(--muted-foreground); }
   .ws-pricing-table .ws-other-row .ws-service-name { padding-right: 0; }
+  .ws-pricing-table .ws-other-row td.ws-service-remove { display: none; }
   .ws-pricing-table .history-note { display: block; margin: 4px 0 0; }
   .ws-pricing-table ~ .ws-chips .native-select { width: 100%; min-width: 0; }
 }
