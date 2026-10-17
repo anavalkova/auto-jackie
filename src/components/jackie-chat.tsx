@@ -1,6 +1,6 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, isToolUIPart, getToolName, type UIMessage } from "ai";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CalendarCheck, RotateCcw } from "lucide-react";
 import type { VisitCard } from "@/components/request-visit-dialog";
 import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/ai-elements/conversation";
@@ -13,15 +13,16 @@ import { vehicleForJackie, type Vehicle } from "@/lib/vehicles";
 import { useT } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { QUOTA_ERROR } from "@/lib/chat-quota";
-import { chatQuotaStatus, type ChatQuotaStatus } from "@/lib/chat-quota.functions";
+import { useChatQuota } from "@/hooks/use-chat-quota";
 
 
-export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMessages, persistGuestDraft, onTurnFinished, onReset, saving, workshopId, onSignIn, onBook, onEmptyChange }: {
+export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMessages, persistGuestDraft, userId, sessionReady, onTurnFinished, onReset, saving, workshopId, onSignIn, onBook, onEmptyChange }: {
   workshopId?: string | undefined; onSignIn?: (() => void) | undefined; onBook: (card: VisitCard) => void;
   onEmptyChange?: ((empty: boolean) => void) | undefined;
   vehicle: Vehicle | null; pending: string | null; onPendingSent: () => void;
   chatId?: string | undefined; initialMessages?: UIMessage[] | undefined;
   persistGuestDraft: boolean;
+  userId: string | null; sessionReady: boolean;
   onTurnFinished?: ((messages: UIMessage[]) => void) | undefined; onReset?: (() => void) | undefined; saving?: boolean | undefined;
 }) {
   const { t, lang } = useT();
@@ -40,9 +41,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
   const { messages, sendMessage, status, stop, error, setMessages, clearError } = useChat({ transport, ...(chatId ? { id: chatId } : {}), ...(initialMessages ? { messages: initialMessages } : {}) });
   const busy = status === "submitted" || status === "streaming";
   const wasBusy = useRef(false);
-  const [quota, setQuota] = useState<ChatQuotaStatus | null>(null);
-  const refreshQuota = useCallback(() => { chatQuotaStatus().then(setQuota).catch(() => {}); }, []);
-  useEffect(() => { refreshQuota(); }, [refreshQuota]);
+  const { quota, refreshQuota } = useChatQuota(userId, sessionReady);
   useEffect(() => {
     if (busy) { wasBusy.current = true; return; }
     if (wasBusy.current && status === "ready") { wasBusy.current = false; onTurnFinished?.(messages); refreshQuota(); }
