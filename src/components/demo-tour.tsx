@@ -87,6 +87,44 @@ export const TOUR_STEPS: TourStep[] = [
 
 const IDX = { en: 0, sv: 1, de: 2 } as const;
 
+export type SectionWhy = { id: string; title: string; pitch: string; stats: WhyStat[]; points?: string[]; footer?: string };
+
+/**
+ * One hint per dashboard section, combining "The problem" (why this exists)
+ * and "What you can do here" (feature tour). One chip opens a popover on
+ * desktop and a bottom sheet on phones.
+ */
+export function SectionHint({ tab, why, demo }: { tab: TourTab; why: SectionWhy; demo: boolean }) {
+  const { lang } = useT();
+  const i = IDX[lang as keyof typeof IDX] ?? 0;
+  const steps = TOUR_STEPS.filter(s => s.tab === tab);
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onDown); document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onDown); document.removeEventListener("keydown", onKey); };
+  }, [open]);
+  const label = tr("About this section");
+  return <div className="why-overlay section-hint" ref={ref}>
+    <button type="button" className="why-chip" aria-expanded={open} onClick={() => setOpen(o => !o)}><Lightbulb aria-hidden/> {label}</button>
+    {open && <aside className="why-note why-pop section-hint-pop" aria-label={label}>
+      <div className="why-pop-head"><strong className="why-title">{tr(why.title)}</strong><button type="button" className="why-close" aria-label={tr("Close")} onClick={() => setOpen(false)}><X/></button></div>
+      <p className="section-hint-area">{tr("THE PROBLEM")}</p>
+      <WhyBody {...why}/>
+      {demo && steps.length > 0 && <>
+        <p className="section-hint-area">{tr("WHAT YOU CAN DO HERE")}</p>
+        {steps.map(s => <section key={s.area[0]} className="demo-guide-step">
+          <p className="demo-guide-title"><strong>{s.title[i]}</strong></p>
+          <ul className="tour-can">{s.can.map(c => <li key={c[0]}><Check aria-hidden/>{c[i]}</li>)}</ul>
+        </section>)}
+      </>}
+    </aside>}
+  </div>;
+}
+
 /**
  * Inline demo guide: shows what each dashboard section can do, right above
  * the section itself — no pop-up, nothing hidden behind a blur.
