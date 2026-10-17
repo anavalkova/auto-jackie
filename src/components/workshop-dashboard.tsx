@@ -168,6 +168,9 @@ export function WorkshopDashboard() {
     </div>
     <div className="ws-layout">
     <nav className="ws-nav" role="tablist" aria-label={tr("Dashboard sections")}>{TABS.filter(tb => shop.role !== "staff" || STAFF_TABS.includes(tb.id)).map(t => <button key={t.id} type="button" className={`ws-nav-item${tab === t.id ? " active" : ""}`} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{tr(t.label)}</button>)}</nav>
+    <select className="native-select ws-nav-select" aria-label={tr("Dashboard sections")} value={tab} onChange={e => setTab(e.target.value as typeof tab)}>
+      {TABS.filter(tb => shop.role !== "staff" || STAFF_TABS.includes(tb.id)).map(t => <option key={t.id} value={t.id}>{tr(t.label)}</option>)}
+    </select>
     <div className="ws-content">
     <div className="ws-content-head"><WhyNote key={tab} overlay {...WHY[tab]}/></div>
     {tab === "booking" ? <BookingTab requests={<>
