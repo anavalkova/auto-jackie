@@ -406,12 +406,32 @@ export type Database = {
           name: string
         }[]
       }
+      workshop_add_member: {
+        Args: {
+          _email: string
+          _role: Database["public"]["Enums"]["workshop_role"]
+          _workshop: string
+        }
+        Returns: string
+      }
       workshop_booking_rules: { Args: { _workshop: string }; Returns: Json }
       workshop_jackie_profile: { Args: { _workshop: string }; Returns: Json }
       workshop_public_profile: { Args: { _slug: string }; Returns: Json }
+      workshop_remove_member: {
+        Args: { _user: string; _workshop: string }
+        Returns: undefined
+      }
       workshop_role_of: {
         Args: { _user: string; _workshop: string }
         Returns: Database["public"]["Enums"]["workshop_role"]
+      }
+      workshop_team: {
+        Args: { _workshop: string }
+        Returns: {
+          email: string
+          role: Database["public"]["Enums"]["workshop_role"]
+          user_id: string
+        }[]
       }
     }
     Enums: {

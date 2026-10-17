@@ -28,8 +28,9 @@ type Status = Database["public"]["Enums"]["inquiry_status"];
 type Shop = { id: string; name: string; city: string; vat_number: string; slug: string | null; role: string };
 type Tab = "overview" | "booking" | "context" | "pricing" | "profile";
 const TABS: { id: Tab; label: string }[] = [
-  { id: "overview", label: "Overview" }, { id: "booking", label: "Booking" }, { id: "context", label: "Jackie's context" }, { id: "pricing", label: "Pricing engine" }, { id: "profile", label: "Profile" },
+  { id: "overview", label: "Overview" }, { id: "booking", label: "Booking" }, { id: "context", label: "Jackie's context" }, { id: "pricing", label: "Pricing engine" }, { id: "profile", label: "Settings" },
 ];
+const STAFF_TABS: Tab[] = ["overview", "booking"];
 
 const STATUSES: { id: Status; label: string }[] = [
   { id: "new", label: "New" }, { id: "contacted", label: "Contacted" }, { id: "quoted", label: "Quoted" }, { id: "booked", label: "Booked" }, { id: "closed", label: "Closed" },
@@ -76,11 +77,13 @@ export function WorkshopDashboard() {
   const [error, setError] = useState(false);
 
   const [demo, setDemo] = useState(false);
+  const [shops, setShops] = useState<Shop[]>([]);
   const loadShop = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase.from("workshop_members").select("role, workshops(id,name,city,vat_number,slug)").eq("user_id", user.id).limit(1).maybeSingle();
-    const w = data?.workshops as { id: string; name: string; city: string; vat_number: string; slug: string | null } | null | undefined;
-    setShop(w ? { ...w, role: data!.role } : null);
+    const { data } = await supabase.from("workshop_members").select("role, workshops(id,name,city,vat_number,slug)").eq("user_id", user.id);
+    const list = (data ?? []).flatMap(m => m.workshops ? [{ ...(m.workshops as Omit<Shop, "role">), role: m.role }] : []);
+    setShops(list);
+    setShop(cur => (cur && list.some(w => w.id === cur.id)) ? cur : (list[0] ?? null));
   }, [user?.id]);
   const openDemo = useCallback(async () => {
     const { data: id } = await supabase.rpc("demo_workshop_id");
@@ -142,8 +145,13 @@ export function WorkshopDashboard() {
   else if (!shop) body = <WorkshopPitch onSignIn={() => setSignIn(true)} signedIn onOpenDemo={() => void openDemo()}/>;
   else body = <>
     {demo && <p className="demo-banner" role="note"><Sparkles aria-hidden/> {t.pitch.demoBanner}</p>}
-    <div className="ws-title"><div><span className="eyebrow">{tr("WORKSHOP DASHBOARD")}</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div></div>
-    <div className="ws-tabs" role="tablist" aria-label={tr("Dashboard sections")}>{TABS.map(t => <Button key={t.id} variant={tab === t.id ? "default" : "outline"} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{tr(t.label)}</Button>)}<WhyNote key={tab} overlay {...WHY[tab]}/></div>
+    <div className="ws-title"><div><span className="eyebrow">{tr("WORKSHOP DASHBOARD")}</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div>
+      {!demo && shops.length > 1 && <div className="ws-field" style={{ margin: 0 }}><Label htmlFor="ws-switch">{tr("Your workshops")}</Label>
+        <select id="ws-switch" className="native-select" value={shop.id} onChange={e => { const w = shops.find(x => x.id === e.target.value); if (w) { setShop(w); setTab("overview"); setSelected(null); setPage(0); } }}>
+          {shops.map(w => <option key={w.id} value={w.id}>{w.name}{w.city ? ` · ${w.city}` : ""}</option>)}
+        </select></div>}
+    </div>
+    <div className="ws-tabs" role="tablist" aria-label={tr("Dashboard sections")}>{TABS.filter(tb => shop.role !== "staff" || STAFF_TABS.includes(tb.id)).map(t => <Button key={t.id} variant={tab === t.id ? "default" : "outline"} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{tr(t.label)}</Button>)}<WhyNote key={tab} overlay {...WHY[tab]}/></div>
     {tab === "booking" ? <BookingTab requests={<>
     <div className="ws-filters" role="tablist" aria-label={tr("Filter requests")}>
       {([{ id: "open", label: "All open" }, ...STATUSES] as { id: Status | "open"; label: string }[]).map(s => <Button key={s.id} size="sm" variant={filter === s.id ? "default" : "outline"} role="tab" aria-selected={filter === s.id} onClick={() => changeFilter(s.id)}>{tr(s.label)}</Button>)}
@@ -158,7 +166,7 @@ export function WorkshopDashboard() {
         <time dateTime={i.created_at}>{when(i.created_at)}</time>
       </button></li>)}</ul>}
     {shown.length > 0 && <Pager page={page} pages={Math.max(1, Math.ceil(shown.length / PAGE))} onPage={setPage}/>}
-    </>} settings={<BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>}/>
+    </>} settings={shop.role === "staff" ? null : <BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>}/>
     : tab === "context" ? <ContextSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>
     : tab === "pricing" ? <PricingView workshopId={shop.id} canEdit={shop.role === "owner"}/>
     : tab === "profile" ? <ProfileView shop={shop} canEdit={shop.role === "owner"} onSaved={loadShop}/> : <>
@@ -213,7 +221,9 @@ function Pager({ page, pages, onPage }: { page: number; pages: number; onPage: (
 const BOOKING_STEPS = [{ title: "Requests" }, { title: "Booking settings" }];
 function BookingTab({ requests, settings }: { requests: React.ReactNode; settings: React.ReactNode }) {
   const [step, setStep] = useState(0);
-  return <div className="ws-section"><Stepper steps={BOOKING_STEPS} step={step} setStep={setStep}/>{step === 0 ? <Collapsible title={tr("Requests")} tip={tr("Everything drivers sent you, newest first. Click a request to see the visit, the quote Jackie sent and how to reach the driver. Filter with the buttons above.")}><div className="ws-section">{requests}</div></Collapsible> : settings}</div>;
+  const list = <Collapsible title={tr("Requests")} tip={tr("Everything drivers sent you, newest first. Click a request to see the visit, the quote Jackie sent and how to reach the driver. Filter with the buttons above.")}><div className="ws-section">{requests}</div></Collapsible>;
+  if (!settings) return <div className="ws-section">{list}</div>;
+  return <div className="ws-section"><Stepper steps={BOOKING_STEPS} step={step} setStep={setStep}/>{step === 0 ? list : settings}</div>;
 }
 
 function Collapsible({ title, tip, children, defaultOpen = true }: { title: string; tip?: string; children: React.ReactNode; defaultOpen?: boolean }) {
@@ -525,11 +535,55 @@ async function shrinkLogo(f: File): Promise<string> {
   return url.startsWith("data:image/webp") ? url : c.toDataURL("image/png");
 }
 
+type Member = { user_id: string; email: string; role: "owner" | "staff" };
+
+function TeamSection({ workshopId }: { workshopId: string }) {
+  const [team, setTeam] = useState<Member[] | null>(null);
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState<"owner" | "staff">("staff");
+  const [msg, setMsg] = useState("");
+  const load = useCallback(async () => {
+    const { data } = await supabase.rpc("workshop_team", { _workshop: workshopId });
+    setTeam((data ?? []) as Member[]);
+  }, [workshopId]);
+  useEffect(() => { void load(); }, [load]);
+  const add = async () => {
+    setMsg("");
+    const { error } = await supabase.rpc("workshop_add_member", { _workshop: workshopId, _email: email, _role: role });
+    if (error) setMsg(error.message.includes("no AutoJackie account") ? tr("No AutoJackie account with that email yet. Ask them to sign in once, then add them.") : tr("Couldn't add that person. Please try again."));
+    else { setEmail(""); setMsg(tr("Added.")); }
+    void load();
+  };
+  const remove = async (m: Member) => {
+    setMsg("");
+    const { error } = await supabase.rpc("workshop_remove_member", { _workshop: workshopId, _user: m.user_id });
+    if (error) setMsg(tr("Couldn't remove that person. Please try again."));
+    void load();
+  };
+  if (!team) return <p className="history-note" role="status">{tr("Loading…")}</p>;
+  return <div className="ws-form-card">
+    <div className="ws-label-row"><Label>{tr("Team")}</Label><Hint controls={tr("who can open this workshop's dashboard. Admins see and change everything; front desk sees Overview and Bookings only.")} shows={tr("only to you, here in Settings.")}/></div>
+    <table className="ws-table"><tbody>
+      {team.map(m => <tr key={m.user_id}><td>{m.email}</td><td><strong>{m.role === "owner" ? tr("Admin") : tr("Front desk")}</strong></td>
+        <td style={{ textAlign: "right" }}>{m.role !== "owner" && <Button type="button" size="sm" variant="ghost" aria-label={tr("Remove")} onClick={() => void remove(m)}>×</Button>}</td></tr>)}
+    </tbody></table>
+    <div className="ws-chips">
+      <Input type="email" maxLength={120} placeholder={tr("Their AutoJackie email")} value={email} onChange={e => setEmail(e.target.value)} style={{ maxWidth: 260 }} aria-label={tr("Their AutoJackie email")}/>
+      <select className="native-select" value={role} onChange={e => setRole(e.target.value as "owner" | "staff")} aria-label={tr("Role")}>
+        <option value="staff">{tr("Front desk")}</option><option value="owner">{tr("Admin")}</option>
+      </select>
+      <Button type="button" variant="outline" disabled={!email.includes("@")} onClick={() => void add()}>{tr("Add to team")}</Button>
+    </div>
+    {msg && <p className="history-note" role="status">{msg}</p>}
+  </div>;
+}
+
 function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean; onSaved: () => void }) {
   const { s, setS, save, state } = useSettings(shop.id);
   const [city, setCity] = useState(shop.city);
   const [step, setStep] = useState(0);
   if (!s) return <p className="history-note" role="status">{tr("Loading…")}</p>;
+  const steps = canEdit ? [...PROFILE_STEPS, { title: "Team", sees: "Who can open this dashboard and what they can change." }] : PROFILE_STEPS;
   const link = shop.slug && typeof window !== "undefined" ? `${window.location.origin}/w/${shop.slug}` : "";
   const submit = async () => {
     if (city !== shop.city) { await supabase.from("workshops").update({ city }).eq("id", shop.id); onSaved(); }
@@ -538,9 +592,9 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
       website: /^https?:\/\//i.test(s.website) ? s.website : "" });
   };
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); void submit(); }}>
-    <Stepper steps={PROFILE_STEPS} step={step} setStep={setStep}/>
+    <Stepper steps={steps} step={step} setStep={setStep}/>
     <section className="ws-card">
-    <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>{tr("Drivers see:")}</b> {tr(PROFILE_STEPS[step]!.sees)}</p></Tip>{step + 1}. {tr(PROFILE_STEPS[step]!.title)}</h2></div>
+    <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>{tr("Drivers see:")}</b> {tr(steps[step]!.sees)}</p></Tip>{step + 1}. {tr(steps[step]!.title)}</h2></div>
     <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0 }}>
       {step === 0 && <div className="ws-form-card ws-grid2">
         <div><div className="ws-label-row"><Label>{tr("Company name")}</Label><Hint controls={tr("your name in the booking list and on your Jackie page.")} shows={tr("to drivers. Managed by AutoJackie.")}/></div><div className="ws-readonly">{shop.name}</div></div>
@@ -569,7 +623,8 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
         <div><div className="ws-label-row"><Label htmlFor="b-greet">{tr("Greeting line")}</Label><Hint controls={tr("the welcome line above the chat.")} shows={tr("on your Jackie page, before drivers type.")}/></div><Input id="b-greet" maxLength={160} placeholder={tr("Welcome to Demo Verkstad. Tell Jackie what's up.")} value={s.brand_greeting} onChange={e => setS({ ...s, brand_greeting: e.target.value })}/></div>
       </div>}
     </fieldset>
-    <div className="ws-wizard-nav"><Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>{tr("Back")}</Button><WizardActions canEdit={canEdit} last={step === PROFILE_STEPS.length - 1} next={() => setStep(step + 1)}/></div>
+    {step === 2 && canEdit && <TeamSection workshopId={shop.id}/>}
+    <div className="ws-wizard-nav"><Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>{tr("Back")}</Button>{step < 2 && <WizardActions canEdit={canEdit} last={false} next={() => setStep(step + 1)}/>}</div>
     {state && <p className="history-note" role="status">{state}</p>}
     </section>
   </form>;
