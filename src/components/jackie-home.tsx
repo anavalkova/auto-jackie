@@ -56,6 +56,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
   const [initial, setInitial] = useState<UIMessage[] | null>(chatId ? null : readGuestChat());
   const [missing, setMissing] = useState(false);
   const [chatEmpty, setChatEmpty] = useState(true);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   // Older versions kept the car in this browser; guests are now private by default.
   useEffect(() => { try { localStorage.removeItem("autojackie.vehicle"); } catch { /* ignore */ } }, []);
@@ -197,7 +198,8 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
         </section>
 
         <section className="chat-history" aria-label="Chat history">
-          <div className="history-heading"><h2>{t.myChats}</h2><Button variant="ghost" size="icon" onClick={onReset} disabled={isFreshChat} aria-label={t.newChat} title={t.newChat}><Plus/></Button></div>
+          <div className="history-heading"><h2 className="history-desktop-title">{t.myChats}</h2><Button variant="ghost" className="history-mobile-toggle" aria-expanded={historyOpen} aria-controls="driver-chat-history" onClick={() => setHistoryOpen(open => !open)}><MessageSquare/>{t.myChats}<ChevronDown className={historyOpen ? "history-chevron-open" : undefined}/></Button><Button variant="ghost" size="icon" onClick={onReset} disabled={isFreshChat} aria-label={t.newChat} title={t.newChat}><Plus/></Button></div>
+          <div id="driver-chat-history" className={`history-content${historyOpen ? " is-open" : ""}`}>
           {!ready || chatsLoading ? <p className="history-note" role="status">{t.loadingChats}</p>
             : !user ? <div className="history-guest"><p className="history-note">{t.privateNotSaved}</p><Button variant="outline" size="sm" onClick={() => setSignInOpen(true)}><UserRound/> {t.signInChats}</Button></div>
             : chatsError ? <div><p className="history-note" role="alert">{t.chatsError}</p><Button variant="ghost" size="sm" onClick={() => void loadChats()}>{t.tryAgain}</Button></div>
@@ -206,6 +208,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
               <Link to="/c/$chatId" params={{ chatId: c.id }} className="history-item" aria-current={c.id === chatId ? "page" : undefined} title={c.title}><MessageSquare/><span className="history-item-copy"><span>{c.title}</span><time dateTime={c.updated_at}>{new Date(c.updated_at).toLocaleString(lang === "en" ? "en-GB" : lang, { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</time></span></Link>
               <Button variant="ghost" size="icon" className="history-delete" aria-label={`${t.deleteChat}: ${c.title}`} title={t.deleteChat} onClick={() => deleteChat(c.id)}><Trash2/></Button>
             </li>)}</ul>}
+          </div>
         </section>
       </aside>
 
