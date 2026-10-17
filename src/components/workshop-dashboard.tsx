@@ -8,8 +8,8 @@ import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 import { ensureOther, OTHER } from "@/lib/services";
 import { TIERS, TIER_INFO, DEFAULT_TIERS, type Tier } from "@/lib/ai-tiers";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CircleHelp, CalendarCheck, CalendarClock, Car, ChevronDown, Globe2, Inbox, MessageCircle, Moon, Sparkles, TrendingUp, Wrench } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ArrowUpRight, LogOut, Settings2, UserRound, CircleHelp, CalendarCheck, CalendarClock, Car, ChevronDown, Globe2, Inbox, MessageCircle, Moon, Sparkles, TrendingUp, Wrench } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { LANGS, setLang, useT } from "@/lib/i18n";
 import jackieImg from "@/assets/jackie.jpg";
 import { Button } from "@/components/ui/button";
@@ -136,7 +136,20 @@ export function WorkshopDashboard() {
   };
   const header = <header className="site-header">
     <Link to="/" className="brand" aria-label={tr("AutoJackie home")}><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span><span className="brand-sub">{tr("for workshops")}</span></Link>
-    <nav aria-label={tr("Workshop navigation")}>{isAdmin && <Button variant="outline" asChild><Link to="/admin">{tr("Operations")}</Link></Button>}<DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="sm" className="language-control" aria-label={tr("Language")}><Globe2/> {LANGS.find(l => l.code === lang)?.short} <ChevronDown/></Button></DropdownMenuTrigger><DropdownMenuContent align="end">{LANGS.map(l => <DropdownMenuItem key={l.code} onSelect={() => setLang(l.code)} aria-current={l.code === lang ? "true" : undefined}>{l.short} · {l.label}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu><Button variant="ghost" asChild><Link to="/">{tr("Driver view")}</Link></Button>{user && <Button variant="ghost" onClick={async () => { await supabase.auth.signOut(); window.location.assign("/workshop"); }}>{tr("Sign out")}</Button>}</nav>
+    <nav aria-label={tr("Workshop navigation")}>
+      <Button variant="ghost" asChild className="workshop-link"><Link to="/">{tr("Driver view")} <ArrowUpRight/></Link></Button>
+      <span className="nav-divider" aria-hidden="true"/>
+      {user && <DropdownMenu>
+        <DropdownMenuTrigger asChild><Button variant="outline" size="icon" className="nav-control nav-icon" aria-label={tr("Account")}><UserRound/></Button></DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel className="account-email">{user.email}</DropdownMenuLabel>
+          <DropdownMenuSeparator/>
+          {isAdmin && <DropdownMenuItem asChild><Link to="/admin"><Settings2/> {tr("Operations")}</Link></DropdownMenuItem>}
+          <DropdownMenuItem onSelect={async () => { await supabase.auth.signOut(); window.location.assign("/workshop"); }}><LogOut/> {tr("Sign out")}</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>}
+      <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="nav-control language-control" aria-label={tr("Language")}><Globe2/> {LANGS.find(l => l.code === lang)?.short} <ChevronDown/></Button></DropdownMenuTrigger><DropdownMenuContent align="end">{LANGS.map(l => <DropdownMenuItem key={l.code} onSelect={() => setLang(l.code)} aria-current={l.code === lang ? "true" : undefined}>{l.short} · {l.label}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>
+    </nav>
   </header>;
 
   let body;
