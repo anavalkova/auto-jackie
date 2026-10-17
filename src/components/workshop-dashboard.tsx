@@ -1,5 +1,7 @@
 import { holidayName, slotLabel, swedishHolidays } from "@/lib/booking";
 import { tr } from "@/lib/tr";
+import { getLang } from "@/lib/i18n";
+const loc = () => ({ en: "en-GB", sv: "sv-SE", de: "de-DE" } as const)[getLang()];
 import { Link } from "@tanstack/react-router";
 import { useWebMCP } from "use-webmcp-tool";
 import { runWebMCPTool } from "@/lib/webmcp-telemetry";
@@ -58,7 +60,7 @@ const WHY: Record<Tab, { id: string; title: string; pitch: string; stats: WhySta
 };
 const OPEN: Status[] = ["new", "contacted", "quoted", "booked"];
 const kr = (n: number) => `${Math.round(n).toLocaleString("sv-SE")} kr`;
-const when = (d: string) => new Date(d).toLocaleString("en-GB", { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+const when = (d: string) => new Date(d).toLocaleString(loc(), { timeZone: "Europe/Stockholm", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 const mid = (i: Inquiry) => i.price_low_sek != null && i.price_high_sek != null ? (i.price_low_sek + i.price_high_sek) / 2 : 0;
 
 export function WorkshopDashboard() {
@@ -181,9 +183,9 @@ export function WorkshopDashboard() {
             <dl className="ws-dl">
               {selected.vehicle_label && <><dt>{tr("Car")}</dt><dd>{selected.vehicle_label}</dd></>}
               <dt>{tr("Service")}</dt><dd>{selected.service ?? OTHER}</dd>
-              <dt>{tr("Time")}</dt><dd>{selected.booked_at ? <><strong>{slotLabel(selected.booked_at)}</strong> <Button variant="link" size="sm" onClick={() => void book(selected, null)}>{tr("Change")}</Button></>
+              <dt>{tr("Time")}</dt><dd>{selected.booked_at ? <><strong>{slotLabel(selected.booked_at, loc())}</strong> <Button variant="link" size="sm" onClick={() => void book(selected, null)}>{tr("Change")}</Button></>
                 : selected.preferred_slots.length === 0 ? tr("No time chosen yet")
-                : <div className="ws-filters">{selected.preferred_slots.map(t => <Button key={t} size="sm" variant="outline" onClick={() => void book(selected, t)}>{tr("Book {t}", { t: slotLabel(t) })}</Button>)}</div>}</dd>
+                : <div className="ws-filters">{selected.preferred_slots.map(t => <Button key={t} size="sm" variant="outline" onClick={() => void book(selected, t)}>{tr("Book {t}", { t: slotLabel(t, loc()) })}</Button>)}</div>}</dd>
             </dl>
             {selected.message && <p className="ws-quote-note">“{selected.message}”</p>}
           </section>
@@ -320,7 +322,7 @@ const AHEAD = [{ d: 30, l: "1 month" }, { d: 60, l: "2 months" }, { d: 90, l: "3
 
 
 function dayLabel(d: string) {
-  return new Date(`${d}T12:00:00Z`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+  return new Date(`${d}T12:00:00Z`).toLocaleDateString(loc(), { weekday: "short", day: "numeric", month: "short", year: "numeric" });
 }
 const OFF_PAGE = 5;
 
