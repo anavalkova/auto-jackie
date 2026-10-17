@@ -27,7 +27,7 @@ async function freeSlots(shopId: string, days = 10) {
 }
 
 /** Booking via chat: Jackie lists real free drop-off times and files the same request the booking form does, as the signed-in driver (RLS applies). */
-export function createBookingTools(opts: { workshopId?: string | undefined; userId: string | null; token: string; vehicleLabel: string }) {
+export function createBookingTools(opts: { workshopId?: string | undefined; userId: string | null; token: string; vehicleLabel: string; lang?: "en" | "sv" | "de" | undefined }) {
   const getAvailableTimes = tool({
     description: "List the workshop's free drop-off times (Stockholm time) for the next bookable days. Use when the driver asks when they can come in or wants to book. If no workshop is fixed and several exist, it returns the workshop list so you can ask which one.",
     inputSchema: z.object({
@@ -50,7 +50,7 @@ export function createBookingTools(opts: { workshopId?: string | undefined; user
   });
 
   const bookVisit = tool({
-    description: `Send a booking request to the workshop. Only call after the driver explicitly confirmed a summary of: workshop, job, one drop-off time taken from getAvailableTimes, their name, phone and how to confirm (sms, whatsapp or email).`,
+    description: `Send a booking request to the workshop. Only call after the driver explicitly confirmed a summary of: workshop, job, one drop-off time taken from getAvailableTimes, their name, phone and their email for the confirmation. Confirmations go by email only; SMS and WhatsApp are coming soon.`,
     inputSchema: z.object({
       workshopId: z.string().uuid(),
       slots: z.array(z.string()).min(1).max(MAX_PICKS).describe("ISO times exactly as returned by getAvailableTimes"),
@@ -60,14 +60,13 @@ export function createBookingTools(opts: { workshopId?: string | undefined; user
       priceHighSek: z.number().int().min(0).max(200000).optional(),
       name: z.string().min(1).max(80),
       phone: z.string().min(5).max(30),
-      channel: z.enum(["sms", "whatsapp", "email"]),
-      email: z.string().email().max(120).optional(),
+      channel: z.enum(["email"]).default("email"),
+      email: z.string().email().max(120),
       message: z.string().max(1000).optional(),
     }),
     execute: async (i) => {
       if (!opts.userId) return { ok: false, reason: "not_signed_in", tell: "The driver must sign in (button at the top) before Jackie can send a booking. Their chat stays." };
       if (opts.workshopId && i.workshopId !== opts.workshopId) return { ok: false, reason: "wrong_workshop" };
-      if (i.channel === "email" && !i.email) return { ok: false, reason: "email_missing" };
       const free = new Set((await freeSlots(i.workshopId, 60)).flatMap(d => d.slots.map(s => s.toISOString())));
       const slots = i.slots.map(s => { const d = new Date(s); return isNaN(+d) ? "" : d.toISOString(); });
       if (slots.some(s => !free.has(s))) return { ok: false, reason: "time_not_available", tell: "Call getAvailableTimes again and offer free times." };
@@ -77,7 +76,7 @@ export function createBookingTools(opts: { workshopId?: string | undefined; user
       if (!url || !key) return { ok: false, reason: "unavailable" };
       const res = await fetch(`${url}/rest/v1/inquiries`, {
         method: "POST",
-        headers: { apikey: key, Authorization: `Bearer ${opts.token}`, "Content-Type": "application/json", Prefer: "return=minimal" },
+        headers: { apikey: key, Authorization: `Bearer ${opts.token}`, "Content-Type": "application/json", Prefer: "return=representation" },
         body: JSON.stringify({
           workshop_id: i.workshopId, driver_id: opts.userId, issue: i.issue, urgency: i.urgency ?? "soon",
           price_low_sek: i.priceLowSek ?? null, price_high_sek: i.priceHighSek ?? null, note: "Booked in chat with Jackie",
@@ -86,7 +85,9 @@ export function createBookingTools(opts: { workshopId?: string | undefined; user
         }),
       }).catch(() => null);
       if (!res?.ok) return { ok: false, reason: "save_failed" };
-      return { ok: true, workshop: profile?.name ?? "", times: slots.map(s => fmt(new Date(s))), channel: i.channel };
+      const { sendBookingEmail } = await import("@/lib/booking-email.server");
+      const emailed = await sendBookingEmail({ to: i.email.trim(), name: i.name.trim(), workshop: profile?.name ?? "", job: i.issue, vehicle: opts.vehicleLabel, at: [...slots].sort()[0]!, lang: opts.lang ?? "en" });
+      return { ok: true, workshop: profile?.name ?? "", times: slots.map(s => fmt(new Date(s))), channel: "email", emailed };
     },
   });
 
