@@ -93,7 +93,7 @@
 .preview-badge { font-size: 10px; padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; color: var(--muted-foreground); }
 .assistant-top-left { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .assistant-top .assistant-title { margin: 0; font-family: var(--font-heading); font-size: 19px; font-weight: 700; line-height: 1.25; letter-spacing: 0; }
-.assistant-summary { grid-column: 1 / -1; margin: 0; color: var(--muted-foreground); font-size: 13px; line-height: 1.55; max-width: 65ch; }
+.assistant-summary { grid-column: 1 / -1; margin: 0; color: var(--muted-foreground); font-size: 13px; line-height: 1.55; }
 .assistant-top-left .shop-greeting { font-size: 11px; line-height: 1.35; }
 .assistant-top-right { display: flex; align-items: center; gap: 10px; }
 .assistant-top .why-pop { width: min(360px, 88vw); }
@@ -281,6 +281,7 @@
 .visits-more { justify-content: flex-start; height: auto; margin-top: 4px; padding: 4px 8px; font-size: 11px; color: var(--muted-foreground); }
 /* Framed side-panel sections so each block reads as its own card. */
 @media (min-width: 761px) {
+  .chat-shell > .try-row { margin-top: auto; }
   .jackie-panel { gap: 10px; padding-bottom: 12px; }
   .jackie-panel > .vehicle-card, .jackie-panel > .chat-history, .jackie-panel > .visits-card { margin: 0 12px; border: 1px solid var(--border); border-top: 1px solid var(--border); border-radius: 12px; background: var(--card); box-shadow: 0 1px 2px color-mix(in oklab, var(--foreground) 6%, transparent); }
   .jackie-panel > .chat-history, .jackie-panel > .visits-card { padding: 12px 10px 10px; }
