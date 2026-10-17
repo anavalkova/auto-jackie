@@ -25,6 +25,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
 }) {
   const { t, lang } = useT();
   const [input, setInput] = useState("");
+  const [tryOpen, setTryOpen] = useState(false);
   const vehiclePayload = vehicleForJackie(vehicle);
   const transport = useMemo(() => new DefaultChatTransport({
     api: "/api/chat",
@@ -106,7 +107,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
       <ConversationScrollButton/>
     </Conversation>}
 
-    {messages.length === 0 && <div className="try-row"><span>{t.tryLabel}</span>{t.starters.map(s => <Button variant="link" key={s} type="button" onClick={() => send(s)}>{s}</Button>)}</div>}
+    {messages.length === 0 && <div className={"try-row" + (tryOpen ? " is-open" : "")}><button type="button" className="try-toggle" aria-expanded={tryOpen} onClick={() => setTryOpen(o => !o)}>{t.tryLabel.replace(":", "")} ▾</button><span>{t.tryLabel}</span>{t.starters.map(s => <Button variant="link" key={s} type="button" onClick={() => send(s)}>{s}</Button>)}</div>}
     <PromptInput className="chat-composer" onSubmit={({ text }) => send(text)}>
       <PromptInputTextarea rows={1} value={input} onChange={e => setInput(e.target.value)} placeholder={t.placeholder}/>
       <PromptInputFooter>
