@@ -10,7 +10,7 @@ describe("latest workshop selection", () => {
     expect(selectWorkshop(workshops, "another-tenant")?.id).toBe("demo");
   });
   it("selects the only membership", () => {
-    expect(selectWorkshop([workshops[1]], "demo")?.id).toBe("dev");
+    expect(selectWorkshop([{ id: "dev", slug: "dev-verkstad" }], "demo")?.id).toBe("dev");
   });
   it("does not select a tenant without a membership", () => {
     expect(selectWorkshop([], "dev")).toBeNull();
