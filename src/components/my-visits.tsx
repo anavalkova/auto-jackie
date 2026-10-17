@@ -67,7 +67,7 @@ export function MyVisits({ userId, refreshKey }: { userId: string | null; refres
           {next.length > 0 && <><p className="visits-group">{t.visitsUpcoming}</p><ul className="visit-list">{next.map(v => <VisitLine key={v.id} v={v} when={`${t.visitDropoff} · ${slotLabel(v.bookedAt!, locale)}`} status={tr("Booked")}/>)}</ul></>}
           {earlier.length > 0 && <><p className="visits-group">{t.visitsPast}</p><ul className="visit-list">{earlier.map(v => <VisitLine key={v.id} v={v} when={slotLabel(v.bookedAt ?? v.createdAt, locale)} status={v.status === "closed" ? tr("Closed") : tr("Booked")}/>)}</ul></>}
           {waiting > 0 && <p className="history-note">{t.visitsWaiting.replace("%n", String(waiting))}</p>}
-          {pages > 1 && <div className="history-pager"><Button variant="ghost" size="icon" aria-label={tr("Previous page")} disabled={cur === 0} onClick={() => setPage(cur - 1)}><ChevronLeft/></Button><span>{cur + 1} / {pages}</span><Button variant="ghost" size="icon" aria-label={tr("Next page")} disabled={cur >= pages - 1} onClick={() => setPage(cur + 1)}><ChevronRight/></Button></div>}
+          {all.length > 0 && <div className="history-pager"><Button variant="ghost" size="icon" aria-label={tr("Previous page")} disabled={cur === 0} onClick={() => setPage(cur - 1)}><ChevronLeft/></Button><span>{cur + 1} / {pages}</span><Button variant="ghost" size="icon" aria-label={tr("Next page")} disabled={cur >= pages - 1} onClick={() => setPage(cur + 1)}><ChevronRight/></Button></div>}
         </>}
     </div>
   </section>;
