@@ -256,7 +256,7 @@
 .vehicle-context-row { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 2px; }
 .vehicle-context-row > button:last-child { width: 24px; height: 24px; }
 .vehicle-context-row > button:last-child svg { width: 12px; height: 12px; }
-.vehicle-context-button { justify-content: flex-start; min-width: 0; padding: 1px 4px; font-size: 12px; line-height: 1.4; }
+.vehicle-context-button { justify-content: flex-start; min-width: 0; height: 28px; padding: 1px 4px; font-size: 12px; line-height: 1.4; }
 .vehicle-context-button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .vehicle-context-button svg { flex-shrink: 0; width: 13px; height: 13px; }
 .vehicle-context-button svg:last-child { margin-left: auto; }
