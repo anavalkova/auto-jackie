@@ -77,11 +77,13 @@ export function WorkshopDashboard() {
   const [error, setError] = useState(false);
 
   const [demo, setDemo] = useState(false);
+  const [shops, setShops] = useState<Shop[]>([]);
   const loadShop = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase.from("workshop_members").select("role, workshops(id,name,city,vat_number,slug)").eq("user_id", user.id).limit(1).maybeSingle();
-    const w = data?.workshops as { id: string; name: string; city: string; vat_number: string; slug: string | null } | null | undefined;
-    setShop(w ? { ...w, role: data!.role } : null);
+    const { data } = await supabase.from("workshop_members").select("role, workshops(id,name,city,vat_number,slug)").eq("user_id", user.id);
+    const list = (data ?? []).flatMap(m => m.workshops ? [{ ...(m.workshops as Omit<Shop, "role">), role: m.role }] : []);
+    setShops(list);
+    setShop(cur => (cur && list.some(w => w.id === cur.id)) ? cur : (list[0] ?? null));
   }, [user?.id]);
   const openDemo = useCallback(async () => {
     const { data: id } = await supabase.rpc("demo_workshop_id");
