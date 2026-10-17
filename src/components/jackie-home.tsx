@@ -15,7 +15,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { nextService, type Vehicle } from "@/lib/vehicles";
 import jackie from "@/assets/jackie.jpg";
-import { LANGS, setLang, useLang, useT, odoUnitFor } from "@/lib/i18n";
+import { LANGS, setLang, useT, odoUnitFor } from "@/lib/i18n";
+import { kmToOdoUnit } from "@/lib/vehicles";
 
 const fmt = (n: number) => n.toLocaleString("sv-SE");
 export type WorkshopBrand = { id: string; name: string; city: string; slug: string; accent: string; logo: string; greeting: string };
@@ -179,7 +180,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
           </button> : <>
             <h2 className="vehicle-name">{vehicle.confidential ? <span className="plate-chip"><span className="plate-eu">S</span>{vehicle.label}</span> : vehicle.label}</h2>
             <p className="vehicle-spec">{vehicle.confidential ? <><LockKeyhole/> {t.privateDetails}</> : vehicle.description}</p>
-            <div className="service-box"><Gauge/>{service ? <div><strong>{t.nextService(fmt(service.remaining))}</strong><span>{t.estimatedAt(fmt(service.dueAt), fmt(vehicle.serviceKm))}</span><div className="service-bar"><span style={{ width: `${Math.round(service.progress * 100)}%` }}/></div></div> : <div><strong>{t.addOdo}</strong><span>{t.toEstimate}</span></div>}</div>
+            <div className="service-box"><Gauge/>{service ? <div><strong>{t.nextService(fmt(kmToOdoUnit(service.remaining, odoUnit)))}</strong><span>{t.estimatedAt(fmt(kmToOdoUnit(service.dueAt, odoUnit)), fmt(kmToOdoUnit(vehicle.serviceKm, odoUnit)))}</span><div className="service-bar"><span style={{ width: `${Math.round(service.progress * 100)}%` }}/></div></div> : <div><strong>{t.addOdo}</strong><span>{t.toEstimate}</span></div>}</div>
             <p className="estimate-note">{user ? t.savedToAccount : t.notSaved} <button type="button" className="text-link" onClick={forgetVehicle}>{t.removeCar}</button></p>
           </>}
         </section>
