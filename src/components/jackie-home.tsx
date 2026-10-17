@@ -226,6 +226,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
 
         <section className="chat-history" aria-label="Chat history">
           <div className="history-heading"><h2 className="history-desktop-title">{t.myChats}</h2><Button variant="ghost" className="history-mobile-toggle" aria-expanded={historyOpen} aria-controls="driver-chat-history" onClick={() => setHistoryOpen(open => !open)}><MessageSquare/>{t.myChats}<ChevronDown className={historyOpen ? "history-chevron-open" : undefined}/></Button><Button variant="ghost" size="icon" onClick={onReset} disabled={isFreshChat} aria-label={t.newChat} title={t.newChat}><Plus/></Button></div>
+          {historyOpen && <button type="button" className="history-sheet-backdrop" aria-label={t.myChats} onClick={() => setHistoryOpen(false)}/>}
           <div id="driver-chat-history" className={`history-content${historyOpen ? " is-open" : ""}`}>
           {!ready || chatsLoading ? <p className="history-note" role="status">{t.loadingChats}</p>
             : !user ? <div className="history-guest"><p className="history-note">{t.privateNotSaved}</p><Button variant="outline" size="sm" onClick={() => setSignInOpen(true)}><UserRound/> {t.signInChats}</Button></div>

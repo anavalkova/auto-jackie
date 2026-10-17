@@ -60,6 +60,7 @@ export function MyVisits({ userId, refreshKey, onReschedule }: { userId: string 
       <Button variant="ghost" className="history-mobile-toggle" aria-expanded={open} aria-controls="driver-visits" onClick={() => setOpen(o => !o)}><CalendarCheck/>{t.myVisits}<ChevronDown className={open ? "history-chevron-open" : undefined}/></Button>
       <Tip text={t.hVisits}/>
     </div>
+    {open && <button type="button" className="history-sheet-backdrop" aria-label={t.myVisits} onClick={() => setOpen(false)}/>}
     <div id="driver-visits" className={`history-content${open ? " is-open" : ""}`}>
       {loading ? <p className="history-note" role="status">{t.visitsLoading}</p>
         : failed ? <div><p className="history-note" role="alert">{t.visitsError}</p><Button variant="ghost" size="sm" onClick={() => void load()}>{t.tryAgain}</Button></div>
