@@ -24,7 +24,7 @@ export function Tip({ text }: { text: string }) {
 type Shop = { id: string; name: string; city: string };
 
 /** Inline booking flow shown in place of the chat (no pop-up): 1 what, 2 when (day strip then times), 3 contact. */
-export function BookingPanel({ card, vehicleLabel, onClose, workshopId }: { card: VisitCard; vehicleLabel: string; onClose: () => void; workshopId?: string | undefined }) {
+export function BookingPanel({ card, vehicleLabel, onClose, workshopId, onBooked }: { card: VisitCard; vehicleLabel: string; onClose: () => void; workshopId?: string | undefined; onBooked?: (() => void) | undefined }) {
   const { t, lang } = useT(); const b = t.bk;
   const locale = lang === "en" ? "en-GB" : lang;
   const { user, ready } = useSessionUser();
@@ -86,6 +86,7 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId }: { card
       preferred_slots: picks, service: mapped || OTHER, contact_channel: channel, contact_email: email.trim(),
     });
     setState(error ? "error" : "sent");
+    if (!error) onBooked?.();
   };
 
   const steps = [b.s1, b.s2, b.s3];

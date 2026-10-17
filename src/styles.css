@@ -250,6 +250,20 @@
 .history-list { max-height: none; overflow: visible; }
 .history-pager { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: auto; padding-top: 6px; color: var(--muted-foreground); font-size: 11px; }
 .history-pager button { width: 28px; height: 28px; }
+/* The driver's own visits: confirmed drop-offs first, finished ones underneath. */
+.visits-card { display: flex; flex-direction: column; flex: none; padding: 14px 16px 18px; border-top: 1px solid var(--border); }
+.visits-group { margin: 6px 8px 2px; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-foreground); }
+.visit-list { display: flex; flex-direction: column; gap: 2px; }
+.visit-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px; border-radius: 6px; min-width: 0; }
+.visit-item:hover { background: var(--card); }
+.visit-item > svg { width: 14px; height: 14px; margin-top: 3px; flex-shrink: 0; color: var(--muted-foreground); }
+.visit-copy { display: grid; min-width: 0; gap: 2px; }
+.visit-copy > strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 600; }
+.visit-copy > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: var(--muted-foreground); }
+.visit-copy > time { font-size: 10px; color: var(--muted-foreground); }
+.visit-status { margin-left: auto; flex-shrink: 0; padding: 2px 7px; border-radius: 999px; background: var(--secondary); font-size: 10px; font-weight: 600; color: var(--muted-foreground); }
+.visits-more { justify-content: flex-start; height: auto; margin-top: 4px; padding: 4px 8px; font-size: 11px; color: var(--muted-foreground); }
+@media (min-width: 761px) { .visits-card.is-expanded .history-content { max-height: 45vh; overflow-y: auto; } }
 .tenant-brand { display: flex; align-items: center; gap: 18px; min-width: 0; max-width: 50%; }
 .tenant-brand .brand { flex-shrink: 0; }
 .tenant-brand .brand-orange { color: var(--jackie-brand); }
@@ -659,6 +673,7 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
   .vehicle-head:has(+ .vehicle-empty) { display: none; }
   .vehicle-empty { min-height: 36px; font-size: 13px; }
   .chat-history { flex: none; padding: 4px 8px; }
+  .visits-card { flex: none; padding: 4px 8px; }
   .history-heading { padding: 0; margin: 0; min-height: 40px; }
   .history-desktop-title { display: none; }
   .history-mobile-toggle { display: inline-flex; gap: 8px; height: 40px; padding: 0 4px; font-size: 13px; }
