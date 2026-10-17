@@ -99,6 +99,13 @@
       "when": 1792180568992,
       "tag": "0013_demo_workshop_read_access",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792222390930,
+      "tag": "0014_migration",
+      "breakpoints": true
     }
   ]
 }
