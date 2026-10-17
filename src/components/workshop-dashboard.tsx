@@ -592,9 +592,9 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
       website: /^https?:\/\//i.test(s.website) ? s.website : "" });
   };
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); void submit(); }}>
-    <Stepper steps={PROFILE_STEPS} step={step} setStep={setStep}/>
+    <Stepper steps={steps} step={step} setStep={setStep}/>
     <section className="ws-card">
-    <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>{tr("Drivers see:")}</b> {tr(PROFILE_STEPS[step]!.sees)}</p></Tip>{step + 1}. {tr(PROFILE_STEPS[step]!.title)}</h2></div>
+    <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>{tr("Drivers see:")}</b> {tr(steps[step]!.sees)}</p></Tip>{step + 1}. {tr(steps[step]!.title)}</h2></div>
     <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0 }}>
       {step === 0 && <div className="ws-form-card ws-grid2">
         <div><div className="ws-label-row"><Label>{tr("Company name")}</Label><Hint controls={tr("your name in the booking list and on your Jackie page.")} shows={tr("to drivers. Managed by AutoJackie.")}/></div><div className="ws-readonly">{shop.name}</div></div>
@@ -623,7 +623,8 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
         <div><div className="ws-label-row"><Label htmlFor="b-greet">{tr("Greeting line")}</Label><Hint controls={tr("the welcome line above the chat.")} shows={tr("on your Jackie page, before drivers type.")}/></div><Input id="b-greet" maxLength={160} placeholder={tr("Welcome to Demo Verkstad. Tell Jackie what's up.")} value={s.brand_greeting} onChange={e => setS({ ...s, brand_greeting: e.target.value })}/></div>
       </div>}
     </fieldset>
-    <div className="ws-wizard-nav"><Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>{tr("Back")}</Button><WizardActions canEdit={canEdit} last={step === PROFILE_STEPS.length - 1} next={() => setStep(step + 1)}/></div>
+    {step === 2 && canEdit && <TeamSection workshopId={shop.id}/>}
+    <div className="ws-wizard-nav"><Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>{tr("Back")}</Button>{step < 2 || !canEdit ? <WizardActions canEdit={canEdit} last={step === steps.length - 1} next={() => setStep(step + 1)}/> : <Button type="button" onClick={() => setStep(step + 1)} disabled={step === steps.length - 1}>{tr("Next")}</Button>}</div>
     {state && <p className="history-note" role="status">{state}</p>}
     </section>
   </form>;
