@@ -16,11 +16,12 @@ import { QUOTA_ERROR } from "@/lib/chat-quota";
 import { chatQuotaStatus, type ChatQuotaStatus } from "@/lib/chat-quota.functions";
 
 
-export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMessages, onTurnFinished, onReset, saving, workshopId, onSignIn, onBook, onEmptyChange }: {
+export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMessages, persistGuestDraft, onTurnFinished, onReset, saving, workshopId, onSignIn, onBook, onEmptyChange }: {
   workshopId?: string | undefined; onSignIn?: (() => void) | undefined; onBook: (card: VisitCard) => void;
   onEmptyChange?: ((empty: boolean) => void) | undefined;
   vehicle: Vehicle | null; pending: string | null; onPendingSent: () => void;
   chatId?: string | undefined; initialMessages?: UIMessage[] | undefined;
+  persistGuestDraft: boolean;
   onTurnFinished?: ((messages: UIMessage[]) => void) | undefined; onReset?: (() => void) | undefined; saving?: boolean | undefined;
 }) {
   const { t, lang } = useT();
@@ -53,12 +54,12 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
 
   // Guests keep their chat only in memory; stash it so a sign-in redirect doesn't wipe it.
   useEffect(() => {
-    if (chatId) return;
+    if (chatId || !persistGuestDraft) return;
     try {
       if (messages.length === 0) sessionStorage.removeItem("autojackie.guestChat");
       else sessionStorage.setItem("autojackie.guestChat", JSON.stringify(messages));
     } catch { /* ignore */ }
-  }, [messages, chatId]);
+  }, [messages, chatId, persistGuestDraft]);
 
   const quotaHint = quota ? (quota.signedIn ? t.quotaHintUser : t.quotaHintGuest).replace("%n", String(quota.remaining)).replace("%m", String(quota.limit)) : "";
   return <div className="chat-shell">

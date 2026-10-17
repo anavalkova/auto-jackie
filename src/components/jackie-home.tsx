@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { isPrivateVehicle, type Vehicle } from "@/lib/vehicles";
 import { CHAT_HISTORY_PAGE_SIZE, chatHistoryRange } from "@/lib/chat-history";
+import { createChatSaver } from "@/lib/chat-save";
 import { readWorkshopSelection, rememberWorkshopSelection, selectWorkshop } from "@/lib/workshop-selection";
 import { tr } from "@/lib/tr";
 import jackie from "@/assets/jackie.jpg";
@@ -110,20 +111,6 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
     });
   }, [chatId, ready, user?.id]);
 
-  // After a guest signs in, keep their conversation: save it to the account and open it.
-  useEffect(() => {
-    if (!ready || !user || chatId) return;
-    const draft = readGuestChat();
-    if (draft.length === 0) return;
-    void (async () => {
-      const payload = { messages: draft as unknown as Json, title: titleFrom(draft), updated_at: new Date().toISOString() };
-      const { data, error } = await supabase.from("chats").insert({ ...payload, user_id: user.id }).select("id").single();
-      if (error || !data) return console.error("Couldn't save chat", error);
-      try { sessionStorage.removeItem("autojackie.guestChat"); } catch { /* ignore */ }
-      navigate({ to: "/c/$chatId", params: { chatId: data.id }, replace: true });
-    })();
-  }, [ready, user?.id, chatId]);
-
   const loadChats = useCallback(async () => {
     if (!user) return;
     setChatsLoading(true);
@@ -155,23 +142,57 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
     if (user) await supabase.from("saved_vehicles").delete().eq("user_id", user.id);
   };
 
-  const shopChatId = useRef<string | null>(null);
+  const conversationSaver = useRef(createChatSaver(chatId ?? null));
+  const importedGuest = useRef<string | null>(null);
+  const saveConversation = useCallback(async (messages: UIMessage[]) => {
+    if (!user || messages.length === 0) return null;
+    return conversationSaver.current.save(messages, async (id, snapshot) => {
+      const payload = { messages: snapshot as unknown as Json, title: titleFrom(snapshot), updated_at: new Date().toISOString() };
+      if (id) {
+        const { error } = await supabase.from("chats").update(payload).eq("id", id);
+        if (error) throw error;
+        return id;
+      }
+      const { data, error } = await supabase.from("chats").insert({ ...payload, user_id: user.id }).select("id").single();
+      if (error) throw error;
+      if (!data) throw new Error("Couldn't save chat");
+      return data.id;
+    });
+  }, [user?.id]);
+
+  // Imports and completed turns use the same identity, even when saving overlaps.
+  useEffect(() => {
+    if (!ready || !user || chatId || importedGuest.current === user.id) return;
+    const draft = readGuestChat();
+    if (draft.length === 0) return;
+    importedGuest.current = user.id;
+    void saveConversation(draft).then(async id => {
+      if (!id) return;
+      try { sessionStorage.removeItem("autojackie.guestChat"); } catch { /* ignore */ }
+      if (workshop) await loadChats();
+      else navigate({ to: "/c/$chatId", params: { chatId: id }, replace: true });
+    }).catch(error => {
+      importedGuest.current = null;
+      console.error("Couldn't save chat", error);
+    });
+  }, [ready, user?.id, chatId, saveConversation, workshop?.id, loadChats, navigate]);
+
   const onTurnFinished = useCallback(async (messages: UIMessage[]) => {
     if (!user || messages.length === 0) return;
     setVisitsKey(k => k + 1);
-    const payload = { messages: messages as unknown as Json, title: titleFrom(messages), updated_at: new Date().toISOString() };
-    if (chatId) { await supabase.from("chats").update(payload).eq("id", chatId); await loadChats(); return; }
-    if (workshop && shopChatId.current) { await supabase.from("chats").update(payload).eq("id", shopChatId.current); await loadChats(); return; }
-    const { data, error } = await supabase.from("chats").insert({ ...payload, user_id: user.id }).select("id").single();
-    if (error || !data) return console.error("Couldn't save chat", error);
-    if (workshop) { shopChatId.current = data.id; await loadChats(); return; }
-    navigate({ to: "/c/$chatId", params: { chatId: data.id }, replace: true });
-  }, [user?.id, chatId, loadChats, workshop?.id]);
+    try {
+      const id = await saveConversation(messages);
+      if (!id) return;
+      try { sessionStorage.removeItem("autojackie.guestChat"); } catch { /* ignore */ }
+      if (chatId || workshop) { await loadChats(); return; }
+      navigate({ to: "/c/$chatId", params: { chatId: id }, replace: true });
+    } catch (error) { console.error("Couldn't save chat", error); }
+  }, [user?.id, chatId, loadChats, workshop?.id, saveConversation, navigate]);
 
   const isFreshChat = !chatId && chatEmpty;
   const onReset = () => {
     if (!user) setVehicle(null);
-    shopChatId.current = null;
+    conversationSaver.current = createChatSaver();
     if (chatId) navigate({ to: "/" });
     else setNewChatKey(k => k + 1);
   };
@@ -258,7 +279,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
         <div className="chat-slot" hidden={!!directBooking || !!rescheduling}>
         {missing ? <div className="chat-empty"><h1>{t.missingTitle}</h1><p>{user ? t.missingDeleted : t.missingSignIn}</p><div className="starter-grid">{!user && <Button onClick={() => setSignInOpen(true)}>{t.signIn}</Button>}<Button variant="outline" asChild><Link to="/">{t.startNew}</Link></Button></div></div>
           : initial === null ? <div className="chat-empty"><p>{t.opening}</p></div>
-          : <JackieChat key={chatId ?? `new-${newChatKey}`} chatId={chatId} initialMessages={initial} vehicle={vehicle} pending={null} onPendingSent={() => {}} onTurnFinished={onTurnFinished} onReset={onReset} saving={!!user && !!chatId} workshopId={workshop?.id} onSignIn={() => setSignInOpen(true)} onBook={setDirectBooking} onEmptyChange={setChatEmpty}/>}
+          : <JackieChat key={chatId ?? `new-${newChatKey}`} chatId={chatId} initialMessages={initial} persistGuestDraft={ready && !user} vehicle={vehicle} pending={null} onPendingSent={() => {}} onTurnFinished={onTurnFinished} onReset={onReset} saving={!!user && !!chatId} workshopId={workshop?.id} onSignIn={() => setSignInOpen(true)} onBook={setDirectBooking} onEmptyChange={setChatEmpty}/>}
         </div>
         <div className="assistant-bottom"><span className="swedish-flag"/><span><strong>{t.madeForSweden}</strong> · {t.bottom}</span></div>
       </section>
