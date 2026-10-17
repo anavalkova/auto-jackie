@@ -1,5 +1,5 @@
 # AutoJackie
-- [ ] Allow local demo configuration edits with locked, explanatory Save controls and verify no persistence.
+- [x] Allow local demo configuration edits with locked, explanatory Save controls and verify no persistence.
 - [x] Restore Jackie branding with the latest selected workshop and remove workshop logo uploads.
 - [x] Highlight tenant branding, paginate chat history, hide registry model details/remove service and odometer UI, and grant Ana both test workshops.
 - [x] Merge workshop context steps, simplify service entry and verify saved values and translations.

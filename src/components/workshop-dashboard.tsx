@@ -311,7 +311,7 @@ function isAfterHours(i: Inquiry) {
 }
 
 function InsightsView({ items, workshopId, canEdit }: { items: Inquiry[]; workshopId: string; canEdit: boolean }) {
-  const { s, setS, save } = useSettings(workshopId);
+  const { s, setS, save } = useSettings(workshopId, canEdit);
   const n = items.length;
   const reached = items.filter(i => i.status !== "new").length;
   const quoted = items.filter(i => ["quoted", "booked"].includes(i.status) || (i.status === "closed" && i.booked_at)).length;
