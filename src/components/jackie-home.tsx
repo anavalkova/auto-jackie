@@ -214,7 +214,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
       </aside>
 
       <section className="assistant-area" aria-label="Chat with Jackie">
-        <div className="assistant-top">{workshop?.greeting ? <span className="shop-greeting">{workshop.greeting}</span> : <span/>}<div className="assistant-top-right"><Button variant="ghost" size="icon" className="assistant-new-chat" onClick={onReset} disabled={isFreshChat} aria-label={t.newChat} title={t.newChat}><Plus/></Button><WhyNote id="driver" overlay autoOpen={false} label={t.whyChip} title={t.whyTitle} pitch={t.whyPitch} stats={[
+        <div className="assistant-top">{workshop?.greeting ? <span className="shop-greeting">{workshop.greeting}</span> : <span/>}<div className="assistant-top-right"><WhyNote id="driver" overlay autoOpen={false} label={t.whyChip} title={t.whyTitle} pitch={t.whyPitch} stats={[
           { value: "36%", text: t.why1, source: { label: "Trafikanalys, 2022", url: "https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" } },
           { value: "P0301?", text: t.why2 },
         ]}/></div></div>
