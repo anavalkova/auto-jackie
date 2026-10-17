@@ -61,9 +61,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
 
   const quotaHint = quota ? (quota.signedIn ? t.quotaHintUser : t.quotaHintGuest).replace("%n", String(quota.remaining)).replace("%m", String(quota.limit)) : "";
   return <div className="chat-shell">
-    {messages.length === 0 ? <div className="chat-empty">
-      <p>{t.heroSub}</p>
-    </div> : <Conversation className="chat-log">
+    {messages.length > 0 && <Conversation className="chat-log">
       <ConversationContent>
         {messages.map(m => <Message from={m.role} key={m.id}>
           <MessageContent className={m.role === "user" ? "user-bubble" : "jackie-text"}>
