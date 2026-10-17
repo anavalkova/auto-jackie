@@ -1,5 +1,7 @@
-import { Check, Lightbulb } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, Lightbulb, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { tr } from "@/lib/tr";
 
 export type TourTab = "overview" | "booking" | "context" | "pricing" | "profile";
 type L3 = [string, string, string]; // EN, SV, DE
