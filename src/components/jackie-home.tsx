@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { GarageDialog } from "@/components/garage-dialog";
 import { JackieChat } from "@/components/jackie-chat";
 import { BookingPanel, Tip, type VisitCard } from "@/components/request-visit-dialog";
+import { MyVisits } from "@/components/my-visits";
 import { WhyNote } from "@/components/why-note";
 import { SignInDialog } from "@/components/sign-in-dialog";
 import { useSessionUser } from "@/hooks/use-session-user";
@@ -62,6 +63,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
   const [historyPage, setHistoryPage] = useState(0);
   const [historyCount, setHistoryCount] = useState(0);
   const [rememberedWorkshop, setRememberedWorkshop] = useState<{ id: string; name: string; slug: string | null } | null>(null);
+  const [visitsKey, setVisitsKey] = useState(0);
   const headerWorkshop = workshop ?? rememberedWorkshop;
 
   useEffect(() => {
@@ -155,6 +157,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
   const shopChatId = useRef<string | null>(null);
   const onTurnFinished = useCallback(async (messages: UIMessage[]) => {
     if (!user || messages.length === 0) return;
+    setVisitsKey(k => k + 1);
     const payload = { messages: messages as unknown as Json, title: titleFrom(messages), updated_at: new Date().toISOString() };
     if (chatId) { await supabase.from("chats").update(payload).eq("id", chatId); await loadChats(); return; }
     if (workshop && shopChatId.current) { await supabase.from("chats").update(payload).eq("id", shopChatId.current); await loadChats(); return; }
@@ -227,6 +230,8 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
           {user && <div className="history-pager"><Button variant="ghost" size="icon" aria-label={tr("Previous page")} disabled={historyPage === 0 || chatsLoading} onClick={() => setHistoryPage(p => p - 1)}><ChevronLeft/></Button><span>{historyPage + 1} / {Math.max(1, Math.ceil(historyCount / CHAT_HISTORY_PAGE_SIZE))}</span><Button variant="ghost" size="icon" aria-label={tr("Next page")} disabled={(historyPage + 1) * CHAT_HISTORY_PAGE_SIZE >= historyCount || chatsLoading} onClick={() => setHistoryPage(p => p + 1)}><ChevronRight/></Button></div>}
           </div>
         </section>
+
+        <MyVisits userId={user?.id ?? null} refreshKey={visitsKey}/>
       </aside>
 
       <section className="assistant-area" aria-label="Chat with Jackie">
@@ -234,7 +239,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
           { value: "36%", text: t.why1, source: { label: "Trafikanalys, 2022", url: "https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" } },
           { value: "P0301?", text: t.why2 },
         ]}/></div></div>
-        {directBooking && <BookingPanel card={directBooking} vehicleLabel={vehicle && !isPrivateVehicle(vehicle) ? vehicle.label : ""} onClose={() => setDirectBooking(null)} workshopId={workshop?.id}/>}
+        {directBooking && <BookingPanel card={directBooking} vehicleLabel={vehicle && !isPrivateVehicle(vehicle) ? vehicle.label : ""} onClose={() => setDirectBooking(null)} workshopId={workshop?.id} onBooked={() => setVisitsKey(k => k + 1)}/>}
         <div className="chat-slot" hidden={!!directBooking}>
         {missing ? <div className="chat-empty"><h1>{t.missingTitle}</h1><p>{user ? t.missingDeleted : t.missingSignIn}</p><div className="starter-grid">{!user && <Button onClick={() => setSignInOpen(true)}>{t.signIn}</Button>}<Button variant="outline" asChild><Link to="/">{t.startNew}</Link></Button></div></div>
           : initial === null ? <div className="chat-empty"><p>{t.opening}</p></div>
