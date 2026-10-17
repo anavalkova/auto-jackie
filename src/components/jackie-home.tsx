@@ -13,7 +13,7 @@ import { SignInDialog } from "@/components/sign-in-dialog";
 import { useSessionUser } from "@/hooks/use-session-user";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
-import { nextService, type Vehicle } from "@/lib/vehicles";
+import { kmToOdoUnit, nextService, type Vehicle } from "@/lib/vehicles";
 import jackie from "@/assets/jackie.jpg";
 import { LANGS, setLang, useT, odoUnitFor } from "@/lib/i18n";
 import { kmToOdoUnit } from "@/lib/vehicles";
