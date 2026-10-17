@@ -5,13 +5,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { catalog, isSwedishPlate, type Vehicle } from "@/lib/vehicles";
+import { catalog, isSwedishPlate, odoInputToKm, kmToOdoUnit, type Vehicle } from "@/lib/vehicles";
+import { useLang, odoUnitFor } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 
 export function GarageDialog({ open, onOpenChange, vehicle, onSave, signedIn }: {
   open: boolean; onOpenChange: (o: boolean) => void; vehicle: Vehicle | null; onSave: (v: Vehicle) => void; signedIn: boolean;
 }) {
-  const [mileage, setMileage] = useState(vehicle?.mileageKm?.toString() ?? "");
+  const lang = useLang();
+  const unit = odoUnitFor(lang);
+  const [mileage, setMileage] = useState(vehicle?.mileageKm != null ? String(kmToOdoUnit(vehicle.mileageKm, unit)) : "");
   const [plate, setPlate] = useState("");
   const [plateDone, setPlateDone] = useState(false);
   const [hsn, setHsn] = useState("");
@@ -23,7 +26,8 @@ export function GarageDialog({ open, onOpenChange, vehicle, onSave, signedIn }: 
   const [year, setYear] = useState("");
   const [engine, setEngine] = useState("");
 
-  const km = mileage.trim() ? Math.max(0, Number(mileage.replace(/\s/g, "")) || 0) : undefined;
+  const raw = mileage.trim() ? Math.max(0, Number(mileage.replace(/\s/g, "")) || 0) : undefined;
+  const km = raw == null ? undefined : odoInputToKm(raw, unit);
   const finish = (v: Vehicle) => { onSave({ ...v, mileageKm: km }); setError(""); setPlateDone(false); onOpenChange(false); };
 
   const savePlate = async () => {
@@ -73,7 +77,7 @@ export function GarageDialog({ open, onOpenChange, vehicle, onSave, signedIn }: 
   return <Dialog open={open} onOpenChange={o => { onOpenChange(o); setError(""); setPlateDone(false); }}>
     <DialogContent className="garage-dialog">
       <DialogHeader><DialogTitle>{vehicle ? "Change your car" : "Tell Jackie about your car"}</DialogTitle><DialogDescription>{signedIn ? "Saved to your account so Jackie remembers it next time. Remove it any time." : "Used for this chat only. Nothing is saved. Start a new chat or close the tab and it's gone."}</DialogDescription></DialogHeader>
-      <div className="garage-field"><Label htmlFor="mileage">Odometer (km), optional</Label><Input id="mileage" inputMode="numeric" placeholder="e.g. 84 000" value={mileage} onChange={e => setMileage(e.target.value)}/></div>
+      <div className="garage-field"><Label htmlFor="mileage">{unit === "mil" ? "Odometer (mil), optional" : "Odometer (km), optional"}</Label><Input id="mileage" inputMode="numeric" placeholder={unit === "mil" ? "e.g. 8 400" : "e.g. 84 000"} value={mileage} onChange={e => setMileage(e.target.value)}/></div>
       <Tabs defaultValue="plate" onValueChange={() => setError("")}>
         <TabsList className="garage-tabs"><TabsTrigger value="plate">Swedish plate</TabsTrigger><TabsTrigger value="hsn">German HSN/TSN</TabsTrigger><TabsTrigger value="manual">Pick manually</TabsTrigger></TabsList>
         <TabsContent value="plate" className="garage-pane">
