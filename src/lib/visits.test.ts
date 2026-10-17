@@ -23,7 +23,7 @@ describe("driver visits", () => {
 
     const split = splitVisits([waiting, finished, upcoming, closed], NOW);
     expect(split.upcoming.map(v => v.id)).toEqual([upcoming.id]);
-    expect(split.past.map(v => v.id)).toEqual([finished.id, closed.id]);
+    expect(split.past.map(v => v.id)).toEqual([closed.id, finished.id]);
     expect(split.waiting).toBe(1);
   });
 
