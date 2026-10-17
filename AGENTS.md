@@ -17,6 +17,7 @@
 - Define AutoJackie visual styling in src/styles.css and use shared design-system controls so future screens inherit the same brand.
 - Driver and workshop phone headers share MobileHeaderMenu for navigation, account and language actions, preventing duplicated mobile layout fixes.
 - The shared chat screen loads saved conversations into an always-visible sidebar and refreshes it after completed turns; keep history navigation in sync with saved chats.
+- Guest imports and completed turns share a serialized conversation saver; signed-in chats must not write guest drafts, preventing duplicate history records and stale imports.
 - On phones, driver chats use document scrolling and an inline expandable history row; avoid nested fixed-height transcript scrollers so older messages and history remain reachable.
 - Driver history uses counted database pagination through chat-history helpers rather than a capped list or nested sidebar scroller; registry privacy is normalized by vehicles helpers for legacy records and model payloads.
 - Jackie tools live in src/lib/ai/*.server.ts and are registered in /api/chat; large reference indexes (OBD codes, Tesla manual contents) are bundled JSON in src/lib/vehicles-data, page bodies fetched live — keeps the worker small and data current.
