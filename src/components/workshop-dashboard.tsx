@@ -1,5 +1,6 @@
 import { holidayName, slotLabel, swedishHolidays } from "@/lib/booking";
 import { tr } from "@/lib/tr";
+import { readWorkshopSelection, rememberWorkshopSelection, selectWorkshop } from "@/lib/workshop-selection";
 import { getLang } from "@/lib/i18n";
 const loc = () => ({ en: "en-GB", sv: "sv-SE", de: "de-DE" } as const)[getLang()];
 import { Link } from "@tanstack/react-router";
@@ -53,9 +54,9 @@ const WHY: Record<Tab, { id: string; title: string; pitch: string; stats: WhySta
     { value: "72%", text: "of drivers feel anxious about what a repair will cost.", source: { label: "RepairPal / Harris", url: "https://repairpal.com/consumer-survey-march-2013" } },
     { value: "1 in 3", text: "Swedish car owners have felt cheated by a workshop.", source: { label: "Mekonomen", url: "https://www.mynewsdesk.com/se/mekonomen/pressreleases/var-tredje-bilaegare-har-kaent-sig-lurad-av-verkstaden-oekad-kunskap-om-godkaend-bilverkstad-kan-vara-en-loesning-3359302" } },
   ] },
-  profile: { id: "ws-profile", title: "Your workshop, your brand.", pitch: "Jackie is your friendly front desk on your own page, in your colors and with your logo. Drivers talk to her first and arrive feeling helped, not sold to.", stats: [], points: [
+  profile: { id: "ws-profile", title: "Your workshop, your brand.", pitch: "Jackie is your friendly front desk on your own page, in your colors and with your workshop name. Drivers talk to her first and arrive feeling helped, not sold to.", stats: [], points: [
     "Your own Jackie link to share on your website, Google profile or SMS.",
-    "Your logo, accent color and greeting, so drivers see your workshop, not ours.",
+    "Your workshop name, accent color and greeting, alongside Jackie.",
     "Made for drivers without deep car knowledge. No jargon, no judging.",
     "Service in English, Swedish and German, so you don't miss foreign customers.",
   ] },
@@ -88,8 +89,9 @@ export function WorkshopDashboard() {
     const { data } = await supabase.from("workshop_members").select("role, workshops(id,name,city,vat_number,slug)").eq("user_id", user.id);
     const list = (data ?? []).flatMap(m => m.workshops ? [{ ...(m.workshops as Omit<Shop, "role">), role: m.role }] : []);
     setShops(list);
-    setShop(cur => (cur && list.some(w => w.id === cur.id)) ? cur : (list[0] ?? null));
+    setShop(cur => (cur && list.some(w => w.id === cur.id)) ? cur : selectWorkshop(list, readWorkshopSelection(user.id)));
   }, [user?.id]);
+  useEffect(() => { if (user && shop && !demo && shops.some(w => w.id === shop.id)) rememberWorkshopSelection(user.id, shop.id); }, [user?.id, shop?.id, demo, shops]);
   const openDemo = useCallback(async () => {
     const { data: id } = await supabase.rpc("demo_workshop_id");
     if (!id) return;
@@ -429,7 +431,7 @@ const CONTEXT_STEPS = [
 
 const PROFILE_STEPS = [
   { title: "Contact details", sees: "How to reach and find you, mostly after they book." },
-  { title: "Your brand", sees: "Your page link, colors, logo and greeting on your Jackie page." },
+  { title: "Your brand", sees: "Your page link, colors, workshop name and greeting on your Jackie page." },
 ];
 
 function Stepper({ steps, step, setStep }: { steps: { title: string }[]; step: number; setStep: (n: number) => void }) {
@@ -556,24 +558,6 @@ function PricingView({ workshopId, canEdit }: { workshopId: string; canEdit: boo
   </form>;
 }
 
-export const LOGO_TYPES = ["image/png", "image/jpeg", "image/webp"];
-export const LOGO_MAX_BYTES = 2 * 1024 * 1024;
-export function logoError(f: { type: string; size: number }): string | null {
-  if (!LOGO_TYPES.includes(f.type)) return tr("Please use a PNG, JPEG or WebP image (SVG isn't allowed).");
-  if (f.size > LOGO_MAX_BYTES) return tr("That image is over 2 MB. Please pick a smaller one.");
-  return null;
-}
-// Re-draw on a canvas: drops metadata/embedded payloads and caps size at 256px.
-async function shrinkLogo(f: File): Promise<string> {
-  const bmp = await createImageBitmap(f);
-  const k = Math.min(1, 256 / Math.max(bmp.width, bmp.height));
-  const c = document.createElement("canvas");
-  c.width = Math.max(1, Math.round(bmp.width * k)); c.height = Math.max(1, Math.round(bmp.height * k));
-  c.getContext("2d")!.drawImage(bmp, 0, 0, c.width, c.height);
-  const url = c.toDataURL("image/webp", 0.85);
-  return url.startsWith("data:image/webp") ? url : c.toDataURL("image/png");
-}
-
 type Member = { user_id: string; email: string; role: "owner" | "staff" };
 
 function TeamSection({ workshopId }: { workshopId: string }) {
@@ -627,7 +611,7 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
   const submit = async () => {
     if (city !== shop.city) { await supabase.from("workshops").update({ city }).eq("id", shop.id); onSaved(); }
     await save({ phone: s.phone, address: s.address, opening_hours: s.opening_hours, contact_email: s.contact_email,
-      brand_accent: /^#[0-9a-fA-F]{6}$/.test(s.brand_accent) ? s.brand_accent : "", brand_logo_url: s.brand_logo_url.startsWith("data:image/") ? s.brand_logo_url : "", brand_greeting: s.brand_greeting,
+      brand_accent: /^#[0-9a-fA-F]{6}$/.test(s.brand_accent) ? s.brand_accent : "", brand_greeting: s.brand_greeting,
       website: /^https?:\/\//i.test(s.website) ? s.website : "" });
   };
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); void submit(); }}>
@@ -648,17 +632,6 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
       {step === 1 && <div className="ws-form-card">
         <div><div className="ws-label-row"><Label>{tr("Your Jackie page")}</Label><Hint controls={tr("the page where drivers chat with Jackie as your workshop.")} shows={tr("wherever you share it: website, Google profile, SMS.")}/></div>{link && <div className="ws-chips"><a href={link} target="_blank" rel="noreferrer" className="text-link">{link}</a><Button type="button" size="sm" variant="outline" onClick={() => void navigator.clipboard?.writeText(link)}>{tr("Copy")}</Button></div>}</div>
         <div><div className="ws-label-row"><Label htmlFor="b-accent">{tr("Accent color")}</Label><Hint controls={tr("buttons, highlights and links.")} shows={tr("on your Jackie page.")}/></div><div className="ws-chips"><input id="b-accent" type="color" value={s.brand_accent || "#f2711c"} onChange={e => setS({ ...s, brand_accent: e.target.value })}/>{s.brand_accent && <Button type="button" size="sm" variant="ghost" onClick={() => setS({ ...s, brand_accent: "" })}>{tr("Use AutoJackie orange")}</Button>}</div></div>
-        <div><div className="ws-label-row"><Label htmlFor="b-logo">{tr("Logo")}</Label><Hint controls={tr("the small logo next to your name. PNG, JPEG or WebP, max 2 MB. We shrink it to 256 px and re-save it, so nothing hidden in the file survives.")} shows={tr("in the top bar of your Jackie page.")}/></div>
-          <div className="ws-chips">
-            <span className="shop-badge">{s.brand_logo_url && <img src={s.brand_logo_url} alt={tr("Logo preview")} className="shop-logo"/>}<span>{shop.name}</span></span>
-            <Input id="b-logo" type="file" accept="image/png,image/jpeg,image/webp" style={{ maxWidth: 240 }} onChange={async e => {
-              const f = e.target.files?.[0]; e.target.value = "";
-              if (!f) return;
-              const err = logoError(f); if (err) return alert(err);
-              try { setS({ ...s, brand_logo_url: await shrinkLogo(f) }); } catch { alert(tr("That image couldn't be read. Try another PNG, JPEG or WebP.")); }
-            }}/>
-            {s.brand_logo_url && <Button type="button" size="sm" variant="ghost" onClick={() => setS({ ...s, brand_logo_url: "" })}>{tr("Remove logo")}</Button>}
-          </div></div>
         <div><div className="ws-label-row"><Label htmlFor="b-greet">{tr("Greeting line")}</Label><Hint controls={tr("the welcome line above the chat.")} shows={tr("on your Jackie page, before drivers type.")}/></div><Input id="b-greet" maxLength={160} placeholder={tr("Welcome to Demo Verkstad. Tell Jackie what's up.")} value={s.brand_greeting} onChange={e => setS({ ...s, brand_greeting: e.target.value })}/></div>
       </div>}
     </fieldset>
