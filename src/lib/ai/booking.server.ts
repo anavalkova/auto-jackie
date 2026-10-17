@@ -86,7 +86,7 @@ export function createBookingTools(opts: { workshopId?: string | undefined; user
       }).catch(() => null);
       if (!res?.ok) return { ok: false, reason: "save_failed" };
       const { sendBookingEmail } = await import("@/lib/booking-email.server");
-      const emailed = await sendBookingEmail({ to: i.email.trim(), name: i.name.trim(), workshop: profile?.name ?? "", job: i.issue, vehicle: opts.vehicleLabel, at: [...slots].sort()[0]!, lang: opts.lang ?? "en" });
+      const emailed = await sendBookingEmail({ workshopId: i.workshopId, to: i.email.trim(), name: i.name.trim(), workshop: profile?.name ?? "", job: i.issue, vehicle: opts.vehicleLabel, at: [...slots].sort()[0]!, lang: opts.lang ?? "en" });
       return { ok: true, workshop: profile?.name ?? "", times: slots.map(s => fmt(new Date(s))), channel: "email", emailed };
     },
   });
