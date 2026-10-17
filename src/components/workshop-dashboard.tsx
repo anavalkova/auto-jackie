@@ -9,6 +9,7 @@ import { ensureOther, OTHER } from "@/lib/services";
 import { TIERS, TIER_INFO, DEFAULT_TIERS, type Tier } from "@/lib/ai-tiers";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, LogOut, Settings2, UserRound, CircleHelp, CalendarCheck, CalendarClock, Car, ChevronDown, Globe2, Inbox, MessageCircle, Moon, Sparkles, TrendingUp, Wrench } from "lucide-react";
+import { DemoTour, TOUR_STEPS, tourDone } from "@/components/demo-tour";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { LANGS, setLang, useT } from "@/lib/i18n";
 import jackieImg from "@/assets/jackie.jpg";
@@ -77,6 +78,10 @@ export function WorkshopDashboard() {
   const [error, setError] = useState(false);
 
   const [demo, setDemo] = useState(false);
+  const [tour, setTour] = useState<number | null>(null);
+  const closeTour = useCallback(() => { setTour(null); try { localStorage.setItem("autojackie_tour_done", "1"); } catch { /* private mode */ } }, []);
+  const tourStep = useCallback((s: number) => { setTour(s); setTab(TOUR_STEPS[s].tab); }, []);
+  useEffect(() => { if (demo && !tourDone()) setTour(0); }, [demo]);
   const [shops, setShops] = useState<Shop[]>([]);
   const loadShop = useCallback(async () => {
     if (!user) return;
