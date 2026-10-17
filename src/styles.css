@@ -238,6 +238,8 @@
 .history-item time { font-size: 10px; color: var(--muted-foreground); }
 .history-delete { flex-shrink: 0; width: 28px; height: 28px; color: var(--muted-foreground); }
 .history-delete svg { width: 13px; height: 13px; }
+.history-content { display: flex; flex-direction: column; min-height: 0; }
+.history-mobile-toggle { display: none; }
 @media (max-width: 760px) { .chat-history { min-height: 0; } .history-list { max-height: 180px; } }
 
 .offer-card { display: flex; flex-direction: column; gap: .4rem; margin-top: .75rem; padding: 1rem 1.1rem; border: 1px solid color-mix(in oklab, var(--primary) 45%, transparent); border-left: 4px solid var(--primary); border-radius: var(--radius); background: color-mix(in oklab, var(--primary) 7%, var(--card)); }
@@ -618,3 +620,44 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
 .tour-card-actions { display: flex; justify-content: space-between; gap: 8px; }
 .demo-tour-btn { margin-left: 10px; }
 @media (min-width: 700px) { .tour-backdrop { align-items: center; } }
+
+/* Phone chat uses document scrolling, not a second fixed-height scroll region. */
+@media (max-width: 760px) {
+  .app-frame:has(.workspace) { padding-inline: 12px; }
+  .workspace { height: auto; min-height: 0; overflow: visible; }
+  .jackie-panel { min-width: 0; overflow: visible; border-radius: 8px 8px 0 0; }
+  .portrait-wrap.compact { height: 96px; border-radius: 8px 8px 0 0; }
+  .portrait-wrap.compact > img { width: 96px; object-fit: cover; object-position: center 20%; }
+  .portrait-wrap.compact .portrait-label { left: 106px; right: 10px; bottom: auto; top: 50%; transform: translateY(-50%); padding: 6px; font-size: 10px; }
+  .vehicle-card { padding: 10px 12px; gap: 6px; }
+  .vehicle-head:has(+ .vehicle-empty) { display: none; }
+  .vehicle-empty { min-height: 36px; font-size: 13px; }
+  .chat-history { flex: none; padding: 4px 8px; }
+  .history-heading { padding: 0; margin: 0; min-height: 40px; }
+  .history-desktop-title { display: none; }
+  .history-mobile-toggle { display: inline-flex; gap: 8px; height: 40px; padding: 0 4px; font-size: 13px; }
+  .history-mobile-toggle svg { width: 16px; height: 16px; }
+  .history-chevron-open { transform: rotate(180deg); }
+  .history-content { display: none; }
+  .history-content.is-open { display: flex; padding-block: 6px; }
+  .history-list { max-height: none; overflow: visible; }
+  .history-guest { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 4px; }
+  .history-guest .history-note { margin: 0; }
+  .history-guest > button { margin: 0; flex-shrink: 0; }
+  .assistant-area, .chat-slot { flex: none; overflow: visible; }
+  .assistant-top { padding: 8px 12px; min-height: 44px; }
+  .chat-shell { flex: none; height: auto; min-height: 0; padding: 0 12px 12px; }
+  .chat-empty { flex: none; padding-block: 12px; }
+  .chat-empty h1 { font-size: 28px; margin-top: 4px; }
+  .chat-log { flex: none; overflow: visible; }
+  .chat-log > div { height: auto !important; overflow: visible !important; scrollbar-gutter: auto !important; }
+  .chat-log > div > div { padding: 12px 0; gap: 20px; }
+  .chat-log > button { display: none; }
+  .chat-composer { flex-shrink: 0; }
+  .composer-hint { min-width: 0; font-size: 10px; }
+  .composer-actions { flex-shrink: 0; }
+  .composer-actions > button:first-child:not(:only-child) { width: 32px; padding: 0; font-size: 0; gap: 0; }
+  .composer-actions > button:first-child:not(:only-child) svg { width: 15px; height: 15px; }
+  .assistant-bottom { padding: 10px 12px; align-items: flex-start; }
+  .assistant-bottom .swedish-flag { margin-top: 3px; }
+}

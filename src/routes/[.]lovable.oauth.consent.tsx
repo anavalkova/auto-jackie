@@ -18,7 +18,7 @@ const oauth = () => (supabase.auth as unknown as { oauth: OAuthApi }).oauth;
 export const Route = createFileRoute("/.lovable/oauth/consent")({
   ssr: false,
   validateSearch: (s: Record<string, unknown>) => ({ authorization_id: typeof s["authorization_id"] === "string" ? s["authorization_id"] : "" }),
-  head: () => ({ meta: [{ title: "Connect an assistant · AutoJackie" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Connect an assistant · AutoJackie" }, { name: "description", content: "Review and approve your assistant's access to AutoJackie." }, { property: "og:title", content: "Connect an assistant · AutoJackie" }, { property: "og:description", content: "Review and approve your assistant's access to AutoJackie." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }),
   beforeLoad: ({ search }) => { if (!search.authorization_id) throw new Error("This connection link is missing its request ID. Start again from your assistant."); },
   component: Consent,
   errorComponent: ({ error }) => <main className="consent-page"><div className="ws-card consent-card"><h1>{tr("Couldn't open this connection request")}</h1><p className="history-note">{error instanceof Error ? error.message : String(error)}</p></div></main>,
