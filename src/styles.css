@@ -777,14 +777,14 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
 
 
 
-/* Inline demo guide: explains each dashboard section without hiding it. */
-.demo-guide { display: grid; gap: 12px; margin-bottom: 16px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; background: color-mix(in oklch, var(--primary) 4%, var(--card)); }
-.demo-guide section { display: grid; gap: 6px; }
-.demo-guide section + section { padding-top: 12px; border-top: 1px dashed var(--border); }
-.demo-guide-title { display: flex; gap: 8px; align-items: center; margin: 0; font-size: 14px; }
-.demo-guide-title svg { width: 15px; height: 15px; flex: none; color: var(--primary); }
+/* Demo guide: a chip per section that expands into a "Why this exists"-style popover. */
+.demo-guide-toggle { position: relative; display: inline-block; margin-bottom: 12px; }
+.demo-guide-pop { position: absolute; top: calc(100% + 8px); left: 0; z-index: 40; width: min(420px, calc(100vw - 48px)); max-height: 70vh; overflow-y: auto; display: grid; gap: 12px; padding: 14px 16px; }
+.demo-guide-step { display: grid; gap: 6px; }
+.demo-guide-step + .demo-guide-step { padding-top: 12px; border-top: 1px dashed var(--border); }
+.demo-guide-title { margin: 0; font-size: 14px; }
 .demo-guide-body { margin: 0; font-size: 13px; color: var(--muted-foreground); }
-.demo-guide .tour-can li { font-size: 13px; }
+.demo-guide-pop .tour-can li { font-size: 13px; }
 @media (max-width: 760px) {
-  .demo-guide { padding: 12px 14px; gap: 10px; }
+  .demo-guide-pop { width: calc(100vw - 48px); }
 }
