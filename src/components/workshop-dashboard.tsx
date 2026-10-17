@@ -408,8 +408,7 @@ function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
 }
 
 const CONTEXT_STEPS = [
-  { title: "Your strengths", sees: "Drivers on your Jackie page hear why your workshop fits their problem." },
-  { title: "How you work", sees: "Jackie explains what you would do, in your order and with your parts." },
+  { title: "Your workshop's know-how", sees: "Jackie uses your services, expertise and working preferences to guide drivers. Set prices and job times in Pricing engine." },
   { title: "Jackie's brain", sees: "Nothing visible. It controls answer quality, speed and running cost." },
 ];
 
@@ -439,23 +438,32 @@ function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
   const { s, setS, save, state } = useSettings(workshopId);
   const [step, setStep] = useState(0);
   if (!s) return <p className="history-note" role="status">{tr("Loading…")}</p>;
-  const services = (s.services as string[]).join("\n");
+  const services = (s.services as string[]).join(", ");
   const last = step === CONTEXT_STEPS.length - 1;
-  const cur = CONTEXT_STEPS[step]!;
-  return <form className="ws-section ws-wizard" onSubmit={e => { e.preventDefault(); void save({ ai_chat_tier: s.ai_chat_tier, ai_quote_tier: s.ai_quote_tier, services: (s.services as string[]).map(x => x.trim()).filter(Boolean), specialties: s.specialties, jackie_context: s.jackie_context }); }}>
+  const cur = CONTEXT_STEPS[step];
+  if (!cur) return null;
+  return <form className="ws-section ws-wizard" onSubmit={e => { e.preventDefault(); void save(step === 0 ? { services: (s.services as string[]).map(x => x.trim()).filter(Boolean), specialties: s.specialties, jackie_context: s.jackie_context } : { ai_chat_tier: s.ai_chat_tier, ai_quote_tier: s.ai_quote_tier }); }}>
     <Stepper steps={CONTEXT_STEPS} step={step} setStep={setStep}/>
     <section className="ws-card">
       <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>{tr("Drivers see:")}</b> {tr(cur.sees)}</p></Tip>{step + 1}. {tr(cur.title)}</h2></div>
       <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0, display: "grid", gap: 10 }}>
         {step === 0 && <>
-          <Label htmlFor="c-serv">{tr("Services you offer (one per line)")}</Label><textarea id="c-serv" className="native-select ws-textarea" value={services} onChange={e => setS({ ...s, services: e.target.value.split("\n") })}/>
-          <Label htmlFor="c-spec">{tr("Specialties and brands")}</Label><textarea id="c-spec" className="native-select ws-textarea" maxLength={1000} placeholder={tr("E.g. Volvo and VW specialists, EV certified, own tyre hotel")} value={s.specialties} onChange={e => setS({ ...s, specialties: e.target.value })}/>
+          <div className="ws-grid2">
+            <div className="ws-field">
+              <Label htmlFor="c-serv" className="ws-label-row"><Tip><p>{tr("Describe your scope in ordinary words, including jobs you don't take on. This guides Jackie; prices and durations stay in Pricing engine.")}</p></Tip>{tr("What you help with")}</Label>
+              <textarea id="c-serv" className="native-select ws-textarea" placeholder={tr("For example: We handle routine servicing, brakes and seasonal tyre changes, including tyre storage. We diagnose warning lights, but refer bodywork and paint repairs to a partner.")} value={services} onChange={e => setS({ ...s, services: e.target.value ? [e.target.value] : [] })}/>
+            </div>
+            <div className="ws-field">
+              <Label htmlFor="c-spec" className="ws-label-row"><Tip><p>{tr("Add the brands, qualifications and facilities that make you a good fit. Only include things your workshop actually offers.")}</p></Tip>{tr("Expertise and facilities")}</Label>
+              <textarea id="c-spec" className="native-select ws-textarea" maxLength={1000} placeholder={tr("For example: Our team specialises in Volvo and Volkswagen. Two technicians are EV-certified. We have an on-site tyre hotel and a courtesy car available by arrangement.")} value={s.specialties} onChange={e => setS({ ...s, specialties: e.target.value })}/>
+            </div>
+          </div>
+          <div className="ws-field">
+            <Label htmlFor="c-ctx" className="ws-label-row"><Tip><p>{tr("Tell Jackie your preferred parts, checks and approval process. These are your working preferences, not another price list.")}</p></Tip>{tr("Parts, checks and customer approval")}</Label>
+            <textarea id="c-ctx" className="native-select ws-textarea" maxLength={3000} placeholder={tr("For example: We prefer OEM or Bosch brake parts. First inspect the brakes and explain what needs replacing. Ask the customer before any extra work. Offer a lower-cost alternative where suitable, and explain any trade-offs in plain words.")} value={s.jackie_context} onChange={e => setS({ ...s, jackie_context: e.target.value })}/>
+          </div>
         </>}
         {step === 1 && <>
-          <Label htmlFor="c-ctx">{tr("Preferred parts and materials, order of operations, what you always check")}</Label>
-          <textarea id="c-ctx" className="native-select ws-textarea ws-textarea-tall" maxLength={3000} placeholder={tr("E.g. We use OEM brake parts only. We always replace pads and discs together. Diagnostics fee is deducted if you repair with us.")} value={s.jackie_context} onChange={e => setS({ ...s, jackie_context: e.target.value })}/>
-        </>}
-        {step === 2 && <>
           <p className="history-note" style={{ margin: 0 }}>{tr("How smart should Jackie be? Pick a level per job. Smarter means better answers but higher running costs. ★ is our recommendation.")}</p>
           <div className="ws-tiers">
             <TierRow title={tr("Everyday chat")} hint={tr("Listening, explaining, fault codes and manual lookups. Most of the volume, so cost adds up here.")} value={s.ai_chat_tier as Tier} recommended={DEFAULT_TIERS.chat} onChange={v => setS({ ...s, ai_chat_tier: v })}/>
