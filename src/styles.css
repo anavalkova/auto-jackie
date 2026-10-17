@@ -185,7 +185,17 @@
 .chat-composer:focus-within { border-color: var(--primary); }
 .composer-hint { font-size: 11px; color: var(--muted-foreground); padding-left: 4px; }
 .composer-actions { display: flex; gap: 6px; align-items: center; margin-left: auto; }
-.garage-dialog { gap: 14px; }
+/* Shared pop-up: centered on desktop, bottom sheet on phones (see AppSheet). */
+.app-sheet { gap: 14px; }
+.app-sheet-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--primary); }
+.app-sheet-footer { display: flex; justify-content: space-between; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border); }
+@media (max-width: 639px) { .app-sheet-footer > * { flex: 1; } }
+.tour-can { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.tour-can li { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; line-height: 1.45; }
+.tour-can svg { width: 16px; height: 16px; flex: none; margin-top: 2px; color: var(--primary); }
+.tour-dots { display: flex; justify-content: center; gap: 5px; }
+.tour-dots span { width: 6px; height: 6px; border-radius: 999px; background: var(--border); }
+.tour-dots span.on { width: 16px; background: var(--primary); }
 .garage-tabs { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); height: auto; min-height: 36px; }
 .garage-tabs > button { white-space: normal; line-height: 1.2; min-width: 0; padding: 6px 4px; text-align: center; }
 @media (max-width: 639px) { .garage-tabs > button { font-size: 12.5px; } }
@@ -657,20 +667,12 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
 @media (max-width: 760px) { .when-grid { grid-template-columns: 1fr; } }
 
 /* Guided demo tour */
-.tour-backdrop { position: fixed; inset: 0; z-index: 80; background: color-mix(in oklab, var(--foreground) 35%, transparent); display: flex; align-items: flex-end; justify-content: center; padding: 16px; }
-.tour-card { background: var(--card); color: var(--card-foreground); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 18px 50px -12px rgb(0 0 0 / 0.35); padding: 18px 20px; max-width: 420px; width: 100%; }
-.tour-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.tour-close { height: 28px; width: 28px; }
-.tour-card h3 { margin: 6px 0 6px; font-size: 17px; }
-.tour-card p { margin: 0 0 14px; font-size: 14px; line-height: 1.55; color: var(--muted-foreground); }
-.tour-card-actions { display: flex; justify-content: space-between; gap: 8px; }
 .demo-tour-btn { margin-left: auto; flex: none; }
 .demo-banner { align-items: center; }
 .ws-title-name { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
 .ws-title-name h1 { margin: 0; }
 .ws-save-wrap { display: inline-flex; border-radius: 8px; cursor: not-allowed; }
 .ws-save-wrap > button { pointer-events: none; }
-@media (min-width: 700px) { .tour-backdrop { align-items: center; } }
 
 /* Phone chat uses document scrolling, not a second fixed-height scroll region. */
 @media (max-width: 760px) {

@@ -63,8 +63,9 @@ export const TOUR_STEPS: TourStep[] = [
     title: ["How drivers reach you", "Hur förare når dig", "Wie Fahrer Sie erreichen"],
     body: ["Shown to drivers mostly after they book.", "Visas för förare mest efter bokning.", "Wird Fahrern meist nach der Buchung gezeigt."],
     can: [
-      ["Add address, phone, email and opening hours", "Lägg till adress, telefon, mejl och öppettider", "Adresse, Telefon, E-Mail und Öffnungszeiten eintragen"],
-      ["Keep your city and VAT details correct", "Håll stad och momsuppgifter rätt", "Stadt und USt-Angaben aktuell halten"],
+      ["Add phone, email, address and website", "Lägg till telefon, mejl, adress och webbplats", "Telefon, E-Mail, Adresse und Website eintragen"],
+      ["Opening hours are what Jackie tells drivers", "Öppettiderna är det Jackie berättar för förare", "Öffnungszeiten sagt Jackie den Fahrern"],
+      ["Your city decides which drivers find you", "Din stad avgör vilka förare som hittar dig", "Ihre Stadt bestimmt, welche Fahrer Sie finden"],
     ] },
   { tab: "profile", sub: 1, area: ["Profile · Your brand", "Profil · Ditt varumärke", "Profil · Ihre Marke"],
     title: ["Your own Jackie page", "Din egen Jackie-sida", "Ihre eigene Jackie-Seite"],
