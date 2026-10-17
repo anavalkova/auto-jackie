@@ -779,7 +779,7 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
 
 /* Demo guide: a chip per section that expands into a "Why this exists"-style popover. */
 .demo-guide-toggle { position: relative; display: inline-block; margin-bottom: 12px; }
-.demo-guide-pop { position: absolute; top: calc(100% + 8px); left: 0; z-index: 40; width: min(420px, calc(100vw - 48px)); max-height: 70vh; overflow-y: auto; display: grid; gap: 12px; padding: 14px 16px; }
+.demo-guide-pop { position: absolute; top: calc(100% + 8px); left: 0; right: auto; z-index: 40; width: min(420px, calc(100vw - 48px)); max-height: 70vh; overflow-y: auto; display: grid; gap: 12px; padding: 14px 16px; }
 .demo-guide-step { display: grid; gap: 6px; }
 .demo-guide-step + .demo-guide-step { padding-top: 12px; border-top: 1px dashed var(--border); }
 .demo-guide-title { margin: 0; font-size: 14px; }
