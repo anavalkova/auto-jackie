@@ -373,6 +373,9 @@
 .pitch-entry > button { width: 100%; min-height: 44px; height: auto; padding: 12px 14px; white-space: normal; font-weight: 700; }
 .pitch-entry-note { font-size: .8rem; line-height: 1.5; color: var(--muted-foreground); }
 .pitch-sign-in { border-color: var(--foreground); color: var(--foreground); background: var(--card); }
+.ws-config-save { display: grid; gap: 8px; justify-items: start; min-width: 0; }
+.ws-config-actions { display: flex; gap: 12px; align-items: flex-start; justify-content: flex-end; flex-wrap: wrap; min-width: 0; }
+.ws-config-save .history-note { max-width: 36ch; line-height: 1.5; }
 .pitch-jackie { margin: 0; text-align: center; }
 .pitch-jackie img { width: 100%; aspect-ratio: 1; object-fit: cover; object-position: center top; border-radius: 50%; border: 3px solid var(--primary); }
 .pitch-jackie figcaption { font-size: .8rem; color: var(--muted-foreground); margin-top: 8px; }

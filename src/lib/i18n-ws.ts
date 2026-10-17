@@ -1,5 +1,6 @@
 /** Swedish and German for workshop, operations and sign-in screens. Keyed by the English text; [sv, de]. Missing keys fall back to English. */
 export const WS: Record<string, [string, string]> = {
+  "Demo workshop. Try the fields; changes cannot be saved.": ["Demoverkstad. Prova fälten. Ändringar kan inte sparas.", "Demo-Werkstatt. Felder ausprobieren. Änderungen können nicht gespeichert werden."],
   "Your workshop's know-how": ["Din verkstads kunnande", "Das Know-how Ihrer Werkstatt"],
   "Jackie uses your services, expertise and working preferences to guide drivers. Set prices and job times in Pricing engine.": ["Jackie använder dina tjänster, din expertis och ditt arbetssätt för att vägleda förare. Ange priser och arbetstider i prismotorn.", "Jackie nutzt Ihre Leistungen, Fachkenntnisse und Arbeitsweise, um Fahrer zu beraten. Preise und Arbeitszeiten legen Sie in der Preis-Engine fest."],
   "What you help with": ["Vad ni hjälper till med", "Wobei Sie helfen"],
