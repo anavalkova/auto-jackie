@@ -765,7 +765,7 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
 }
 /* The chat keeps a little of the screen to itself, below the input, so it still reads as a chat. */
 @media (max-width: 760px) {
-  .workspace { min-height: calc(100svh - 190px); }
+  .workspace { min-height: calc(100svh - 120px); }
   .assistant-area { flex: 1; }
   .chat-slot { flex: 1; }
   .chat-shell { flex: 1; min-height: 0; }
