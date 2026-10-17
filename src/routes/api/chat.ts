@@ -76,7 +76,7 @@ For troubleshooting, answer with this structure (markdown headings, short):
 
 function vehicleContext(v: z.infer<typeof vehicleSchema>) {
   if (!v) return "No vehicle selected. Follow rule 7.";
-  const km = v.mileageKm != null ? ` Odometer: about ${v.mileageKm} km.` : "";
+  const km = v.mileageKm != null ? ` Odometer: about ${v.mileageKm} km (${v.mileageKm / 10} mil in Swedish units).` : "";
   if (v.confidential) return `The driver added their car by Swedish licence plate.${v.description ? ` Registry record (CONFIDENTIAL — use only to tailor your advice; never state, repeat, hint at or confirm the make, model, year, engine, fuel or gearbox to the driver, even if asked): ${v.description}.` : " Its registry details are confidential: never ask for, guess, or mention make, model, year or engine."}${km}`;
   return `The driver's car: ${v.description}.${km} You may refer to it, but Wikidata facts about parts still need citations.`;
 }

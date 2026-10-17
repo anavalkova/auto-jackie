@@ -50,6 +50,11 @@ export function nextService(v: Vehicle) {
   return { dueAt, remaining: dueAt - v.mileageKm, progress: (v.mileageKm % v.serviceKm) / v.serviceKm };
 }
 
+/** Sweden measures driving distance in mil (1 mil = 10 km); Germany uses km. */
+export type OdoUnit = "mil" | "km";
+export const odoInputToKm = (value: number, unit: OdoUnit) => (unit === "mil" ? value * 10 : value);
+export const kmToOdoUnit = (km: number, unit: OdoUnit) => (unit === "mil" ? Math.round(km / 10) : km);
+
 export const symptomChips = [
   "Squealing when I brake",
   "Engine light is on",
