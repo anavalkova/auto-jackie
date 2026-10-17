@@ -137,7 +137,9 @@ export function WorkshopDashboard() {
   const header = <header className="site-header">
     <Link to="/" className="brand" aria-label={tr("AutoJackie home")}><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span><span className="brand-sub">{tr("for workshops")}</span></Link>
     <nav aria-label={tr("Workshop navigation")}>
-      <Button variant="ghost" asChild className="workshop-link"><Link to="/">{tr("Driver view")} <ArrowUpRight/></Link></Button>
+      <Button variant="ghost" asChild className="workshop-link">{!demo && shop?.slug
+        ? <Link to="/w/$slug" params={{ slug: shop.slug }}>{tr("Driver view")} <ArrowUpRight/></Link>
+        : <Link to="/">{tr("Driver view")} <ArrowUpRight/></Link>}</Button>
       <span className="nav-divider" aria-hidden="true"/>
       {user && <DropdownMenu>
         <DropdownMenuTrigger asChild><Button variant="outline" size="icon" className="nav-control nav-icon" aria-label={tr("Account")}><UserRound/></Button></DropdownMenuTrigger>
