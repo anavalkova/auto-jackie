@@ -438,11 +438,14 @@ function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
   const { s, setS, save, state } = useSettings(workshopId);
   const [step, setStep] = useState(0);
   if (!s) return <p className="history-note" role="status">{tr("Loading…")}</p>;
-  const services = (s.services as string[]).join(", ");
+  const storedServices = s.services as string[];
+  const templateServices = ["Annual service", "Brake pads & discs", "Tyre change & storage", "Diagnostics (engine light)", "Timing belt", "Battery & electrics"];
+  const isTemplate = storedServices.length === templateServices.length && storedServices.every((value, i) => value === templateServices[i]);
+  const services = isTemplate ? "" : storedServices.join(", ");
   const last = step === CONTEXT_STEPS.length - 1;
   const cur = CONTEXT_STEPS[step];
   if (!cur) return null;
-  return <form className="ws-section ws-wizard" onSubmit={e => { e.preventDefault(); void save(step === 0 ? { services: (s.services as string[]).map(x => x.trim()).filter(Boolean), specialties: s.specialties, jackie_context: s.jackie_context } : { ai_chat_tier: s.ai_chat_tier, ai_quote_tier: s.ai_quote_tier }); }}>
+  return <form className="ws-section ws-wizard" onSubmit={e => { e.preventDefault(); void save(step === 0 ? { services: isTemplate ? [] : storedServices.map(x => x.trim()).filter(Boolean), specialties: s.specialties, jackie_context: s.jackie_context } : { ai_chat_tier: s.ai_chat_tier, ai_quote_tier: s.ai_quote_tier }); }}>
     <Stepper steps={CONTEXT_STEPS} step={step} setStep={setStep}/>
     <section className="ws-card">
       <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>{tr("Drivers see:")}</b> {tr(cur.sees)}</p></Tip>{step + 1}. {tr(cur.title)}</h2></div>
