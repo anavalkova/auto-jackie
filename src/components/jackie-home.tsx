@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { GarageDialog } from "@/components/garage-dialog";
 import { JackieChat } from "@/components/jackie-chat";
 import { BookingPanel, Tip, type VisitCard } from "@/components/request-visit-dialog";
-import { MyVisits } from "@/components/my-visits";
+import { MyVisits, type RescheduleTarget } from "@/components/my-visits";
 import { WhyNote } from "@/components/why-note";
 import { SignInDialog } from "@/components/sign-in-dialog";
 import { useSessionUser } from "@/hooks/use-session-user";

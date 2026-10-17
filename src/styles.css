@@ -727,3 +727,21 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
   .ws-title .ws-field, .ws-title .ws-field select { width: 100%; }
 }
 @media (max-width: 640px) { .ws-title-name .why-pop { left: 12px; right: 12px; } }
+/* My visits: tappable cards, details dialog (bottom sheet on phones). */
+.visit-list > li { min-width: 0; }
+.visit-item { width: 100%; text-align: left; cursor: pointer; font: inherit; color: inherit; border: 1px solid var(--border); background: var(--card); }
+.visit-item > svg { color: var(--primary); }
+.visit-item:hover, .visit-item:focus-visible { border-color: color-mix(in oklab, var(--primary) 45%, var(--border)); }
+.visit-status.is-booked { background: color-mix(in oklab, var(--primary) 14%, var(--card)); color: var(--primary); }
+.visit-dl { display: grid; grid-template-columns: max-content 1fr; gap: 10px 16px; margin: 0; font-size: 14px; }
+.visit-dl dt { color: var(--muted-foreground); font-size: 12px; padding-top: 2px; }
+.visit-dl dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.visit-dialog-actions { display: grid; gap: 10px; padding-top: 12px; border-top: 1px solid var(--border); }
+.visit-dialog-actions > button { justify-self: end; }
+@media (max-width: 639px) { .visit-dialog-actions > button { justify-self: stretch; } }
+@media (max-width: 760px) {
+  .jackie-panel { gap: 8px; }
+  .jackie-panel > .chat-history, .jackie-panel > .visits-card { margin: 0 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); }
+  .jackie-panel > .visits-card { margin-bottom: 8px; }
+  .visit-item { background: var(--background); }
+}
