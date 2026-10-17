@@ -412,7 +412,6 @@
 .channel-row { display: flex; gap: 8px; margin-top: 6px; }
 
 /* Workshop sections */
-.ws-tabs { flex-wrap: wrap; }
 .ws-section { display: grid; gap: 20px; }
 .ws-tight { gap: 0; }
 .ws-section-intro { margin: 0; color: var(--muted-foreground); font-size: 14px; max-width: 640px; }
@@ -449,7 +448,6 @@
 .ws-big strong { font-family: var(--font-heading); font-size: 18px; line-height: 1; }
 .ws-h2 { font-size: 16px; margin: 0 0 10px; }
 /* Why-this-exists overlay */
-.ws-tabs { position: relative; align-items: center; }
 .why-overlay { margin-left: auto; position: relative; }
 .why-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--primary); color: var(--primary); background: var(--card); cursor: pointer; }
 .why-chip svg { width: 14px; height: 14px; }
