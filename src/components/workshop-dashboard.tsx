@@ -161,8 +161,7 @@ export function WorkshopDashboard() {
 
   let body;
   if (!ready || (user && shop === undefined)) body = <p className="history-note" role="status">{tr("Loading…")}</p>;
-  else if (!user) body = <WorkshopPitch onSignIn={() => setSignIn(true)} onOpenDemo={() => void openDemo()}/>;
-  else if (!shop) body = <WorkshopPitch onSignIn={() => setSignIn(true)} signedIn onOpenDemo={() => void openDemo()}/>;
+  else if (!shop) body = <WorkshopPitch onSignIn={() => setSignIn(true)} signedIn={!!user} onOpenDemo={() => void openDemo()}/>;
   else body = <>
     {demo && <p className="demo-banner" role="note"><Sparkles aria-hidden/> {t.pitch.demoBanner} <Button variant="outline" size="sm" className="demo-tour-btn" onClick={() => tourStep(0)}>{tr("Guided tour")}</Button></p>}
     {demo && tour !== null && <DemoTour step={tour} onStep={tourStep} onClose={closeTour}/>}
