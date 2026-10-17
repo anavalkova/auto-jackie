@@ -838,9 +838,9 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
   .jackie-panel > .vehicle-card { grid-column: 1 / -1; grid-row: 1; background: var(--secondary); border: 0; box-shadow: none; border-radius: 10px; }
   .jackie-panel > .vehicle-card button, .jackie-panel > .vehicle-card .vehicle-empty { min-height: 34px; height: 34px; font-size: 12px; background: transparent; }
   .jackie-panel > .vehicle-card svg { width: 15px; height: 15px; }
-  .jackie-panel > .visits-card { grid-column: 1; grid-row: 2; }
+  .jackie-panel > section.visits-card, .jackie-panel > .visits-card:has(.is-open) { grid-column: 1; grid-row: 2; }
   .jackie-panel > .chat-history, .jackie-panel > .chat-history:has(.is-open) { grid-column: 2; grid-row: 2; display: flex; align-items: center; }
-  .jackie-panel > .chat-history:only-of-type { grid-column: 1 / -1; }
+  .jackie-panel:not(:has(.visits-card)) > .chat-history { grid-column: 1 / -1; }
   .jackie-panel > .visits-card, .jackie-panel > .chat-history { position: static; padding: 0 6px; min-height: 42px; display: flex; align-items: center; }
   .jackie-panel > .visits-card > .history-heading, .jackie-panel > .chat-history > .history-heading { width: 100%; margin: 0; }
   .jackie-panel .history-mobile-toggle { font-size: 12px; padding: 0 4px; min-width: 0; overflow: hidden; }
