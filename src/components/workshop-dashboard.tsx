@@ -151,7 +151,7 @@ export function WorkshopDashboard() {
       : <ul className="ws-list">{shown.slice(page * PAGE, (page + 1) * PAGE).map(i => <li key={i.id}><button type="button" className="ws-row" onClick={() => setSelected(i)}>
         <span className={`ws-status s-${i.status}`}>{tr(STATUSES.find(s => s.id === i.status)?.label ?? "")}</span>
         <span className="ws-row-main"><strong>{i.issue}</strong><span>{i.contact_name}{i.vehicle_label ? ` · ${i.vehicle_label}` : ""}</span></span>
-        <span className={`ws-urgency u-${i.urgency.replace(" ", "-")}`}>{i.urgency}</span>
+        <span className={`ws-urgency u-${i.urgency.replace(" ", "-")}`}>{tr(i.urgency)}</span>
         <span className="ws-price">{i.price_low_sek != null && i.price_high_sek != null ? `${kr(i.price_low_sek)} ${tr("to")} ${kr(i.price_high_sek)}` : tr("No price")}</span>
         <time dateTime={i.created_at}>{when(i.created_at)}</time>
       </button></li>)}</ul>}
