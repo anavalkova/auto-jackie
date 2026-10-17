@@ -8,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { catalog, isSwedishPlate, type Vehicle } from "@/lib/vehicles";
 import { useLang } from "@/lib/i18n";
 import { tr } from "@/lib/tr";
-import { supabase } from "@/integrations/supabase/client";
 
 export function GarageDialog({ open, onOpenChange, vehicle, onSave, signedIn }: {
   open: boolean; onOpenChange: (o: boolean) => void; vehicle: Vehicle | null; onSave: (v: Vehicle) => void; signedIn: boolean;
@@ -32,11 +31,7 @@ export function GarageDialog({ open, onOpenChange, vehicle, onSave, signedIn }: 
     if (!isSwedishPlate(p)) return setError("That doesn't look like a Swedish plate. Try something like ABC 123 or ABC 12A.");
     setError(""); setLooking(true);
     try {
-      const { data: s } = await supabase.auth.getSession();
-      const token = s.session?.access_token;
-      if (!token) return setError("Sign in to look up a Swedish plate. You can still pick your car manually or use HSN/TSN.");
-      const res = await fetch("/api/vehicles/lookup", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ plate: p }) });
-      if (res.status === 401) return setError("Sign in to look up a Swedish plate. You can still pick your car manually or use HSN/TSN.");
+      const res = await fetch("/api/vehicles/lookup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ plate: p }) });
       if (res.status === 404) return setError("The Swedish register didn't find that plate. Check it, or pick your car manually.");
       if (!res.ok) return setError("Couldn't reach the Swedish register just now. Try again, or pick your car manually.");
       const hit = await res.json() as { make: string; model: string; year: string; engine: string; fuel: string; transmission: string };
