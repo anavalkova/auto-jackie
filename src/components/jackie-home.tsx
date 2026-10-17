@@ -246,7 +246,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
         <div className="assistant-top"><div className="assistant-top-left"><h1 className="assistant-title">{t.heroTitle}</h1>{workshop?.greeting && <span className="shop-greeting">{workshop.greeting}</span>}</div><div className="assistant-top-right"><WhyNote id="driver" overlay autoOpen={false} label={t.whyChip} title={t.whyTitle} pitch={t.whyPitch} stats={[
           { value: "36%", text: t.why1, source: { label: "Trafikanalys, 2022", url: "https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" } },
           { value: "P0301?", text: t.why2 },
-        ]}/></div></div>
+        ]}/></div>{chatEmpty && <p className="assistant-summary">{t.heroSub}</p>}</div>
         {rescheduling && <BookingPanel key={rescheduling.id} card={{ issue: rescheduling.job }} vehicleLabel="" rescheduleId={rescheduling.id} workshopId={rescheduling.workshopId} onClose={() => setRescheduling(null)} onBooked={() => setVisitsKey(k => k + 1)}/>}
         {!rescheduling && directBooking && <BookingPanel card={directBooking} vehicleLabel={vehicle && !isPrivateVehicle(vehicle) ? vehicle.label : ""} onClose={() => setDirectBooking(null)} workshopId={workshop?.id} onBooked={() => setVisitsKey(k => k + 1)}/>}
         <div className="chat-slot" hidden={!!directBooking || !!rescheduling}>
