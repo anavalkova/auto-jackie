@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { CalendarCheck, CalendarClock, ChevronDown } from "lucide-react";
+import { CalendarCheck, CalendarClock, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tip } from "@/components/request-visit-dialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,7 +20,7 @@ export function MyVisits({ userId, refreshKey }: { userId: string | null; refres
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
   const [open, setOpen] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [page, setPage] = useState(0);
 
   const load = useCallback(async () => {
     if (!userId) return;
@@ -43,12 +43,14 @@ export function MyVisits({ userId, refreshKey }: { userId: string | null; refres
 
   if (!userId) return null;
   const { upcoming, past, waiting } = splitVisits(rows.map(toVisit), new Date());
-  const cap = expanded ? Number.MAX_SAFE_INTEGER : VISITS_PAGE_SIZE;
-  const next = upcoming.slice(0, cap);
-  const earlier = past.slice(0, cap);
-  const hidden = upcoming.length + past.length - next.length - earlier.length;
+  const all = [...upcoming.map(v => ({ v, up: true })), ...past.map(v => ({ v, up: false }))];
+  const pages = Math.max(1, Math.ceil(all.length / VISITS_PAGE_SIZE));
+  const cur = Math.min(page, pages - 1);
+  const shown = all.slice(cur * VISITS_PAGE_SIZE, (cur + 1) * VISITS_PAGE_SIZE);
+  const next = shown.filter(x => x.up).map(x => x.v);
+  const earlier = shown.filter(x => !x.up).map(x => x.v);
 
-  return <section className={`visits-card${expanded ? " is-expanded" : ""}`} aria-label={t.myVisits}>
+  return <section className="visits-card" aria-label={t.myVisits}>
     <div className="history-heading">
       <h2 className="history-desktop-title">{t.myVisits}</h2>
       <Button variant="ghost" className="history-mobile-toggle" aria-expanded={open} aria-controls="driver-visits" onClick={() => setOpen(o => !o)}><CalendarCheck/>{t.myVisits}<ChevronDown className={open ? "history-chevron-open" : undefined}/></Button>
@@ -65,7 +67,7 @@ export function MyVisits({ userId, refreshKey }: { userId: string | null; refres
           {next.length > 0 && <><p className="visits-group">{t.visitsUpcoming}</p><ul className="visit-list">{next.map(v => <VisitLine key={v.id} v={v} when={`${t.visitDropoff} · ${slotLabel(v.bookedAt!, locale)}`} status={tr("Booked")}/>)}</ul></>}
           {earlier.length > 0 && <><p className="visits-group">{t.visitsPast}</p><ul className="visit-list">{earlier.map(v => <VisitLine key={v.id} v={v} when={slotLabel(v.bookedAt ?? v.createdAt, locale)} status={v.status === "closed" ? tr("Closed") : tr("Booked")}/>)}</ul></>}
           {waiting > 0 && <p className="history-note">{t.visitsWaiting.replace("%n", String(waiting))}</p>}
-          {expanded || hidden > 0 ? <Button variant="ghost" size="sm" className="visits-more" onClick={() => setExpanded(e => !e)}>{expanded ? t.visitsLess : t.visitsMore}</Button> : null}
+          {all.length > 0 && <div className="history-pager"><Button variant="ghost" size="icon" aria-label={tr("Previous page")} disabled={cur === 0} onClick={() => setPage(cur - 1)}><ChevronLeft/></Button><span>{cur + 1} / {pages}</span><Button variant="ghost" size="icon" aria-label={tr("Next page")} disabled={cur >= pages - 1} onClick={() => setPage(cur + 1)}><ChevronRight/></Button></div>}
         </>}
     </div>
   </section>;
