@@ -15,11 +15,12 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { isPrivateVehicle, type Vehicle } from "@/lib/vehicles";
 import { CHAT_HISTORY_PAGE_SIZE, chatHistoryRange } from "@/lib/chat-history";
+import { readWorkshopSelection, rememberWorkshopSelection, selectWorkshop } from "@/lib/workshop-selection";
 import { tr } from "@/lib/tr";
 import jackie from "@/assets/jackie.jpg";
 import { LANGS, setLang, useT } from "@/lib/i18n";
 
-export type WorkshopBrand = { id: string; name: string; city: string; slug: string; accent: string; logo: string; greeting: string };
+export type WorkshopBrand = { id: string; name: string; city: string; slug: string; accent: string; greeting: string };
 type ChatRow = { id: string; title: string; updated_at: string };
 
 function readGuestChat(): UIMessage[] {
@@ -60,6 +61,20 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyPage, setHistoryPage] = useState(0);
   const [historyCount, setHistoryCount] = useState(0);
+  const [rememberedWorkshop, setRememberedWorkshop] = useState<{ id: string; name: string; slug: string | null } | null>(null);
+  const headerWorkshop = workshop ?? rememberedWorkshop;
+
+  useEffect(() => {
+    if (!ready || !user) { setRememberedWorkshop(null); return; }
+    let cancelled = false;
+    void supabase.from("workshop_members").select("workshops(id,name,slug)").eq("user_id", user.id).then(({ data }) => {
+      if (cancelled) return;
+      const list = (data ?? []).flatMap(m => m.workshops ? [m.workshops] : []);
+      if (workshop && list.some(w => w.id === workshop.id)) rememberWorkshopSelection(user.id, workshop.id);
+      setRememberedWorkshop(selectWorkshop(list, readWorkshopSelection(user.id)));
+    });
+    return () => { cancelled = true; };
+  }, [ready, user?.id, workshop?.id]);
 
   // Older versions kept the car in this browser; guests are now private by default.
   useEffect(() => { try { localStorage.removeItem("autojackie.vehicle"); } catch { /* ignore */ } }, []);
@@ -69,8 +84,9 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
     if (workshop) return;
     const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event !== "SIGNED_IN" || !session?.user) return;
-      const { data: m } = await supabase.from("workshop_members").select("workshops(slug)").eq("user_id", session.user.id).limit(1).maybeSingle();
-      const slug = (m?.workshops as { slug?: string } | null)?.slug;
+      const { data } = await supabase.from("workshop_members").select("workshops(id,slug)").eq("user_id", session.user.id);
+      const list = (data ?? []).flatMap(m => m.workshops ? [m.workshops] : []);
+      const slug = selectWorkshop(list, readWorkshopSelection(session.user.id))?.slug;
       if (slug) navigate({ to: "/w/$slug", params: { slug } });
     });
     return () => data.subscription.unsubscribe();
@@ -168,7 +184,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
 
   return <div className="app-frame" style={workshop?.accent ? { ["--primary" as string]: workshop.accent } : undefined}>
     <header className="site-header">
-      {workshop ? <div className="tenant-brand"><div className="tenant-brand-name">{/^data:image\/(webp|png|jpeg);base64,/.test(workshop.logo) && <img src={workshop.logo} alt=""/>}<strong>{workshop.name}</strong></div><Link to="/" className="tenant-brand-credit">AutoJackie</Link></div> : <Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span></Link>}
+      <div className="tenant-brand"><Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span></Link>{headerWorkshop && <strong className="tenant-brand-name">{headerWorkshop.name}</strong>}</div>
       <nav aria-label="Main navigation">
         {(!workshop || user) && <Button variant="ghost" asChild className="workshop-link"><Link to="/workshop">{t.forWorkshops} <ArrowUpRight/></Link></Button>}
         <span className="nav-divider" aria-hidden="true"/>
