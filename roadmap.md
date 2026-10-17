@@ -1,5 +1,5 @@
 # AutoJackie
-- [ ] Prevent one conversation from creating duplicate history records and verify signed-in saving.
+- [x] Prevent duplicate history records with shared serialized saving; verified signed-in question + follow-up create one record and reopen intact, with four regression tests.
 - [x] Populate every demo workshop section with fictional judging examples; verified all tabs, request filters/details, locked saves, and mobile overview without registration.
 - [x] Keep signed-in Demo visitors read-only with tour access; retain Ana as sole Demo/Dev owner and administrator. Verified demo locked saves, local edits reset, tour replay, both owner workspaces, and unchanged demo password.
 - [x] Replace the pop-up guided tour with an inline per-section demo guide so nothing is hidden behind a blur.
