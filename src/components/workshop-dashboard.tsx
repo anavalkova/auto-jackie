@@ -562,18 +562,18 @@ function TeamSection({ workshopId }: { workshopId: string }) {
   };
   if (!team) return <p className="history-note" role="status">{tr("Loading…")}</p>;
   return <div className="ws-form-card">
-    <div className="ws-label-row"><Label>{tr("Team")}</Label><Hint controls={tr("who can open this workshop's dashboard. Admins see and change everything; front desk sees Overview and Bookings only.")} shows={tr("only to you, here in Settings.")}/></div>
-    <table className="ws-table"><tbody>
+    <div className="ws-label-row"><Hint controls={tr("who can open this workshop's dashboard. Admins see and change everything; front desk sees Overview and Bookings only.")} shows={tr("only to you, here in Settings.")}/></div>
+    <table className="ws-table"><thead><tr><th>{tr("Email")}</th><th>{tr("Role")}</th><th/></tr></thead><tbody>
       {team.map(m => <tr key={m.user_id}><td>{m.email}</td><td><strong>{m.role === "owner" ? tr("Admin") : tr("Front desk")}</strong></td>
-        <td style={{ textAlign: "right" }}>{m.role !== "owner" && <Button type="button" size="sm" variant="ghost" aria-label={tr("Remove")} onClick={() => void remove(m)}>×</Button>}</td></tr>)}
+        <td>{m.role !== "owner" && <Button type="button" size="sm" variant="ghost" aria-label={tr("Remove")} onClick={() => void remove(m)}>×</Button>}</td></tr>)}
+      <tr>
+        <td><Input type="email" maxLength={120} placeholder={tr("Their AutoJackie email")} value={email} onChange={e => setEmail(e.target.value)} aria-label={tr("Their AutoJackie email")}/></td>
+        <td><select className="native-select" value={role} onChange={e => setRole(e.target.value as "owner" | "staff")} aria-label={tr("Role")}>
+          <option value="staff">{tr("Front desk")}</option><option value="owner">{tr("Admin")}</option>
+        </select></td>
+        <td><Button type="button" size="sm" variant="outline" disabled={!email.includes("@")} onClick={() => void add()}>{tr("Add")}</Button></td>
+      </tr>
     </tbody></table>
-    <div className="ws-chips">
-      <Input type="email" maxLength={120} placeholder={tr("Their AutoJackie email")} value={email} onChange={e => setEmail(e.target.value)} style={{ maxWidth: 260 }} aria-label={tr("Their AutoJackie email")}/>
-      <select className="native-select" value={role} onChange={e => setRole(e.target.value as "owner" | "staff")} aria-label={tr("Role")}>
-        <option value="staff">{tr("Front desk")}</option><option value="owner">{tr("Admin")}</option>
-      </select>
-      <Button type="button" variant="outline" disabled={!email.includes("@")} onClick={() => void add()}>{tr("Add to team")}</Button>
-    </div>
     {msg && <p className="history-note" role="status">{msg}</p>}
   </div>;
 }
