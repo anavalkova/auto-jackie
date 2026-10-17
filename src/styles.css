@@ -381,7 +381,18 @@
 .ws-overview { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 16px; align-items: start; margin-bottom: 20px; }
 .ws-overview .why-note { margin: 0; }
 .ws-overview .ws-kpis { grid-template-columns: 1fr; margin: 0; }
-.ws-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px; }
+.ws-layout { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 24px; align-items: start; }
+.ws-nav { display: flex; flex-direction: column; gap: 4px; border-right: 1px solid var(--border); padding-right: 16px; position: sticky; top: 16px; }
+.ws-nav-item { display: block; width: 100%; text-align: left; padding: 9px 12px; border-radius: 8px; border: 0; background: none; color: var(--muted-foreground); font-size: 14px; font-weight: 600; cursor: pointer; }
+.ws-nav-item:hover { background: var(--secondary); color: var(--foreground); }
+.ws-nav-item.active { background: var(--primary); color: var(--primary-foreground); }
+.ws-content { min-width: 0; }
+.ws-content-head { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+@media (max-width: 900px) {
+  .ws-layout { grid-template-columns: 1fr; gap: 12px; }
+  .ws-nav { flex-direction: row; flex-wrap: wrap; border-right: 0; border-bottom: 1px solid var(--border); padding: 0 0 12px; position: static; }
+  .ws-nav-item { width: auto; }
+}
 .ws-settings { max-width: none; }
 .ws-settings fieldset.visit-form { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 20px; }
 .ws-settings .ws-span { grid-column: 1 / -1; }
@@ -401,7 +412,6 @@
 .channel-row { display: flex; gap: 8px; margin-top: 6px; }
 
 /* Workshop sections */
-.ws-tabs { flex-wrap: wrap; }
 .ws-section { display: grid; gap: 20px; }
 .ws-tight { gap: 0; }
 .ws-section-intro { margin: 0; color: var(--muted-foreground); font-size: 14px; max-width: 640px; }
@@ -438,7 +448,6 @@
 .ws-big strong { font-family: var(--font-heading); font-size: 18px; line-height: 1; }
 .ws-h2 { font-size: 16px; margin: 0 0 10px; }
 /* Why-this-exists overlay */
-.ws-tabs { position: relative; align-items: center; }
 .why-overlay { margin-left: auto; position: relative; }
 .why-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--primary); color: var(--primary); background: var(--card); cursor: pointer; }
 .why-chip svg { width: 14px; height: 14px; }
