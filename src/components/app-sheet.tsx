@@ -10,11 +10,11 @@ export function AppSheet({ open, onOpenChange, title, description, eyebrow, clas
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: ReactNode;
-  description?: ReactNode;
-  eyebrow?: ReactNode;
-  className?: string;
+  description?: ReactNode | undefined;
+  eyebrow?: ReactNode | undefined;
+  className?: string | undefined;
   children?: ReactNode;
-  footer?: ReactNode;
+  footer?: ReactNode | undefined;
 }) {
   return <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className={cn("app-sheet", className)}>

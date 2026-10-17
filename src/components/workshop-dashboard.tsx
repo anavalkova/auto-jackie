@@ -251,12 +251,12 @@ function Pager({ page, pages, onPage }: { page: number; pages: number; onPage: (
 }
 
 const BOOKING_STEPS = [{ title: "Requests" }, { title: "Booking settings" }];
-function useSubTab(sub?: number) {
+function useSubTab(sub?: number | undefined) {
   const [step, setStep] = useState(sub ?? 0);
   useEffect(() => { if (sub != null) setStep(sub); }, [sub]);
   return [step, setStep] as const;
 }
-function BookingTab({ requests, settings, sub }: { requests: React.ReactNode; settings: React.ReactNode; sub?: number }) {
+function BookingTab({ requests, settings, sub }: { requests: React.ReactNode; settings: React.ReactNode; sub?: number | undefined }) {
   const [step, setStep] = useSubTab(sub);
   const list = <Collapsible title={tr("Requests")} tip={tr("Everything drivers sent you, newest first. Click a request to see the visit, the quote Jackie sent and how to reach the driver. Filter with the buttons above.")}><div className="ws-section">{requests}</div></Collapsible>;
   if (!settings) return <div className="ws-section">{list}</div>;
@@ -467,7 +467,7 @@ function Hint({ controls, shows }: { controls: string; shows: string }) {
   return <Tip><p><b>{tr("Controls:")}</b> {controls}</p><p><b>{tr("Shows:")}</b> {shows}</p></Tip>;
 }
 
-function ContextSettings({ workshopId, canEdit, demo = false, sub }: { workshopId: string; canEdit: boolean; demo?: boolean; sub?: number }) {
+function ContextSettings({ workshopId, canEdit, demo = false, sub }: { workshopId: string; canEdit: boolean; demo?: boolean; sub?: number | undefined }) {
   const { s, setS, save, state } = useSettings(workshopId, canEdit, demo);
   const [step, setStep] = useSubTab(sub);
   if (!s) return <p className="history-note" role="status">{tr("Loading…")}</p>;
@@ -618,7 +618,7 @@ function TeamSection({ workshopId, demo = false }: { workshopId: string; demo?: 
   </div>;
 }
 
-function ProfileView({ shop, canEdit, demo = false, onSaved, sub }: { shop: Shop; canEdit: boolean; demo?: boolean; onSaved: () => void; sub?: number }) {
+function ProfileView({ shop, canEdit, demo = false, onSaved, sub }: { shop: Shop; canEdit: boolean; demo?: boolean; onSaved: () => void; sub?: number | undefined }) {
   const { s, setS, save, state } = useSettings(shop.id, canEdit, demo);
   const [city, setCity] = useState(shop.city);
   const [step, setStep] = useSubTab(sub);
