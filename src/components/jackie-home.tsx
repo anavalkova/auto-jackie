@@ -143,7 +143,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
 
   const signOut = async () => { await supabase.auth.signOut(); setVehicle(null); navigate({ to: "/", replace: true }); };
   const service = vehicle ? nextService(vehicle) : null;
-  const odoUnit = odoUnitFor(useLang());
+  const odoUnit = odoUnitFor(lang);
   const [directBooking, setDirectBooking] = useState<VisitCard | null>(null);
 
   return <div className="app-frame" style={workshop?.accent ? { ["--primary" as string]: workshop.accent } : undefined}>
