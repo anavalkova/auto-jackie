@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SignInDialog } from "@/components/sign-in-dialog";
 import { WhyNote, type WhyStat } from "@/components/why-note";
@@ -168,7 +169,7 @@ export function WorkshopDashboard() {
   else body = <>
     {demo && <p className="demo-banner" role="note"><Sparkles aria-hidden/> {t.pitch.demoBanner} <Button variant="outline" size="sm" className="demo-tour-btn" onClick={() => tourStep(0)}>{tr("Guided tour")}</Button></p>}
     {demo && tour !== null && <DemoTour step={tour} onStep={tourStep} onClose={closeTour}/>}
-    <div className="ws-title"><div><span className="eyebrow">{tr("WORKSHOP DASHBOARD")}</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div>
+    <div className="ws-title"><div><span className="eyebrow">{tr("WORKSHOP DASHBOARD")}</span><div className="ws-title-name"><h1>{shop.name}</h1><WhyNote key={tab} overlay {...WHY[tab]}/></div></div>
       {!demo && shops.length > 1 && <div className="ws-field" style={{ margin: 0 }}><Label htmlFor="ws-switch">{tr("Your workshops")}</Label>
         <select id="ws-switch" className="native-select" value={shop.id} onChange={e => { const w = shops.find(x => x.id === e.target.value); if (w) { setShop(w); setTab("overview"); setSelected(null); setPage(0); } }}>
           {shops.map(w => <option key={w.id} value={w.id}>{w.name}{w.city ? ` · ${w.city}` : ""}</option>)}
@@ -180,7 +181,6 @@ export function WorkshopDashboard() {
       {TABS.filter(tb => shop.role !== "staff" || STAFF_TABS.includes(tb.id)).map(t => <option key={t.id} value={t.id}>{tr(t.label)}</option>)}
     </select>
     <div className="ws-content">
-    <div className="ws-content-head"><WhyNote key={tab} overlay {...WHY[tab]}/></div>
     {tab === "booking" ? <BookingTab requests={<>
     <div className="ws-filters" role="tablist" aria-label={tr("Filter requests")}>
       {([{ id: "open", label: "All open" }, ...STATUSES] as { id: Status | "open"; label: string }[]).map(s => <Button key={s.id} size="sm" variant={filter === s.id ? "default" : "outline"} role="tab" aria-selected={filter === s.id} onClick={() => changeFilter(s.id)}>{tr(s.label)}</Button>)}
@@ -292,11 +292,12 @@ function useSettings(workshopId: string, canEdit = true, demo = false) {
 }
 
 function ConfigurationSave({ canEdit, demo = false, label = "Save" }: { canEdit: boolean; demo?: boolean; label?: string }) {
-  return <div className="ws-config-save">
-    <Button type="submit" disabled={demo || !canEdit}>{demo && <LockKeyhole/>}{tr(label)}</Button>
-    {demo ? <span className="history-note">{tr("Demo workshop. Try the fields; changes cannot be saved.")}</span>
-      : !canEdit && <span className="history-note">{tr("Only the workshop owner can change these.")}</span>}
-  </div>;
+  const why = demo ? tr("Demo workshop. Try the fields; changes cannot be saved.") : !canEdit ? tr("Only the workshop owner can change these.") : "";
+  const btn = <Button type="submit" disabled={demo || !canEdit}>{(demo || !canEdit) && <LockKeyhole/>}{tr(label)}</Button>;
+  if (!why) return <div className="ws-config-save">{btn}</div>;
+  return <div className="ws-config-save"><TooltipProvider delayDuration={150}><Tooltip><TooltipTrigger asChild>
+    <span tabIndex={0} aria-label={why} className="ws-save-wrap">{btn}</span></TooltipTrigger>
+    <TooltipContent side="top">{why}</TooltipContent></Tooltip></TooltipProvider></div>;
 }
 
 function SaveRow({ canEdit, demo = false, state }: { canEdit: boolean; demo?: boolean; state: string }) {
@@ -444,11 +445,11 @@ const PROFILE_STEPS = [
 ];
 
 function Stepper({ steps, step, setStep }: { steps: { title: string }[]; step: number; setStep: (n: number) => void }) {
-  return <ol className="ws-stepper">{steps.map((st, i) => <li key={st.title}><button type="button" aria-current={i === step ? "step" : undefined} data-done={i < step || undefined} onClick={() => setStep(i)}><span className="ws-step-num">{i + 1}</span>{tr(st.title)}</button></li>)}</ol>;
+  return <ol className="ws-stepper" role="tablist">{steps.map((st, i) => <li key={st.title}><button type="button" role="tab" aria-selected={i === step} aria-current={i === step ? "step" : undefined} onClick={() => setStep(i)}>{tr(st.title)}</button></li>)}</ol>;
 }
 
-function WizardActions({ canEdit, demo = false, last, next }: { canEdit: boolean; demo?: boolean; last: boolean; next: () => void }) {
-  return <div className="ws-config-actions"><ConfigurationSave canEdit={canEdit} demo={demo} label="Save this step"/>{!last && <Button type="button" onClick={next}>{tr("Next")}</Button>}</div>;
+function WizardActions({ canEdit, demo = false }: { canEdit: boolean; demo?: boolean }) {
+  return <div className="ws-config-actions"><ConfigurationSave canEdit={canEdit} demo={demo}/></div>;
 }
 
 function Tip({ children, label }: { children: React.ReactNode; label?: string }) {
@@ -468,13 +469,12 @@ function ContextSettings({ workshopId, canEdit, demo = false }: { workshopId: st
   const templateServices = ["Annual service", "Brake pads & discs", "Tyre change & storage", "Diagnostics (engine light)", "Timing belt", "Battery & electrics"];
   const isTemplate = storedServices.length === templateServices.length && storedServices.every((value, i) => value === templateServices[i]);
   const services = isTemplate ? "" : storedServices.join(", ");
-  const last = step === CONTEXT_STEPS.length - 1;
   const cur = CONTEXT_STEPS[step];
   if (!cur) return null;
   return <form className="ws-section ws-wizard" onSubmit={e => { e.preventDefault(); void save(step === 0 ? { services: isTemplate ? [] : storedServices.map(x => x.trim()).filter(Boolean), specialties: s.specialties, jackie_context: s.jackie_context } : { ai_chat_tier: s.ai_chat_tier, ai_quote_tier: s.ai_quote_tier }); }}>
     <Stepper steps={CONTEXT_STEPS} step={step} setStep={setStep}/>
     <section className="ws-card">
-      <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>{tr("Drivers see:")}</b> {tr(cur.sees)}</p></Tip>{step + 1}. {tr(cur.title)}</h2></div>
+      <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>{tr("Drivers see:")}</b> {tr(cur.sees)}</p></Tip>{tr(cur.title)}</h2></div>
       <fieldset disabled={!canEdit && !demo} style={{ border: 0, padding: 0, margin: 0, display: "grid", gap: 10 }}>
         {step === 0 && <>
           <div className="ws-grid2">
@@ -502,8 +502,7 @@ function ContextSettings({ workshopId, canEdit, demo = false }: { workshopId: st
         </>}
       </fieldset>
       <div className="ws-wizard-nav">
-        <Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>{tr("Back")}</Button>
-        <WizardActions canEdit={canEdit} demo={demo} last={last} next={() => setStep(step + 1)}/>
+        <WizardActions canEdit={canEdit} demo={demo}/>
       </div>
       {state && <p className="history-note" role="status">{state}</p>}
     </section>
@@ -632,7 +631,7 @@ function ProfileView({ shop, canEdit, demo = false, onSaved }: { shop: Shop; can
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); void submit(); }}>
     <Stepper steps={steps} step={step} setStep={setStep}/>
     <section className="ws-card">
-    <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>{tr("Drivers see:")}</b> {tr(currentStep.sees)}</p></Tip>{step + 1}. {tr(currentStep.title)}</h2></div>
+    <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>{tr("Drivers see:")}</b> {tr(currentStep.sees)}</p></Tip>{tr(currentStep.title)}</h2></div>
     <fieldset disabled={!canEdit && !demo} style={{ border: 0, padding: 0, margin: 0 }}>
       {step === 0 && <div className="ws-form-card ws-grid2">
         <div><div className="ws-label-row"><Label>{tr("Company name")}</Label><Hint controls={tr("your name in the booking list and on your Jackie page.")} shows={tr("to drivers. Managed by AutoJackie.")}/></div><div className="ws-readonly">{shop.name}</div></div>
@@ -651,7 +650,7 @@ function ProfileView({ shop, canEdit, demo = false, onSaved }: { shop: Shop; can
       </div>}
     </fieldset>
     {step === 2 && (canEdit || demo) && <TeamSection workshopId={shop.id} demo={demo}/>}
-    <div className="ws-wizard-nav"><Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>{tr("Back")}</Button>{(step < 2 || demo) && <WizardActions canEdit={canEdit} demo={demo} last={step === steps.length - 1} next={() => setStep(step + 1)}/>}</div>
+    {(step < 2 || demo) && <div className="ws-wizard-nav"><WizardActions canEdit={canEdit} demo={demo}/></div>}
     {state && <p className="history-note" role="status">{state}</p>}
     </section>
   </form>;

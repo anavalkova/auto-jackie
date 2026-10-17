@@ -530,12 +530,12 @@
 .ws-hint b { color: var(--foreground); font-weight: 600; }
 .ws-form-card > div { display: grid; gap: 6px; }
 .ws-stepper { display: flex; gap: 8px; list-style: none; padding: 0; margin: 0 0 4px; flex-wrap: wrap; }
-.ws-stepper button { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border); background: var(--card); border-radius: 999px; padding: 6px 14px 6px 6px; font-size: 13px; color: var(--muted-foreground); cursor: pointer; }
+.ws-stepper button { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border); background: var(--card); border-radius: 999px; padding: 6px 14px; font-size: 13px; color: var(--muted-foreground); cursor: pointer; }
 .ws-step-num { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--muted); color: var(--foreground); font-size: 12px; font-weight: 700; }
 .ws-stepper button[aria-current="step"] { border-color: var(--primary); color: var(--foreground); font-weight: 600; }
 .ws-stepper button[aria-current="step"] .ws-step-num, .ws-stepper button[data-done] .ws-step-num { background: var(--primary); color: var(--primary-foreground); }
 .ws-step-head { display: grid; gap: 2px; margin-bottom: 8px; }
-.ws-wizard-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+.ws-wizard-nav { display: flex; justify-content: flex-end; align-items: center; margin-top: 14px; }
 .ws-textarea-tall { min-height: 180px; }
 .ws-pager { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 10px; }
 .ws-stack { display: grid; gap: 12px; }
@@ -655,7 +655,12 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
 .tour-card h3 { margin: 6px 0 6px; font-size: 17px; }
 .tour-card p { margin: 0 0 14px; font-size: 14px; line-height: 1.55; color: var(--muted-foreground); }
 .tour-card-actions { display: flex; justify-content: space-between; gap: 8px; }
-.demo-tour-btn { margin-left: 10px; }
+.demo-tour-btn { margin-left: auto; flex: none; }
+.demo-banner { align-items: center; }
+.ws-title-name { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
+.ws-title-name h1 { margin: 0; }
+.ws-save-wrap { display: inline-flex; border-radius: 8px; cursor: not-allowed; }
+.ws-save-wrap > button { pointer-events: none; }
 @media (min-width: 700px) { .tour-backdrop { align-items: center; } }
 
 /* Phone chat uses document scrolling, not a second fixed-height scroll region. */
