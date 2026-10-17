@@ -1,4 +1,5 @@
 # AutoJackie
+- [ ] Highlight tenant branding, paginate chat history, hide registry model details/remove service and odometer UI, and grant Ana both test workshops.
 - [x] Merge workshop context steps, simplify service entry and verify saved values and translations.
 - [x] Phase 0: branded driver frame.
 - [x] Phase 1: Wikidata-grounded AI chat (/api/chat), garage (plate / HSN-TSN / manual), vehicle dashboard, symptom chips.
