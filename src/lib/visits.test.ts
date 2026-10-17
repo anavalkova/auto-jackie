@@ -5,7 +5,7 @@ const NOW = new Date("2026-03-10T09:00:00Z");
 
 const row = (over: Partial<InquiryRow>): InquiryRow => ({
   id: crypto.randomUUID(), issue: "Brake pads", service: "Brake pads, front", status: "new",
-  booked_at: null, created_at: "2026-03-01T08:00:00Z", workshops: { name: "Demo Verkstad" }, ...over,
+  booked_at: null, created_at: "2026-03-01T08:00:00Z", workshop_id: "w1", workshops: { name: "Demo Verkstad" }, ...over,
 });
 
 describe("driver visits", () => {

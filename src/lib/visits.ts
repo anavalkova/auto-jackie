@@ -9,6 +9,7 @@ export type VisitRow = {
   bookedAt: string | null;
   createdAt: string;
   workshopName: string;
+  workshopId: string;
 };
 
 /** A row as it comes back from the requests table. */
@@ -19,6 +20,7 @@ export type InquiryRow = {
   status: string;
   booked_at: string | null;
   created_at: string;
+  workshop_id: string;
   workshops: { name: string } | null;
 };
 
@@ -31,6 +33,7 @@ export function toVisit(r: InquiryRow): VisitRow {
     bookedAt: r.booked_at,
     createdAt: r.created_at,
     workshopName: r.workshops?.name ?? "",
+    workshopId: r.workshop_id,
   };
 }
 
