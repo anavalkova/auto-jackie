@@ -24,4 +24,5 @@
 - Workshop selection is a user-scoped browser navigation preference validated against current memberships; share workshop-selection helpers between dashboard and driver headers/sign-in redirects so the latest selection stays consistent. Uploaded workshop logos are retired in presentation and settings; keep legacy database fields for compatibility.
 - Workshops pick AI tiers (economy/balanced/premium), never model names; src/lib/ai-tiers.ts is the only tier-to-model map, so models can change centrally without touching settings.
 - Workshop context keeps a unified know-how step and a separate AI-tier step, saving only the active step; free-form service descriptions use the existing services array to preserve compatibility with server-side context.
+- Workshop configuration separates local field interaction from persistence; shared configuration-save guards block demo and non-owner writes, while demo team experiments stay local, so trying controls cannot alter stored workshop data.
 - Agent integrations: MCP at /mcp (OAuth, read-only driver + workshop tools), consent page, WebMCP on workshop requests.
