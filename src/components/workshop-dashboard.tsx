@@ -535,11 +535,55 @@ async function shrinkLogo(f: File): Promise<string> {
   return url.startsWith("data:image/webp") ? url : c.toDataURL("image/png");
 }
 
+type Member = { user_id: string; email: string; role: "owner" | "staff" };
+
+function TeamSection({ workshopId }: { workshopId: string }) {
+  const [team, setTeam] = useState<Member[] | null>(null);
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState<"owner" | "staff">("staff");
+  const [msg, setMsg] = useState("");
+  const load = useCallback(async () => {
+    const { data } = await supabase.rpc("workshop_team", { _workshop: workshopId });
+    setTeam((data ?? []) as Member[]);
+  }, [workshopId]);
+  useEffect(() => { void load(); }, [load]);
+  const add = async () => {
+    setMsg("");
+    const { error } = await supabase.rpc("workshop_add_member", { _workshop: workshopId, _email: email, _role: role });
+    if (error) setMsg(error.message.includes("no AutoJackie account") ? tr("No AutoJackie account with that email yet. Ask them to sign in once, then add them.") : tr("Couldn't add that person. Please try again."));
+    else { setEmail(""); setMsg(tr("Added.")); }
+    void load();
+  };
+  const remove = async (m: Member) => {
+    setMsg("");
+    const { error } = await supabase.rpc("workshop_remove_member", { _workshop: workshopId, _user: m.user_id });
+    if (error) setMsg(tr("Couldn't remove that person. Please try again."));
+    void load();
+  };
+  if (!team) return <p className="history-note" role="status">{tr("Loading…")}</p>;
+  return <div className="ws-form-card">
+    <div className="ws-label-row"><Label>{tr("Team")}</Label><Hint controls={tr("who can open this workshop's dashboard. Admins see and change everything; front desk sees Overview and Bookings only.")} shows={tr("only to you, here in Settings.")}/></div>
+    <table className="ws-table"><tbody>
+      {team.map(m => <tr key={m.user_id}><td>{m.email}</td><td><strong>{m.role === "owner" ? tr("Admin") : tr("Front desk")}</strong></td>
+        <td style={{ textAlign: "right" }}>{m.role !== "owner" && <Button type="button" size="sm" variant="ghost" aria-label={tr("Remove")} onClick={() => void remove(m)}>×</Button>}</td></tr>)}
+    </tbody></table>
+    <div className="ws-chips">
+      <Input type="email" maxLength={120} placeholder={tr("Their AutoJackie email")} value={email} onChange={e => setEmail(e.target.value)} style={{ maxWidth: 260 }} aria-label={tr("Their AutoJackie email")}/>
+      <select className="native-select" value={role} onChange={e => setRole(e.target.value as "owner" | "staff")} aria-label={tr("Role")}>
+        <option value="staff">{tr("Front desk")}</option><option value="owner">{tr("Admin")}</option>
+      </select>
+      <Button type="button" variant="outline" disabled={!email.includes("@")} onClick={() => void add()}>{tr("Add to team")}</Button>
+    </div>
+    {msg && <p className="history-note" role="status">{msg}</p>}
+  </div>;
+}
+
 function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean; onSaved: () => void }) {
   const { s, setS, save, state } = useSettings(shop.id);
   const [city, setCity] = useState(shop.city);
   const [step, setStep] = useState(0);
   if (!s) return <p className="history-note" role="status">{tr("Loading…")}</p>;
+  const steps = canEdit ? [...PROFILE_STEPS, { title: "Team", sees: "Who can open this dashboard and what they can change." }] : PROFILE_STEPS;
   const link = shop.slug && typeof window !== "undefined" ? `${window.location.origin}/w/${shop.slug}` : "";
   const submit = async () => {
     if (city !== shop.city) { await supabase.from("workshops").update({ city }).eq("id", shop.id); onSaved(); }
