@@ -786,7 +786,8 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
   .ws-title > div { min-width: 0; }
   .ws-title h1 { font-size: 24px; line-height: 1.2; }
   .ws-title-name { gap: 8px; }
-  .ws-title .ws-field, .ws-title .ws-field select { width: 100%; }
+  /* The workshop picker lives in the burger menu on phones. */
+  .ws-title .ws-field { display: none; }
 }
 @media (max-width: 640px) { .ws-title-name .why-pop { left: 12px; right: 12px; } }
 /* My visits: tappable cards, details dialog (bottom sheet on phones). */
