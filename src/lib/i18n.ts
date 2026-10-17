@@ -12,6 +12,8 @@ let current: Lang = "en";
 const subs = new Set<() => void>();
 
 export const getLang = (): Lang => current;
+/** Swedish drivers read odometers in mil (1 mil = 10 km); German drivers in km. */
+export const odoUnitFor = (lang: Lang): "mil" | "km" => (lang === "de" ? "km" : "mil");
 
 export function setLang(l: Lang) {
   current = l;
