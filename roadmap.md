@@ -1,4 +1,5 @@
 # AutoJackie
+- [ ] Restore Jackie branding with the latest selected workshop and remove workshop logo uploads.
 - [x] Highlight tenant branding, paginate chat history, hide registry model details/remove service and odometer UI, and grant Ana both test workshops.
 - [x] Merge workshop context steps, simplify service entry and verify saved values and translations.
 - [x] Phase 0: branded driver frame.
@@ -15,8 +16,7 @@
 - [ ] Later: official recalls lookup.
 - [x] Workshop driver page /w/<link> with workshop context and prices used by Jackie.
 - [x] Jackie's brain: per-workshop AI tiers for chat and quotes.
-- [x] Your brand: accent color, logo link, greeting.
-- [ ] Logo upload (blocked: public file storage disabled in workspace settings).
+- [x] Your brand: accent color and greeting; workshop logo uploads retired.
 - [x] Map requests to Pricing engine services (+ always-present "Other"); Overview shows Your services + "Not offered yet" with Add button.
 - [x] Driver page: "Why this exists" as a corner chip in English, Swedish and German, like the workshop tabs.
 - [x] Jackie's portrait: show more of her on desktop, keep her visible on phone view.
