@@ -188,7 +188,9 @@
 .composer-hint { font-size: 11px; color: var(--muted-foreground); padding-left: 4px; }
 .composer-actions { display: flex; gap: 6px; align-items: center; margin-left: auto; }
 .garage-dialog { gap: 14px; }
-.garage-tabs { width: 100%; }
+.garage-tabs { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); height: auto; min-height: 36px; }
+.garage-tabs > button { white-space: normal; line-height: 1.2; min-width: 0; padding: 6px 4px; text-align: center; }
+@media (max-width: 639px) { .garage-tabs > button { font-size: 12.5px; } .garage-row { flex-direction: column; } }
 .garage-pane { display: flex; flex-direction: column; gap: 12px; padding-top: 10px; }
 .garage-field { display: flex; flex-direction: column; gap: 6px; flex: 1; }
 .garage-row { display: flex; gap: 10px; }
