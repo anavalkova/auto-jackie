@@ -166,7 +166,7 @@ export function WorkshopDashboard() {
         <time dateTime={i.created_at}>{when(i.created_at)}</time>
       </button></li>)}</ul>}
     {shown.length > 0 && <Pager page={page} pages={Math.max(1, Math.ceil(shown.length / PAGE))} onPage={setPage}/>}
-    </>} settings={<BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>}/>
+    </>} settings={shop.role === "staff" ? null : <BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>}/>
     : tab === "context" ? <ContextSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>
     : tab === "pricing" ? <PricingView workshopId={shop.id} canEdit={shop.role === "owner"}/>
     : tab === "profile" ? <ProfileView shop={shop} canEdit={shop.role === "owner"} onSaved={loadShop}/> : <>
@@ -221,7 +221,9 @@ function Pager({ page, pages, onPage }: { page: number; pages: number; onPage: (
 const BOOKING_STEPS = [{ title: "Requests" }, { title: "Booking settings" }];
 function BookingTab({ requests, settings }: { requests: React.ReactNode; settings: React.ReactNode }) {
   const [step, setStep] = useState(0);
-  return <div className="ws-section"><Stepper steps={BOOKING_STEPS} step={step} setStep={setStep}/>{step === 0 ? <Collapsible title={tr("Requests")} tip={tr("Everything drivers sent you, newest first. Click a request to see the visit, the quote Jackie sent and how to reach the driver. Filter with the buttons above.")}><div className="ws-section">{requests}</div></Collapsible> : settings}</div>;
+  const list = <Collapsible title={tr("Requests")} tip={tr("Everything drivers sent you, newest first. Click a request to see the visit, the quote Jackie sent and how to reach the driver. Filter with the buttons above.")}><div className="ws-section">{requests}</div></Collapsible>;
+  if (!settings) return <div className="ws-section">{list}</div>;
+  return <div className="ws-section"><Stepper steps={BOOKING_STEPS} step={step} setStep={setStep}/>{step === 0 ? list : settings}</div>;
 }
 
 function Collapsible({ title, tip, children, defaultOpen = true }: { title: string; tip?: string; children: React.ReactNode; defaultOpen?: boolean }) {
