@@ -1,5 +1,6 @@
 /** Swedish and German for workshop, operations and sign-in screens. Keyed by the English text; [sv, de]. Missing keys fall back to English. */
 export const WS: Record<string, [string, string]> = {
+  "Account": ["Konto", "Konto"],
   "(you price these)": ["(du sätter priset)", "(Preis legen Sie fest)"],
   "0 = evaluated by you": ["0 = du bedömer själv", "0 = Sie bewerten selbst"],
   "1 month": ["1 månad", "1 Monat"], "2 months": ["2 månader", "2 Monate"], "3 months": ["3 månader", "3 Monate"], "6 months": ["6 månader", "6 Monate"], "1 year": ["1 år", "1 Jahr"],
