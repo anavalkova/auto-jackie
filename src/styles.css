@@ -518,7 +518,7 @@
 .ws-tip { display: inline-grid; place-items: center; width: 18px; height: 18px; padding: 0; border: 0; background: none; color: var(--muted-foreground); cursor: help; border-radius: 999px; flex: none; }
 .ws-tip:hover, .ws-tip:focus-visible { color: var(--primary); }
 .ws-tip svg { width: 15px; height: 15px; }
-.ws-tip-body { max-width: 280px; font-size: 13px; line-height: 1.45; display: grid; gap: 6px; }
+.ws-tip-body { max-width: min(280px, calc(100vw - 32px)); max-height: 60vh; overflow-y: auto; font-size: 13px; line-height: 1.45; display: grid; gap: 6px; }
 .ws-tip-body p { margin: 0; }
 .ws-tip-body b { font-weight: 600; }
 
