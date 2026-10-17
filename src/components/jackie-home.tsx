@@ -208,7 +208,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
               <DropdownMenuItem onSelect={signOut}><LogOut/> {t.signOut}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </> : <Button variant="outline" className="nav-control" onClick={() => setSignInOpen(true)}><UserRound/> {t.signInToSave}</Button>)}
+        </> : <Button variant="outline" className="nav-control nav-signin" aria-label={t.signInToSave} onClick={() => setSignInOpen(true)}><UserRound/> {t.signInToSave}</Button>)}
         <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="nav-control language-control" aria-label="Language"><Globe2/> {LANGS.find(l => l.code === lang)?.short} <ChevronDown/></Button></DropdownMenuTrigger><DropdownMenuContent align="end">{LANGS.map(l => <DropdownMenuItem key={l.code} onSelect={() => setLang(l.code)} aria-current={l.code === lang ? "true" : undefined}>{l.short} · {l.label}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>
         <Button className="nav-cta" onClick={() => setDirectBooking({ issue: "" })}><CalendarPlus/> {t.bookVisit}</Button>
       </nav>
