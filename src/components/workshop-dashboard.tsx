@@ -12,7 +12,7 @@ import { ensureOther, OTHER } from "@/lib/services";
 import { TIERS, TIER_INFO, DEFAULT_TIERS, type Tier } from "@/lib/ai-tiers";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, LockKeyhole, LogOut, Settings2, UserRound, CircleHelp, CalendarCheck, CalendarClock, Car, ChevronDown, Globe2, Inbox, MessageCircle, Moon, Sparkles, TrendingUp, Wrench } from "lucide-react";
-import { DemoTour, TOUR_STEPS, tourDone } from "@/components/demo-tour";
+import { DemoGuide } from "@/components/demo-tour";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { LANGS, setLang, useT } from "@/lib/i18n";
 import jackieImg from "@/assets/jackie.jpg";
@@ -82,11 +82,6 @@ export function WorkshopDashboard() {
   const [error, setError] = useState(false);
 
   const [demo, setDemo] = useState(false);
-  const [tour, setTour] = useState<number | null>(null);
-  const closeTour = useCallback(() => { setTour(null); try { localStorage.setItem("autojackie_tour_done", "1"); } catch { /* private mode */ } }, []);
-  const tourStep = useCallback((s: number) => { setTour(s); const t = TOUR_STEPS[s]; if (t) setTab(t.tab); }, []);
-  useEffect(() => { if (demo && !tourDone()) setTour(0); }, [demo]);
-  const tourSub = demo && tour !== null ? TOUR_STEPS[tour]?.sub : undefined;
   const [shops, setShops] = useState<Shop[]>([]);
   useEffect(() => { if (user && shop && !demo && shops.some(w => w.id === shop.id)) rememberWorkshopSelection(user.id, shop.id); }, [user?.id, shop?.id, demo, shops]);
   const openDemo = useCallback(async () => {
@@ -172,9 +167,8 @@ export function WorkshopDashboard() {
   if (!ready || (user && shop === undefined)) body = <p className="history-note" role="status">{tr("Loading…")}</p>;
   else if (!shop) body = <WorkshopPitch onSignIn={() => setSignIn(true)} signedIn={!!user} onOpenDemo={() => void openDemo()}/>;
   else body = <>
-    {demo && <p className="demo-banner" role="note"><Sparkles aria-hidden/> {t.pitch.demoBanner} <Button variant="outline" size="sm" className="demo-tour-btn" onClick={() => tourStep(0)}>{tr("Guided tour")}</Button></p>}
-    {demo && tour !== null && <DemoTour step={tour} onStep={tourStep} onClose={closeTour}/>}
-    <div className="ws-title"><div><span className="eyebrow">{tr("WORKSHOP DASHBOARD")}</span><div className="ws-title-name"><h1>{shop.name}</h1><WhyNote key={tab} overlay autoOpen={tour === null} {...WHY[tab]}/></div></div>
+    {demo && <p className="demo-banner" role="note"><Sparkles aria-hidden/> {t.pitch.demoBanner}</p>}
+    <div className="ws-title"><div><span className="eyebrow">{tr("WORKSHOP DASHBOARD")}</span><div className="ws-title-name"><h1>{shop.name}</h1><WhyNote key={tab} overlay autoOpen={!demo} {...WHY[tab]}/></div></div>
       {!demo && shops.length > 1 && <div className="ws-field" style={{ margin: 0 }}><Label htmlFor="ws-switch">{tr("Your workshops")}</Label>
         <select id="ws-switch" className="native-select" value={shop.id} onChange={e => { const w = shops.find(x => x.id === e.target.value); if (w) { setShop(w); setTab("overview"); setSelected(null); setPage(0); } }}>
           {shops.map(w => <option key={w.id} value={w.id}>{w.name}{w.city ? ` · ${w.city}` : ""}</option>)}
@@ -186,6 +180,7 @@ export function WorkshopDashboard() {
       {TABS.filter(tb => shop.role !== "staff" || STAFF_TABS.includes(tb.id)).map(t => <option key={t.id} value={t.id}>{tr(t.label)}</option>)}
     </select>
     <div className="ws-content">
+    {demo && <DemoGuide tab={tab}/>}
     {tab === "booking" ? <BookingTab requests={<>
     <div className="ws-filters" role="tablist" aria-label={tr("Filter requests")}>
       {([{ id: "open", label: "All open" }, ...STATUSES] as { id: Status | "open"; label: string }[]).map(s => <Button key={s.id} size="sm" variant={filter === s.id ? "default" : "outline"} role="tab" aria-selected={filter === s.id} onClick={() => changeFilter(s.id)}>{tr(s.label)}</Button>)}
@@ -200,10 +195,10 @@ export function WorkshopDashboard() {
         <time dateTime={i.created_at}>{when(i.created_at)}</time>
       </button></li>)}</ul>}
     {shown.length > 0 && <Pager page={page} pages={Math.max(1, Math.ceil(shown.length / PAGE))} onPage={setPage}/>}
-    </>} settings={shop.role === "staff" ? null : <BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo}/>} sub={tourSub}/>
-    : tab === "context" ? <ContextSettings workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo} sub={tourSub}/>
+    </>} settings={shop.role === "staff" ? null : <BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo}/>}/>
+    : tab === "context" ? <ContextSettings workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo}/>
     : tab === "pricing" ? <PricingView workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo}/>
-    : tab === "profile" ? <ProfileView shop={shop} canEdit={shop.role === "owner"} demo={demo} onSaved={loadShop} sub={tourSub}/> : <>
+    : tab === "profile" ? <ProfileView shop={shop} canEdit={shop.role === "owner"} demo={demo} onSaved={loadShop}/> : <>
     <div className="ws-kpis">
       <Kpi icon={<Inbox/>} label={tr("New requests")} value={String(kpis.fresh)}/>
       <Kpi icon={<CalendarClock/>} label={tr("Need you this week")} value={String(kpis.urgent)}/>
