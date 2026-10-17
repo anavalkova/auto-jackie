@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 - AI chat streams from the /api/chat server route with Wikidata tools in src/lib/ai; keep model calls and keys server-side so grounding rules can't be bypassed.
-- /api/chat enforces monthly question limits server-side (consume_chat_quota RPC via admin client; signed-in by verified user id, guests by hashed IP); limits live in src/lib/chat-quota.ts so the browser cannot bypass them.
+- /api/chat enforces chat-quota limits by verified user or hashed guest IP; useChatQuota follows session identity and ignores stale reads so the displayed allowance stays current.
 - German HSN/TSN lookups use the bundled official KBA SV 4.2 register (src/lib/vehicles-data, server-only via /api/vehicles/lookup); Swedish plates resolve live via RegCheck /CheckSweden (REGCHECK_USERNAME secret, server-only); details go to the model only, never shown to the driver.
 - Vehicle lookup accepts guests and signed-in drivers alike with input validation and server-only registry credentials; plate context responses are not cached, and lookup does not consume chat-question quota.
 - Accounts are optional (Google / Lovable sign-in). Guests: car and chat live only in React state, nothing persisted. Signed-in: car in saved_vehicles, chats in chats (UIMessage[] jsonb) via the browser client under owner-only RLS; saved chats open at /c/$chatId.
