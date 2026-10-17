@@ -607,3 +607,14 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
 .when-grid { display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: start; }
 .when-grid .channel-row { align-content: flex-start; }
 @media (max-width: 760px) { .when-grid { grid-template-columns: 1fr; } }
+
+/* Guided demo tour */
+.tour-backdrop { position: fixed; inset: 0; z-index: 80; background: color-mix(in oklab, var(--foreground) 35%, transparent); display: flex; align-items: flex-end; justify-content: center; padding: 16px; }
+.tour-card { background: var(--card); color: var(--card-foreground); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 18px 50px -12px rgb(0 0 0 / 0.35); padding: 18px 20px; max-width: 420px; width: 100%; }
+.tour-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.tour-close { height: 28px; width: 28px; }
+.tour-card h3 { margin: 6px 0 6px; font-size: 17px; }
+.tour-card p { margin: 0 0 14px; font-size: 14px; line-height: 1.55; color: var(--muted-foreground); }
+.tour-card-actions { display: flex; justify-content: space-between; gap: 8px; }
+.demo-tour-btn { margin-left: 10px; }
+@media (min-width: 700px) { .tour-backdrop { align-items: center; } }

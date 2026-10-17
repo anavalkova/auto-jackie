@@ -9,6 +9,7 @@ import { ensureOther, OTHER } from "@/lib/services";
 import { TIERS, TIER_INFO, DEFAULT_TIERS, type Tier } from "@/lib/ai-tiers";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, LogOut, Settings2, UserRound, CircleHelp, CalendarCheck, CalendarClock, Car, ChevronDown, Globe2, Inbox, MessageCircle, Moon, Sparkles, TrendingUp, Wrench } from "lucide-react";
+import { DemoTour, TOUR_STEPS, tourDone } from "@/components/demo-tour";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { LANGS, setLang, useT } from "@/lib/i18n";
 import jackieImg from "@/assets/jackie.jpg";
@@ -77,6 +78,10 @@ export function WorkshopDashboard() {
   const [error, setError] = useState(false);
 
   const [demo, setDemo] = useState(false);
+  const [tour, setTour] = useState<number | null>(null);
+  const closeTour = useCallback(() => { setTour(null); try { localStorage.setItem("autojackie_tour_done", "1"); } catch { /* private mode */ } }, []);
+  const tourStep = useCallback((s: number) => { setTour(s); const t = TOUR_STEPS[s]; if (t) setTab(t.tab); }, []);
+  useEffect(() => { if (demo && !tourDone()) setTour(0); }, [demo]);
   const [shops, setShops] = useState<Shop[]>([]);
   const loadShop = useCallback(async () => {
     if (!user) return;
@@ -159,7 +164,8 @@ export function WorkshopDashboard() {
   else if (!user) body = <WorkshopPitch onSignIn={() => setSignIn(true)}/>;
   else if (!shop) body = <WorkshopPitch onSignIn={() => setSignIn(true)} signedIn onOpenDemo={() => void openDemo()}/>;
   else body = <>
-    {demo && <p className="demo-banner" role="note"><Sparkles aria-hidden/> {t.pitch.demoBanner}</p>}
+    {demo && <p className="demo-banner" role="note"><Sparkles aria-hidden/> {t.pitch.demoBanner} <Button variant="outline" size="sm" className="demo-tour-btn" onClick={() => tourStep(0)}>{tr("Guided tour")}</Button></p>}
+    {demo && tour !== null && <DemoTour step={tour} onStep={tourStep} onClose={closeTour}/>}
     <div className="ws-title"><div><span className="eyebrow">{tr("WORKSHOP DASHBOARD")}</span><h1>{shop.name}</h1>{shop.city && <p className="history-note">{shop.city}</p>}</div>
       {!demo && shops.length > 1 && <div className="ws-field" style={{ margin: 0 }}><Label htmlFor="ws-switch">{tr("Your workshops")}</Label>
         <select id="ws-switch" className="native-select" value={shop.id} onChange={e => { const w = shops.find(x => x.id === e.target.value); if (w) { setShop(w); setTab("overview"); setSelected(null); setPage(0); } }}>
