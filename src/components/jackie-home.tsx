@@ -186,6 +186,13 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
   const [directBooking, setDirectBooking] = useState<VisitCard | null>(null);
   const [rescheduling, setRescheduling] = useState<RescheduleTarget | null>(null);
 
+  // Put the tenant accent on <html> so pop-ups (rendered outside this frame) and the logo follow it too.
+  useEffect(() => {
+    if (!workshop?.accent) return;
+    const root = document.documentElement;
+    root.style.setProperty("--primary", workshop.accent);
+    return () => { root.style.removeProperty("--primary"); };
+  }, [workshop?.accent]);
   return <div className="app-frame" style={workshop?.accent ? { ["--primary" as string]: workshop.accent } : undefined}>
     <header className="site-header">
       <div className="tenant-brand"><Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span></Link>{headerWorkshop && <strong className="tenant-brand-name">{headerWorkshop.name}</strong>}</div>
