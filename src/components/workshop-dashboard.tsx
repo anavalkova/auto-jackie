@@ -168,7 +168,7 @@ export function WorkshopDashboard() {
   else if (!shop) body = <WorkshopPitch onSignIn={() => setSignIn(true)} signedIn={!!user} onOpenDemo={() => void openDemo()}/>;
   else body = <>
     {demo && <p className="demo-banner" role="note"><Sparkles aria-hidden/> {t.pitch.demoBanner}</p>}
-    <div className="ws-title"><div><span className="eyebrow">{tr("WORKSHOP DASHBOARD")}</span><div className="ws-title-name"><h1>{shop.name}</h1><WhyNote key={tab} overlay {...WHY[tab]}/></div></div>
+    <div className="ws-title"><div><span className="eyebrow">{tr("WORKSHOP DASHBOARD")}</span><div className="ws-title-name"><h1>{shop.name}</h1><WhyNote key={tab} overlay autoOpen={!demo} {...WHY[tab]}/></div></div>
       {!demo && shops.length > 1 && <div className="ws-field" style={{ margin: 0 }}><Label htmlFor="ws-switch">{tr("Your workshops")}</Label>
         <select id="ws-switch" className="native-select" value={shop.id} onChange={e => { const w = shops.find(x => x.id === e.target.value); if (w) { setShop(w); setTab("overview"); setSelected(null); setPage(0); } }}>
           {shops.map(w => <option key={w.id} value={w.id}>{w.name}{w.city ? ` · ${w.city}` : ""}</option>)}
