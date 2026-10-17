@@ -62,7 +62,6 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
   const quotaHint = quota ? (quota.signedIn ? t.quotaHintUser : t.quotaHintGuest).replace("%n", String(quota.remaining)).replace("%m", String(quota.limit)) : "";
   return <div className="chat-shell">
     {messages.length === 0 ? <div className="chat-empty">
-      <h1>{t.heroTitle}</h1>
       <p>{t.heroSub}</p>
     </div> : <Conversation className="chat-log">
       <ConversationContent>
