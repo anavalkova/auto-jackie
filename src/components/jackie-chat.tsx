@@ -9,7 +9,7 @@ import { PromptInput, PromptInputFooter, PromptInputSubmit, PromptInputTextarea 
 import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from "@/components/ai-elements/tool";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
-import type { Vehicle } from "@/lib/vehicles";
+import { vehicleForJackie, type Vehicle } from "@/lib/vehicles";
 import { useT } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { QUOTA_ERROR } from "@/lib/chat-quota";
@@ -25,7 +25,7 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
 }) {
   const { t, lang } = useT();
   const [input, setInput] = useState("");
-  const vehiclePayload = vehicle ? { confidential: vehicle.confidential, description: vehicle.confidential ? undefined : vehicle.description, mileageKm: vehicle.mileageKm } : null;
+  const vehiclePayload = vehicleForJackie(vehicle);
   const transport = useMemo(() => new DefaultChatTransport({
     api: "/api/chat",
     body: { vehicle: vehiclePayload, lang, ...(workshopId ? { workshopId } : {}) },
