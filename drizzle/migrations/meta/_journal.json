@@ -120,6 +120,13 @@
       "when": 1792230202546,
       "tag": "0016_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792231584975,
+      "tag": "0017_separate_demo_identity_from_owner_invite",
+      "breakpoints": true
     }
   ]
 }
