@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { tr } from "@/lib/tr";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useState } from "react";
 import { ShieldCheck } from "lucide-react";
@@ -63,36 +64,36 @@ function AdminPage() {
 
   return <div className="app-frame">
     <header className="site-header">
-      <Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span><span className="brand-sub">operations</span></Link>
-      <nav><Button variant="ghost" asChild><Link to="/workshop">Workshop view</Link></Button>{user && <Button variant="ghost" onClick={async () => { await supabase.auth.signOut(); window.location.assign("/workshop"); }}>Sign out</Button>}</nav>
+      <Link to="/" className="brand" aria-label={tr("AutoJackie home")}><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>{tr("Auto")}<span className="brand-orange">{tr("Jackie")}</span></span><span className="brand-sub">{tr("operations")}</span></Link>
+      <nav><Button variant="ghost" asChild><Link to="/workshop">{tr("Workshop view")}</Link></Button>{user && <Button variant="ghost" onClick={async () => { await supabase.auth.signOut(); window.location.assign("/workshop"); }}>{tr("Sign out")}</Button>}</nav>
     </header>
     <main className="ws-main">
-      {!ready ? <p className="history-note" role="status">Loading…</p>
-        : !user ? <div className="ws-empty"><ShieldCheck/><h1>Operations team only</h1><Button onClick={() => setSignIn(true)}>Sign in</Button></div>
-        : !isAdmin ? <div className="ws-empty"><ShieldCheck/><h1>Operations team only</h1><p>This account isn't an AutoJackie admin.</p></div>
+      {!ready ? <p className="history-note" role="status">{tr("Loading…")}</p>
+        : !user ? <div className="ws-empty"><ShieldCheck/><h1>{tr("Operations team only")}</h1><Button onClick={() => setSignIn(true)}>{tr("Sign in")}</Button></div>
+        : !isAdmin ? <div className="ws-empty"><ShieldCheck/><h1>{tr("Operations team only")}</h1><p>{tr("This account isn't an AutoJackie admin.")}</p></div>
         : <>
-          <div className="ws-title"><div><span className="eyebrow">OPERATIONS</span><h1>Onboard a workshop</h1><p className="history-note">Each workshop gets its own space, started from the standard template (rates, opening hours, services).</p></div></div>
-          <WhyNote id="admin" title="The business case in one glance." stats={[
+          <div className="ws-title"><div><span className="eyebrow">{tr("OPERATIONS")}</span><h1>{tr("Onboard a workshop")}</h1><p className="history-note">{tr("Each workshop gets its own space, started from the standard template (rates, opening hours, services).")}</p></div></div>
+          <WhyNote id="admin" title={tr("The business case in one glance.")} stats={[
             { value: "36%", text: "of privately owned cars in Sweden are registered to women. A huge customer group the industry's jargon-heavy booking flow underserves.", source: { label: "Trafikanalys, 2022", url: "https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" } },
             { value: "$108k", text: "estimated revenue a single auto service location loses per year to poor call handling. Jackie captures that demand in writing instead.", source: { label: "Marchex via Auto Service World", url: "https://www.autoserviceworld.com/phone-fails-lead-to-missed-automotive-service-revenue-report/" } },
             { value: "2 models", text: "a lightweight everyday model for chat, a stronger one only for price estimates. That keeps cost per conversation low enough for workshop monetization." },
           ]} footer="Onboarding stays manual on purpose: we verify each workshop before drivers can send them requests."/>
           <form className="admin-form" onSubmit={e => { e.preventDefault(); void onboard(); }}>
-            <div><Label htmlFor="a-name">Workshop name</Label><Input id="a-name" required minLength={2} maxLength={80} value={name} onChange={e => setName(e.target.value)}/></div>
-            <div><Label htmlFor="a-email">Owner's email</Label><Input id="a-email" required type="email" value={email} onChange={e => setEmail(e.target.value)}/></div>
-            <div><Label htmlFor="a-city">City (optional)</Label><Input id="a-city" maxLength={60} value={city} onChange={e => setCity(e.target.value)}/></div>
-            <div><Label htmlFor="a-vat">VAT number</Label><Input id="a-vat" maxLength={30} placeholder="SE556677889901" value={vat} onChange={e => setVat(e.target.value)}/></div>
-            <div><Label htmlFor="a-phone">Workshop phone</Label><Input id="a-phone" maxLength={30} value={phone} onChange={e => setPhone(e.target.value)}/></div>
-            <div><Label htmlFor="a-addr">Address</Label><Input id="a-addr" maxLength={200} value={address} onChange={e => setAddress(e.target.value)}/></div>
-            <Button type="submit" disabled={busy}>Onboard</Button>
+            <div><Label htmlFor="a-name">{tr("Workshop name")}</Label><Input id="a-name" required minLength={2} maxLength={80} value={name} onChange={e => setName(e.target.value)}/></div>
+            <div><Label htmlFor="a-email">{tr("Owner's email")}</Label><Input id="a-email" required type="email" value={email} onChange={e => setEmail(e.target.value)}/></div>
+            <div><Label htmlFor="a-city">{tr("City (optional)")}</Label><Input id="a-city" maxLength={60} value={city} onChange={e => setCity(e.target.value)}/></div>
+            <div><Label htmlFor="a-vat">{tr("VAT number")}</Label><Input id="a-vat" maxLength={30} placeholder={tr("SE556677889901")} value={vat} onChange={e => setVat(e.target.value)}/></div>
+            <div><Label htmlFor="a-phone">{tr("Workshop phone")}</Label><Input id="a-phone" maxLength={30} value={phone} onChange={e => setPhone(e.target.value)}/></div>
+            <div><Label htmlFor="a-addr">{tr("Address")}</Label><Input id="a-addr" maxLength={200} value={address} onChange={e => setAddress(e.target.value)}/></div>
+            <Button type="submit" disabled={busy}>{tr("Onboard")}</Button>
           </form>
           {msg && <p className="history-note" role="status">{msg}</p>}
 
-          <div className="ws-title admin-demo"><div><span className="eyebrow">DEMO</span><h2>Demo Verkstad for judges</h2><p className="history-note">Creates the demo workshop with sample requests the first time. Each click issues a new password.</p></div><Button variant="outline" onClick={() => void makeDemo()} disabled={busy}>Set up / reset demo login</Button></div>
-          {demo && <div className="offer-card"><span className="eyebrow">DEMO LOGIN · COPY IT NOW</span><p>Email: <strong>{demo.email}</strong></p><p>Password: <strong>{demo.password}</strong></p></div>}
+          <div className="ws-title admin-demo"><div><span className="eyebrow">{tr("DEMO")}</span><h2>{tr("Demo Verkstad for judges")}</h2><p className="history-note">{tr("Creates the demo workshop with sample requests the first time. Each click issues a new password.")}</p></div><Button variant="outline" onClick={() => void makeDemo()} disabled={busy}>{tr("Set up / reset demo login")}</Button></div>
+          {demo && <div className="offer-card"><span className="eyebrow">{tr("DEMO LOGIN · COPY IT NOW")}</span><p>{tr("Email:")} <strong>{demo.email}</strong></p><p>{tr("Password:")} <strong>{demo.password}</strong></p></div>}
 
           <h2 className="admin-h2">Workshops ({rows.length})</h2>
-          <p className="history-note"><span className="preview-badge">Coming soon</span> Multiple branches per owner: one account running several workshop locations, each with its own Jackie, prices and booking calendar.</p>
+          <p className="history-note"><span className="preview-badge">{tr("Coming soon")}</span> {tr("Multiple branches per owner: one account running several workshop locations, each with its own Jackie, prices and booking calendar.")}</p>
           <ul className="ws-list">{rows.map(r => <li key={r.id} className="admin-row"><strong>{r.name}</strong><span>{r.city}</span><span>{r.email}</span><span className={`ws-status ${r.claimed ? "s-booked" : ""}`}>{r.claimed ? "Signed in" : "Invited"}</span></li>)}</ul>
         </>}
     </main>

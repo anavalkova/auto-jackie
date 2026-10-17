@@ -1,4 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { tr } from "@/lib/tr";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SignInDialog } from "@/components/sign-in-dialog";
@@ -7,9 +8,9 @@ import { useSessionUser } from "@/hooks/use-session-user";
 
 type Details = { client?: { name?: string; uri?: string; client_name?: string } | null; redirect_uri?: string; scope?: string; redirect_url?: string; redirect_to?: string };
 type OAuthApi = {
-  getAuthorizationDetails: (id: string) => Promise<{ data: Details | null; error: { message: string } | null }>;
-  approveAuthorization: (id: string) => Promise<{ data: { redirect_url?: string; redirect_to?: string } | null; error: { message: string } | null }>;
-  denyAuthorization: (id: string) => Promise<{ data: { redirect_url?: string; redirect_to?: string } | null; error: { message: string } | null }>;
+  getAuthorizationDetails: (id: string) => {tr("Promise")}<{ data: Details | null; error: { message: string } | null }>;
+  approveAuthorization: (id: string) => {tr("Promise")}<{ data: { redirect_url?: string; redirect_to?: string } | null; error: { message: string } | null }>;
+  denyAuthorization: (id: string) => {tr("Promise")}<{ data: { redirect_url?: string; redirect_to?: string } | null; error: { message: string } | null }>;
 };
 const oauth = () => (supabase.auth as unknown as { oauth: OAuthApi }).oauth;
 
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
   head: () => ({ meta: [{ title: "Connect an assistant · AutoJackie" }, { name: "robots", content: "noindex" }] }),
   beforeLoad: ({ search }) => { if (!search.authorization_id) throw new Error("This connection link is missing its request ID. Start again from your assistant."); },
   component: Consent,
-  errorComponent: ({ error }) => <main className="consent-page"><div className="ws-card consent-card"><h1>Couldn't open this connection request</h1><p className="history-note">{error instanceof Error ? error.message : String(error)}</p></div></main>,
+  errorComponent: ({ error }) => <main className="consent-page"><div className="ws-card consent-card"><h1>{tr("Couldn't open this connection request")}</h1><p className="history-note">{error instanceof Error ? error.message : String(error)}</p></div></main>,
 });
 
 const SCOPE_LABEL: Record<string, string> = { openid: "Confirm it's you", email: "Share your email address", profile: "Share your basic profile" };
@@ -57,23 +58,23 @@ function Consent() {
   const name = details?.client?.name ?? details?.client?.client_name ?? "An assistant";
   const scopes = (details?.scope ?? "").split(/\s+/).filter(Boolean);
   return <main className="consent-page"><div className="ws-card consent-card">
-    {!ready ? <p className="history-note">Loading…</p>
+    {!ready ? <p className="history-note">{tr("Loading…")}</p>
     : !user ? <>
-      <h1>Sign in to connect your assistant</h1>
-      <p className="history-note">An assistant wants to connect to your AutoJackie account. Sign in first, then you can approve or cancel.</p>
-      <Button onClick={() => setSignIn(true)}>Sign in</Button>
+      <h1>{tr("Sign in to connect your assistant")}</h1>
+      <p className="history-note">{tr("An assistant wants to connect to your AutoJackie account. Sign in first, then you can approve or cancel.")}</p>
+      <Button onClick={() => setSignIn(true)}>{tr("Sign in")}</Button>
       <SignInDialog open={signIn} onOpenChange={setSignIn} returnTo={here}/>
     </>
-    : error && !details ? <><h1>Couldn't load this request</h1><p className="history-note" role="alert">{error}</p></>
-    : !details ? <p className="history-note">Loading…</p>
+    : error && !details ? <><h1>{tr("Couldn't load this request")}</h1><p className="history-note" role="alert">{error}</p></>
+    : !details ? <p className="history-note">{tr("Loading…")}</p>
     : <>
       <h1>Connect {name} to AutoJackie</h1>
       <p>{name} will be able to use AutoJackie's tools as you: read your saved chats, car and visit requests, or your workshop's requests if you're workshop staff.</p>
-      <p className="history-note">Signed in as <strong>{user.email}</strong>{details.redirect_uri ? <> · returns to {new URL(details.redirect_uri).host}</> : null}</p>
+      <p className="history-note">{tr("Signed in as")} <strong>{user.email}</strong>{details.redirect_uri ? <> · returns to {new URL(details.redirect_uri).host}</> : null}</p>
       {scopes.length > 0 && <ul className="signin-perks">{scopes.map(s => <li key={s}>{SCOPE_LABEL[s] ?? `Additional permission requested: ${s}`}</li>)}</ul>}
-      <p className="history-note">This does not bypass AutoJackie's permissions. Confidential car registry details are never shared.</p>
+      <p className="history-note">{tr("This does not bypass AutoJackie's permissions. Confidential car registry details are never shared.")}</p>
       {error && <p className="chat-error" role="alert">{error}</p>}
-      <div className="ws-chips"><Button disabled={busy} onClick={() => void decide(true)}>Approve</Button><Button variant="outline" disabled={busy} onClick={() => void decide(false)}>Cancel connection</Button></div>
+      <div className="ws-chips"><Button disabled={busy} onClick={() => void decide(true)}>{tr("Approve")}</Button><Button variant="outline" disabled={busy} onClick={() => void decide(false)}>{tr("Cancel connection")}</Button></div>
     </>}
   </div></main>;
 }
