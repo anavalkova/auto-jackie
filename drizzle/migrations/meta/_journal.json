@@ -127,6 +127,13 @@
       "when": 1792231584975,
       "tag": "0017_separate_demo_identity_from_owner_invite",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1792250883566,
+      "tag": "0018_clean_workshop_slugs",
+      "breakpoints": true
     }
   ]
 }
