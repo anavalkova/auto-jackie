@@ -106,9 +106,9 @@ export function JackieChat({ vehicle, pending, onPendingSent, chatId, initialMes
       <ConversationScrollButton/>
     </Conversation>}
 
-    {messages.length === 0 && <div className="try-row"><span>{t.tryLabel}</span>{t.starters.map(s => <button key={s} type="button" onClick={() => send(s)}>{s}</button>)}</div>}
+    {messages.length === 0 && <div className="try-row"><span>{t.tryLabel}</span>{t.starters.map(s => <Button variant="link" key={s} type="button" onClick={() => send(s)}>{s}</Button>)}</div>}
     <PromptInput className="chat-composer" onSubmit={({ text }) => send(text)}>
-      <PromptInputTextarea value={input} onChange={e => setInput(e.target.value)} placeholder={t.placeholder}/>
+      <PromptInputTextarea rows={1} value={input} onChange={e => setInput(e.target.value)} placeholder={t.placeholder}/>
       <PromptInputFooter>
         <span className="composer-hint">{quotaHint}{saving ? ` · ${t.savedToChats}` : ""}</span>
         {!quota?.signedIn && quota != null && quota.remaining <= 2 && onSignIn && <Button variant="ghost" size="sm" type="button" onClick={onSignIn}>{t.signIn}</Button>}

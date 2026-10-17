@@ -39,6 +39,7 @@
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(.957 .006 247);
   --muted-foreground: oklch(.55 .016 255);
+  --chat-placeholder: oklch(.59 .005 255);
   --accent: oklch(.962 .018 55);
   --border: oklch(.914 .008 250);
   --destructive: oklch(.6 .2 25);
@@ -712,9 +713,9 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
   .assistant-top .assistant-title { font-size: 15px; }
   .assistant-summary { font-size: 12px; line-height: 1.5; }
   .chat-shell { flex: none; height: auto; min-height: 0; padding: 0 12px 12px; }
-  .chat-shell .try-row { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; column-gap: 10px; row-gap: 0; padding-top: 12px; margin-bottom: 4px; font-size: 12px; line-height: 1.45; }
-  .chat-shell .try-row > span { grid-row: 1; padding-top: 5px; }
-  .chat-shell .try-row > button { grid-column: 2; box-sizing: border-box; min-width: 0; min-height: 28px; padding-block: 5px; border-bottom: 0; }
+  .chat-shell .try-row { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; column-gap: 8px; row-gap: 0; padding-top: 8px; margin-bottom: 0; font-size: 12px; line-height: 1.4; }
+  .chat-shell .try-row > span { grid-row: 1; padding-top: 4px; }
+  .chat-shell .try-row > button { grid-column: 2; justify-self: start; box-sizing: border-box; min-width: 0; max-width: 100%; min-height: 25px; padding-block: 4px; border-bottom: 0; text-decoration: underline; text-decoration-style: dashed; text-decoration-color: currentColor; text-underline-offset: 3px; text-align: left; }
   .chat-shell .try-row > button:first-of-type { grid-row: 1; }
   .chat-empty { flex: none; padding-block: 12px; }
   .chat-empty h1 { font-size: 28px; margin-top: 4px; }
@@ -723,9 +724,9 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
   .chat-log > div > div { padding: 12px 0; gap: 20px; }
   .chat-log > button { display: none; }
   .chat-composer { flex-shrink: 0; margin-top: 8px; }
-  .chat-composer textarea { min-height: 48px; max-height: 144px; padding: 10px 12px 6px; font-size: 16px; line-height: 1.4; }
-  .chat-composer textarea::placeholder { font-size: 14px; }
-  .chat-composer [data-slot="input-group-addon"] { padding: 4px 8px 8px; gap: 8px; }
+  .chat-composer textarea { flex: none; min-height: 40px; max-height: 128px; padding: 6px 10px 2px; font-size: 16px; line-height: 1.35; }
+  .chat-composer textarea::placeholder { color: var(--chat-placeholder); opacity: 1; font-size: 13px; }
+  .chat-composer [data-slot="input-group-addon"] { padding: 2px 8px 6px; gap: 8px; }
   .composer-hint { min-width: 0; font-size: 10px; }
   .composer-actions { flex-shrink: 0; }
   .composer-actions > button:first-child:not(:only-child) { width: 32px; padding: 0; font-size: 0; gap: 0; }
