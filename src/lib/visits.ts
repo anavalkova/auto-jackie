@@ -49,8 +49,3 @@ export function splitVisits(rows: VisitRow[], now: Date): { upcoming: VisitRow[]
   const past = rows.filter(v => isPast(v, now)).sort((a, b) => new Date(b.bookedAt ?? b.createdAt).getTime() - new Date(a.bookedAt ?? a.createdAt).getTime());
   return { upcoming, past, waiting: rows.length - upcoming.length - past.length };
 }
-
-/** How many pages of past visits are hidden behind "show more". */
-export function pastPages(shown: number, total: number): number {
-  return Math.max(1, Math.ceil(total / VISITS_PAGE_SIZE));
-}
