@@ -195,10 +195,10 @@ export function WorkshopDashboard() {
         <time dateTime={i.created_at}>{when(i.created_at)}</time>
       </button></li>)}</ul>}
     {shown.length > 0 && <Pager page={page} pages={Math.max(1, Math.ceil(shown.length / PAGE))} onPage={setPage}/>}
-    </>} settings={shop.role === "staff" ? null : <BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo}/>} sub={tourSub}/>
-    : tab === "context" ? <ContextSettings workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo} sub={tourSub}/>
+    </>} settings={shop.role === "staff" ? null : <BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo}/>}/>
+    : tab === "context" ? <ContextSettings workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo}/>
     : tab === "pricing" ? <PricingView workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo}/>
-    : tab === "profile" ? <ProfileView shop={shop} canEdit={shop.role === "owner"} demo={demo} onSaved={loadShop} sub={tourSub}/> : <>
+    : tab === "profile" ? <ProfileView shop={shop} canEdit={shop.role === "owner"} demo={demo} onSaved={loadShop}/> : <>
     <div className="ws-kpis">
       <Kpi icon={<Inbox/>} label={tr("New requests")} value={String(kpis.fresh)}/>
       <Kpi icon={<CalendarClock/>} label={tr("Need you this week")} value={String(kpis.urgent)}/>
