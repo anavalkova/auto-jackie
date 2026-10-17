@@ -368,7 +368,11 @@
 .pitch-hero { display: grid; grid-template-columns: 1fr 260px; gap: 32px; align-items: center; }
 .pitch-hero h1 { font-size: clamp(1.8rem, 3.4vw, 2.6rem); line-height: 1.1; margin: 8px 0 10px; }
 .pitch-hero p { font-size: 1.1rem; color: var(--muted-foreground); max-width: 46ch; margin: 0 0 18px; }
-.pitch-cta { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.pitch-cta { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+.pitch-entry { display: grid; gap: 8px; flex: 1 1 240px; min-width: 0; }
+.pitch-entry > button { width: 100%; min-height: 44px; height: auto; padding: 12px 14px; white-space: normal; font-weight: 700; }
+.pitch-entry-note { font-size: .8rem; line-height: 1.5; color: var(--muted-foreground); }
+.pitch-sign-in { border-color: var(--foreground); color: var(--foreground); background: var(--card); }
 .pitch-jackie { margin: 0; text-align: center; }
 .pitch-jackie img { width: 100%; aspect-ratio: 1; object-fit: cover; object-position: center top; border-radius: 50%; border: 3px solid var(--primary); }
 .pitch-jackie figcaption { font-size: .8rem; color: var(--muted-foreground); margin-top: 8px; }

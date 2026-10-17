@@ -654,8 +654,8 @@ function WorkshopPitch({ onSignIn, signedIn, onOpenDemo }: { onSignIn: () => voi
         <p>{p.sub}</p>
         <div className="pitch-cta">
           {onOpenDemo
-            ? <><Button onClick={onOpenDemo}>{p.demoCta}</Button><span className="history-note">{p.demoNote}</span>{!signedIn && <Button variant="ghost" onClick={onSignIn}>{p.cta}</Button>}</>
-            : <><Button onClick={onSignIn}>{p.cta}</Button><span className="history-note">{p.ctaNote}</span></>}
+            ? <><div className="pitch-entry"><Button size="lg" onClick={onOpenDemo}><ArrowUpRight/>{p.demoCta}</Button><span className="pitch-entry-note">{p.demoNote}</span></div>{!signedIn && <div className="pitch-entry"><Button size="lg" variant="outline" className="pitch-sign-in" onClick={onSignIn}><UserRound/>{p.cta}</Button><span className="pitch-entry-note">{p.ctaNote}</span></div>}</>
+            : <div className="pitch-entry"><Button size="lg" onClick={onSignIn}><UserRound/>{p.cta}</Button><span className="pitch-entry-note">{p.ctaNote}</span></div>}
         </div>
       </div>
       <figure className="pitch-jackie"><img src={jackieImg} alt="Jackie, AutoJackie's assistant"/><figcaption>{p.jackieCaption}</figcaption></figure>
