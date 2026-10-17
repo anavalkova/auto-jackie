@@ -1,5 +1,5 @@
 # AutoJackie
-- [ ] Keep signed-in Demo visitors read-only with tour access; retain Ana as sole Demo/Dev owner and administrator.
+- [x] Keep signed-in Demo visitors read-only with tour access; retain Ana as sole Demo/Dev owner and administrator. Verified demo locked saves, local edits reset, tour replay, both owner workspaces, and unchanged demo password.
 - [x] Move the intro above the chat divider and compact mobile examples and composer; verified phone in EN/SV/DE and desktop.
 - [x] Allow local demo configuration edits with locked, explanatory Save controls and verify no persistence.
 - [x] Restore Jackie branding with the latest selected workshop and remove workshop logo uploads.
