@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 import { nextService, type Vehicle } from "@/lib/vehicles";
 import jackie from "@/assets/jackie.jpg";
-import { LANGS, setLang, useT } from "@/lib/i18n";
+import { LANGS, setLang, useLang, useT, odoUnitFor } from "@/lib/i18n";
 
 const fmt = (n: number) => n.toLocaleString("sv-SE");
 export type WorkshopBrand = { id: string; name: string; city: string; slug: string; accent: string; logo: string; greeting: string };
@@ -143,6 +143,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
 
   const signOut = async () => { await supabase.auth.signOut(); setVehicle(null); navigate({ to: "/", replace: true }); };
   const service = vehicle ? nextService(vehicle) : null;
+  const odoUnit = odoUnitFor(useLang());
   const [directBooking, setDirectBooking] = useState<VisitCard | null>(null);
 
   return <div className="app-frame" style={workshop?.accent ? { ["--primary" as string]: workshop.accent } : undefined}>
