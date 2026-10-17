@@ -8,9 +8,9 @@ import { useSessionUser } from "@/hooks/use-session-user";
 
 type Details = { client?: { name?: string; uri?: string; client_name?: string } | null; redirect_uri?: string; scope?: string; redirect_url?: string; redirect_to?: string };
 type OAuthApi = {
-  getAuthorizationDetails: (id: string) => {tr("Promise")}<{ data: Details | null; error: { message: string } | null }>;
-  approveAuthorization: (id: string) => {tr("Promise")}<{ data: { redirect_url?: string; redirect_to?: string } | null; error: { message: string } | null }>;
-  denyAuthorization: (id: string) => {tr("Promise")}<{ data: { redirect_url?: string; redirect_to?: string } | null; error: { message: string } | null }>;
+  getAuthorizationDetails: (id: string) => Promise<{ data: Details | null; error: { message: string } | null }>;
+  approveAuthorization: (id: string) => Promise<{ data: { redirect_url?: string; redirect_to?: string } | null; error: { message: string } | null }>;
+  denyAuthorization: (id: string) => Promise<{ data: { redirect_url?: string; redirect_to?: string } | null; error: { message: string } | null }>;
 };
 const oauth = () => (supabase.auth as unknown as { oauth: OAuthApi }).oauth;
 

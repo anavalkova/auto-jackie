@@ -64,7 +64,7 @@ function AdminPage() {
 
   return <div className="app-frame">
     <header className="site-header">
-      <Link to="/" className="brand" aria-label={tr("AutoJackie home")}><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>{tr("Auto")}<span className="brand-orange">{tr("Jackie")}</span></span><span className="brand-sub">{tr("operations")}</span></Link>
+      <Link to="/" className="brand" aria-label={tr("AutoJackie home")}><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span><span className="brand-sub">{tr("operations")}</span></Link>
       <nav><Button variant="ghost" asChild><Link to="/workshop">{tr("Workshop view")}</Link></Button>{user && <Button variant="ghost" onClick={async () => { await supabase.auth.signOut(); window.location.assign("/workshop"); }}>{tr("Sign out")}</Button>}</nav>
     </header>
     <main className="ws-main">
@@ -82,7 +82,7 @@ function AdminPage() {
             <div><Label htmlFor="a-name">{tr("Workshop name")}</Label><Input id="a-name" required minLength={2} maxLength={80} value={name} onChange={e => setName(e.target.value)}/></div>
             <div><Label htmlFor="a-email">{tr("Owner's email")}</Label><Input id="a-email" required type="email" value={email} onChange={e => setEmail(e.target.value)}/></div>
             <div><Label htmlFor="a-city">{tr("City (optional)")}</Label><Input id="a-city" maxLength={60} value={city} onChange={e => setCity(e.target.value)}/></div>
-            <div><Label htmlFor="a-vat">{tr("VAT number")}</Label><Input id="a-vat" maxLength={30} placeholder={tr("SE556677889901")} value={vat} onChange={e => setVat(e.target.value)}/></div>
+            <div><Label htmlFor="a-vat">{tr("VAT number")}</Label><Input id="a-vat" maxLength={30} placeholder="SE556677889901" value={vat} onChange={e => setVat(e.target.value)}/></div>
             <div><Label htmlFor="a-phone">{tr("Workshop phone")}</Label><Input id="a-phone" maxLength={30} value={phone} onChange={e => setPhone(e.target.value)}/></div>
             <div><Label htmlFor="a-addr">{tr("Address")}</Label><Input id="a-addr" maxLength={200} value={address} onChange={e => setAddress(e.target.value)}/></div>
             <Button type="submit" disabled={busy}>{tr("Onboard")}</Button>
