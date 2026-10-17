@@ -141,6 +141,13 @@
       "when": 1792251171493,
       "tag": "0019_fix_driver_insert_autobook",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792270442219,
+      "tag": "0020_verified_email_team_members",
+      "breakpoints": true
     }
   ]
 }
