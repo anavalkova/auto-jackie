@@ -36,7 +36,7 @@ function AdminPage() {
   const [name, setName] = useState(""); const [email, setEmail] = useState(""); const [city, setCity] = useState("");
   const [vat, setVat] = useState(""); const [phone, setPhone] = useState(""); const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false); const [msg, setMsg] = useState("");
-  const [demo, setDemo] = useState<{ email: string; password: string } | null>(null);
+  const [demo, setDemo] = useState<{ email: string; password: string | null } | null>(null);
   const [signIn, setSignIn] = useState(false);
   const demoFn = useServerFn(setUpDemoWorkshop);
 
@@ -91,8 +91,8 @@ function AdminPage() {
           </form>
           {msg && <p className="history-note" role="status">{msg}</p>}
 
-          <div className="ws-title admin-demo"><div><span className="eyebrow">{tr("DEMO")}</span><h2>{tr("Demo Verkstad for judges")}</h2><p className="history-note">{tr("Creates the demo workshop with sample requests the first time. Each click issues a new password.")}</p></div><Button variant="outline" onClick={() => void makeDemo()} disabled={busy}>{tr("Set up / reset demo login")}</Button></div>
-          {demo && <div className="offer-card"><span className="eyebrow">{tr("DEMO LOGIN · COPY IT NOW")}</span><p>{tr("Email:")} <strong>{demo.email}</strong></p><p>{tr("Password:")} <strong>{demo.password}</strong></p></div>}
+          <div className="ws-title admin-demo"><div><span className="eyebrow">{tr("DEMO")}</span><h2>{tr("Demo Verkstad for judges")}</h2><p className="history-note">{tr("Creates a read-only demo login if needed. Existing passwords stay unchanged.")}</p></div><Button variant="outline" onClick={() => void makeDemo()} disabled={busy}>{tr("Set up demo login")}</Button></div>
+          {demo && <div className="offer-card"><span className="eyebrow">{tr("DEMO LOGIN · COPY IT NOW")}</span><p>{tr("Email:")} <strong>{demo.email}</strong></p>{demo.password ? <p>{tr("Password:")} <strong>{demo.password}</strong></p> : <p>{tr("Demo login already exists. Password unchanged.")}</p>}</div>}
 
           <h2 className="admin-h2">{tr("Workshops")} ({rows.length})</h2>
           <p className="history-note"><span className="preview-badge">{tr("Coming soon")}</span> {tr("Multiple branches per owner: one account running several workshop locations, each with its own Jackie, prices and booking calendar.")}</p>

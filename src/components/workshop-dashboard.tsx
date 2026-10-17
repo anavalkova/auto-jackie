@@ -1,6 +1,7 @@
 import { holidayName, slotLabel, swedishHolidays } from "@/lib/booking";
 import { tr } from "@/lib/tr";
 import { saveWorkshopConfiguration } from "@/lib/configuration-save";
+import { shouldExploreDemo } from "@/lib/workshop-access";
 import { readWorkshopSelection, rememberWorkshopSelection, selectWorkshop } from "@/lib/workshop-selection";
 import { getLang } from "@/lib/i18n";
 const loc = () => ({ en: "en-GB", sv: "sv-SE", de: "de-DE" } as const)[getLang()];
@@ -87,13 +88,6 @@ export function WorkshopDashboard() {
   useEffect(() => { if (demo && !tourDone()) setTour(0); }, [demo]);
   const tourSub = demo && tour !== null ? TOUR_STEPS[tour]?.sub : undefined;
   const [shops, setShops] = useState<Shop[]>([]);
-  const loadShop = useCallback(async () => {
-    if (!user) return;
-    const { data } = await supabase.from("workshop_members").select("role, workshops(id,name,city,vat_number,slug)").eq("user_id", user.id);
-    const list = (data ?? []).flatMap(m => m.workshops ? [{ ...(m.workshops as Omit<Shop, "role">), role: m.role }] : []);
-    setShops(list);
-    setShop(cur => (cur && list.some(w => w.id === cur.id)) ? cur : selectWorkshop(list, readWorkshopSelection(user.id)));
-  }, [user?.id]);
   useEffect(() => { if (user && shop && !demo && shops.some(w => w.id === shop.id)) rememberWorkshopSelection(user.id, shop.id); }, [user?.id, shop?.id, demo, shops]);
   const openDemo = useCallback(async () => {
     const { data: id } = await supabase.rpc("demo_workshop_id");
@@ -101,6 +95,16 @@ export function WorkshopDashboard() {
     const { data: w } = await supabase.from("workshops").select("id,name,city,vat_number,slug").eq("id", id).single();
     if (w) { setDemo(true); setShop({ ...w, role: "demo" }); }
   }, []);
+  const loadShop = useCallback(async () => {
+    if (!user) return;
+    const { data, error } = await supabase.from("workshop_members").select("role, workshops(id,name,city,vat_number,slug)").eq("user_id", user.id);
+    if (error) { setShop(null); return; }
+    const list = (data ?? []).flatMap(m => m.workshops ? [{ ...(m.workshops as Omit<Shop, "role">), role: m.role }] : []);
+    setShops(list);
+    if (shouldExploreDemo(list.length)) { await openDemo(); return; }
+    setDemo(false);
+    setShop(cur => (cur && list.some(w => w.id === cur.id)) ? list.find(w => w.id === cur.id) : selectWorkshop(list, readWorkshopSelection(user.id)));
+  }, [user?.id, openDemo]);
   useEffect(() => { if (ready && user) void loadShop(); }, [ready, loadShop]);
 
   const loadItems = useCallback(async () => {
