@@ -1,7 +1,4 @@
-import { Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { AppSheet } from "@/components/app-sheet";
-import { tr } from "@/lib/tr";
+import { Check, Lightbulb } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
 export type TourTab = "overview" | "booking" | "context" | "pricing" | "profile";
@@ -83,40 +80,24 @@ export const TOUR_STEPS: TourStep[] = [
       ["Front desk sees Overview and requests only", "Reception ser bara översikt och förfrågningar", "Empfang sieht nur Übersicht und Anfragen"],
       ["Remove access any time", "Ta bort åtkomst när som helst", "Zugriff jederzeit entfernen"],
     ] },
-  { tab: "overview", area: ["Driver view", "Förarvy", "Fahreransicht"],
-    title: ["Now see it as a driver", "Se det nu som förare", "Jetzt aus Fahrersicht"],
-    body: ["Open “Driver view” in the top bar to see the page your customers use.", "Öppna ”Förarvy” i toppen för att se sidan dina kunder använder.", "Öffnen Sie oben „Fahreransicht“, um die Seite Ihrer Kunden zu sehen."],
-    can: [
-      ["Describe a problem like a driver would", "Beskriv ett problem som en förare", "Ein Problem wie ein Fahrer beschreiben"],
-      ["Watch Jackie triage it with your context and prices", "Se Jackie sortera det med din kontext och dina priser", "Sehen, wie Jackie mit Ihrem Kontext und Ihren Preisen sortiert"],
-      ["Book a time and watch it land in Requests", "Boka en tid och se den hamna i Förfrågningar", "Einen Termin buchen und in Anfragen sehen"],
-    ] },
 ];
-
-const DONE_KEY = "autojackie_tour_done";
-
-export function tourDone() {
-  try { return localStorage.getItem(DONE_KEY) === "1"; } catch { return true; }
-}
 
 const IDX = { en: 0, sv: 1, de: 2 } as const;
 
-export function DemoTour({ step, onStep, onClose }: { step: number; onStep: (s: number) => void; onClose: () => void }) {
+/**
+ * Inline demo guide: shows what each dashboard section can do, right above
+ * the section itself — no pop-up, nothing hidden behind a blur.
+ */
+export function DemoGuide({ tab }: { tab: TourTab }) {
   const { lang } = useT();
-  const s = TOUR_STEPS[step];
-  if (!s) return null;
   const i = IDX[lang as keyof typeof IDX] ?? 0;
-  const last = step === TOUR_STEPS.length - 1;
-  return <AppSheet open onOpenChange={o => { if (!o) onClose(); }} className="tour-sheet"
-    eyebrow={<>{s.area[i]} · {tr("Step {a} of {b}", { a: step + 1, b: TOUR_STEPS.length })}</>}
-    title={s.title[i]} description={s.body[i]}
-    footer={<>
-      <Button variant="outline" size="sm" disabled={step === 0} onClick={() => onStep(step - 1)}>{tr("Back")}</Button>
-      <Button size="sm" onClick={() => (last ? onClose() : onStep(step + 1))}>{last ? tr("Finish tour") : tr("Next")}</Button>
-    </>}>
-    <ul className="tour-can" aria-label={tr("What you can do here")}>
-      {s.can.map(c => <li key={c[0]}><Check aria-hidden/>{c[i]}</li>)}
-    </ul>
-    <div className="tour-dots" aria-hidden>{TOUR_STEPS.map((_, n) => <span key={n} className={n === step ? "on" : undefined}/>)}</div>
-  </AppSheet>;
+  const steps = TOUR_STEPS.filter(s => s.tab === tab);
+  if (steps.length === 0) return null;
+  return <aside className="demo-guide" aria-label={steps[0]!.area[i]}>
+    {steps.map(s => <section key={s.area[0]}>
+      <p className="demo-guide-title"><Lightbulb aria-hidden/> <strong>{s.title[i]}</strong></p>
+      <p className="demo-guide-body">{s.body[i]}</p>
+      <ul className="tour-can">{s.can.map(c => <li key={c[0]}><Check aria-hidden/>{c[i]}</li>)}</ul>
+    </section>)}
+  </aside>;
 }
