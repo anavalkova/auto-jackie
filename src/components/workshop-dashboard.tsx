@@ -1,5 +1,6 @@
 import { holidayName, slotLabel, swedishHolidays } from "@/lib/booking";
 import { tr } from "@/lib/tr";
+import { saveWorkshopConfiguration } from "@/lib/configuration-save";
 import { readWorkshopSelection, rememberWorkshopSelection, selectWorkshop } from "@/lib/workshop-selection";
 import { getLang } from "@/lib/i18n";
 const loc = () => ({ en: "en-GB", sv: "sv-SE", de: "de-DE" } as const)[getLang()];
@@ -9,7 +10,7 @@ import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 import { ensureOther, OTHER } from "@/lib/services";
 import { TIERS, TIER_INFO, DEFAULT_TIERS, type Tier } from "@/lib/ai-tiers";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, LogOut, Settings2, UserRound, CircleHelp, CalendarCheck, CalendarClock, Car, ChevronDown, Globe2, Inbox, MessageCircle, Moon, Sparkles, TrendingUp, Wrench } from "lucide-react";
+import { ArrowUpRight, LockKeyhole, LogOut, Settings2, UserRound, CircleHelp, CalendarCheck, CalendarClock, Car, ChevronDown, Globe2, Inbox, MessageCircle, Moon, Sparkles, TrendingUp, Wrench } from "lucide-react";
 import { DemoTour, TOUR_STEPS, tourDone } from "@/components/demo-tour";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { LANGS, setLang, useT } from "@/lib/i18n";
@@ -194,10 +195,10 @@ export function WorkshopDashboard() {
         <time dateTime={i.created_at}>{when(i.created_at)}</time>
       </button></li>)}</ul>}
     {shown.length > 0 && <Pager page={page} pages={Math.max(1, Math.ceil(shown.length / PAGE))} onPage={setPage}/>}
-    </>} settings={shop.role === "staff" ? null : <BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>}/>
-    : tab === "context" ? <ContextSettings workshopId={shop.id} canEdit={shop.role === "owner"}/>
-    : tab === "pricing" ? <PricingView workshopId={shop.id} canEdit={shop.role === "owner"}/>
-    : tab === "profile" ? <ProfileView shop={shop} canEdit={shop.role === "owner"} onSaved={loadShop}/> : <>
+    </>} settings={shop.role === "staff" ? null : <BookingSettings workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo}/>}/>
+    : tab === "context" ? <ContextSettings workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo}/>
+    : tab === "pricing" ? <PricingView workshopId={shop.id} canEdit={shop.role === "owner"} demo={demo}/>
+    : tab === "profile" ? <ProfileView shop={shop} canEdit={shop.role === "owner"} demo={demo} onSaved={loadShop}/> : <>
     <div className="ws-kpis">
       <Kpi icon={<Inbox/>} label={tr("New requests")} value={String(kpis.fresh)}/>
       <Kpi icon={<CalendarClock/>} label={tr("Need you this week")} value={String(kpis.urgent)}/>
@@ -278,20 +279,28 @@ type Settings = Database["public"]["Tables"]["workshop_settings"]["Row"];
 type Duration = { job: string; minutes: number };
 type PriceItem = { task: string; price_sek: number; minutes?: number };
 
-function useSettings(workshopId: string) {
+function useSettings(workshopId: string, canEdit = true, demo = false) {
   const [s, setS] = useState<Settings | null>(null);
   const [state, setState] = useState("");
   useEffect(() => { void supabase.from("workshop_settings").select("*").eq("workshop_id", workshopId).maybeSingle().then(({ data }) => setS(data)); }, [workshopId]);
-  const save = async (patch: Partial<Settings>) => {
+  const save = async (patch: Partial<Settings>) => saveWorkshopConfiguration(canEdit, demo, async () => {
     setState(tr("Saving…"));
     const { error } = await supabase.from("workshop_settings").update({ ...patch, updated_at: new Date().toISOString() }).eq("workshop_id", workshopId);
     setState(error ? tr("Couldn't save. Please try again.") : tr("Saved."));
-  };
+  });
   return { s, setS, save, state };
 }
 
-function SaveRow({ canEdit, state }: { canEdit: boolean; state: string }) {
-  return <div className="ws-span">{canEdit ? <Button type="submit">{tr("Save")}</Button> : <p className="history-note">{tr("Only the workshop owner can change these.")}</p>}{state && <p className="history-note" role="status">{state}</p>}</div>;
+function ConfigurationSave({ canEdit, demo = false, label = "Save" }: { canEdit: boolean; demo?: boolean; label?: string }) {
+  return <div className="ws-config-save">
+    <Button type="submit" disabled={demo || !canEdit}>{demo && <LockKeyhole/>}{tr(label)}</Button>
+    {demo ? <span className="history-note">{tr("Demo workshop. Try the fields; changes cannot be saved.")}</span>
+      : !canEdit && <span className="history-note">{tr("Only the workshop owner can change these.")}</span>}
+  </div>;
+}
+
+function SaveRow({ canEdit, demo = false, state }: { canEdit: boolean; demo?: boolean; state: string }) {
+  return <div className="ws-span"><ConfigurationSave canEdit={canEdit} demo={demo}/>{state && <p className="history-note" role="status">{state}</p>}</div>;
 }
 
 function isAfterHours(i: Inquiry) {
@@ -366,8 +375,8 @@ function dayLabel(d: string) {
 }
 const OFF_PAGE = 5;
 
-function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit: boolean }) {
-  const { s, setS, save, state } = useSettings(workshopId);
+function BookingSettings({ workshopId, canEdit, demo = false }: { workshopId: string; canEdit: boolean; demo?: boolean }) {
+  const { s, setS, save, state } = useSettings(workshopId, canEdit, demo);
   const [date, setDate] = useState("");
   const [offPage, setOffPage] = useState(0);
   if (!s) return <p className="history-note" role="status">{tr("Loading…")}</p>;
@@ -390,7 +399,7 @@ function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
   const y = new Date().getFullYear();
   const holidays = [...swedishHolidays(y), ...swedishHolidays(y + 1)].filter(([k]) => k >= today).slice(0, 6);
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); void save({ booking_days: s.booking_days, slot_hours: s.slot_hours, min_notice_days: s.min_notice_days, max_ahead_days: s.max_ahead_days, close_holidays: s.close_holidays, closed_slots: closed }); }}>
-    <fieldset disabled={!canEdit} className="ws-grid2" style={{ border: 0, padding: 0, margin: 0 }}>
+    <fieldset disabled={!canEdit && !demo} className="ws-grid2" style={{ border: 0, padding: 0, margin: 0 }}>
       <section className="ws-card"><h2 className="ws-label-row"><Tip><p>{tr("The days and drop-off times drivers can pick. How long each job takes is set in Pricing engine.")}</p></Tip>{tr("Your normal week")}</h2>
         <div className="ws-field"><Label>{tr("Days")}</Label><div className="ws-chips">{WEEKDAYS.map(w => <Button key={w.d} type="button" size="sm" variant={s.booking_days.includes(w.d) ? "default" : "outline"} onClick={() => setS({ ...s, booking_days: flip(s.booking_days, w.d) })}>{tr(w.l)}</Button>)}</div></div>
         <div className="ws-field"><Label>{tr("Drop-off times")}</Label><div className="ws-chips">{HOURS.map(h => <Button key={h} type="button" size="sm" variant={s.slot_hours.includes(h) ? "default" : "outline"} onClick={() => setS({ ...s, slot_hours: flip(s.slot_hours, h) })}>{String(h).padStart(2, "0")}:00</Button>)}</div></div>
@@ -420,7 +429,7 @@ function BookingSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
             {<Pager page={pg} pages={pages} onPage={setOffPage}/>}</>}
       </section>
     </fieldset>
-    <SaveRow canEdit={canEdit} state={state}/>
+    <SaveRow canEdit={canEdit} demo={demo} state={state}/>
   </form>;
 }
 
@@ -438,8 +447,8 @@ function Stepper({ steps, step, setStep }: { steps: { title: string }[]; step: n
   return <ol className="ws-stepper">{steps.map((st, i) => <li key={st.title}><button type="button" aria-current={i === step ? "step" : undefined} data-done={i < step || undefined} onClick={() => setStep(i)}><span className="ws-step-num">{i + 1}</span>{tr(st.title)}</button></li>)}</ol>;
 }
 
-function WizardActions({ canEdit, last, next }: { canEdit: boolean; last: boolean; next: () => void }) {
-  return <div className="ws-chips">{canEdit ? <Button type="submit" variant={last ? "default" : "outline"}>{tr("Save this step")}</Button> : <span className="history-note">{tr("Only the workshop owner can change these.")}</span>}{!last && <Button type="button" onClick={next}>{tr("Next")}</Button>}</div>;
+function WizardActions({ canEdit, demo = false, last, next }: { canEdit: boolean; demo?: boolean; last: boolean; next: () => void }) {
+  return <div className="ws-config-actions"><ConfigurationSave canEdit={canEdit} demo={demo} label="Save this step"/>{!last && <Button type="button" onClick={next}>{tr("Next")}</Button>}</div>;
 }
 
 function Tip({ children, label }: { children: React.ReactNode; label?: string }) {
@@ -451,8 +460,8 @@ function Hint({ controls, shows }: { controls: string; shows: string }) {
   return <Tip><p><b>{tr("Controls:")}</b> {controls}</p><p><b>{tr("Shows:")}</b> {shows}</p></Tip>;
 }
 
-function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit: boolean }) {
-  const { s, setS, save, state } = useSettings(workshopId);
+function ContextSettings({ workshopId, canEdit, demo = false }: { workshopId: string; canEdit: boolean; demo?: boolean }) {
+  const { s, setS, save, state } = useSettings(workshopId, canEdit, demo);
   const [step, setStep] = useState(0);
   if (!s) return <p className="history-note" role="status">{tr("Loading…")}</p>;
   const storedServices = s.services as string[];
@@ -466,7 +475,7 @@ function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
     <Stepper steps={CONTEXT_STEPS} step={step} setStep={setStep}/>
     <section className="ws-card">
       <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>{tr("Drivers see:")}</b> {tr(cur.sees)}</p></Tip>{step + 1}. {tr(cur.title)}</h2></div>
-      <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0, display: "grid", gap: 10 }}>
+      <fieldset disabled={!canEdit && !demo} style={{ border: 0, padding: 0, margin: 0, display: "grid", gap: 10 }}>
         {step === 0 && <>
           <div className="ws-grid2">
             <div className="ws-field">
@@ -494,7 +503,7 @@ function ContextSettings({ workshopId, canEdit }: { workshopId: string; canEdit:
       </fieldset>
       <div className="ws-wizard-nav">
         <Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>{tr("Back")}</Button>
-        <WizardActions canEdit={canEdit} last={last} next={() => setStep(step + 1)}/>
+        <WizardActions canEdit={canEdit} demo={demo} last={last} next={() => setStep(step + 1)}/>
       </div>
       {state && <p className="history-note" role="status">{state}</p>}
     </section>
@@ -523,8 +532,8 @@ const PREDEFINED_SERVICES: { task: string; price_sek: number; minutes: number }[
   { task: "Inspection prep (besiktning)", price_sek: 800, minutes: 45 }, { task: "Wiper blades", price_sek: 400, minutes: 15 },
 ];
 
-function PricingView({ workshopId, canEdit }: { workshopId: string; canEdit: boolean }) {
-  const { s, setS, save, state } = useSettings(workshopId);
+function PricingView({ workshopId, canEdit, demo = false }: { workshopId: string; canEdit: boolean; demo?: boolean }) {
+  const { s, setS, save, state } = useSettings(workshopId, canEdit, demo);
   const [pp, setPp] = useState(0);
   if (!s) return <p className="history-note" role="status">{tr("Loading…")}</p>;
   const durations = s.job_durations as Duration[];
@@ -538,7 +547,7 @@ function PricingView({ workshopId, canEdit }: { workshopId: string; canEdit: boo
     void save({ hourly_rate_sek: s.hourly_rate_sek, price_list: clean, job_durations: clean.map(p => ({ job: p.task, minutes: p.minutes ?? 60 })) });
   };
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); submit(); }}>
-    <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0 }}>
+    <fieldset disabled={!canEdit && !demo} style={{ border: 0, padding: 0, margin: 0 }}>
       <section className="ws-card"><h2 className="ws-label-row"><Hint controls={tr("every rough quote Jackie gives (the “What's next” card) and how long a booking blocks your calendar.")} shows={tr("prices to drivers on your Jackie page, labelled as an estimate. Times only to you.")}/>{tr("Services, prices and times (incl. VAT)")}</h2>
         <Label htmlFor="c-rate">{tr("Hourly labour rate (kr)")}</Label><Input id="c-rate" type="number" min={0} max={10000} value={s.hourly_rate_sek} onChange={e => setS({ ...s, hourly_rate_sek: Number(e.target.value) })}/>
         <table className="ws-table"><thead><tr><th>{tr("Service")}</th><th>{tr("Price (kr)")}</th><th>{tr("Time (min)")}</th><th/></tr></thead><tbody>
@@ -554,23 +563,25 @@ function PricingView({ workshopId, canEdit }: { workshopId: string; canEdit: boo
         </div>
       </section>
     </fieldset>
-    <SaveRow canEdit={canEdit} state={state}/>
+    <SaveRow canEdit={canEdit} demo={demo} state={state}/>
   </form>;
 }
 
 type Member = { user_id: string; email: string; role: "owner" | "staff" };
 
-function TeamSection({ workshopId }: { workshopId: string }) {
+function TeamSection({ workshopId, demo = false }: { workshopId: string; demo?: boolean }) {
   const [team, setTeam] = useState<Member[] | null>(null);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"owner" | "staff">("staff");
   const [msg, setMsg] = useState("");
   const load = useCallback(async () => {
+    if (demo) { setTeam([]); return; }
     const { data } = await supabase.rpc("workshop_team", { _workshop: workshopId });
     setTeam((data ?? []) as Member[]);
-  }, [workshopId]);
+  }, [workshopId, demo]);
   useEffect(() => { void load(); }, [load]);
   const add = async () => {
+    if (demo) { setTeam(xs => [...(xs ?? []), { user_id: crypto.randomUUID(), email, role }]); setEmail(""); return; }
     setMsg("");
     const { error } = await supabase.rpc("workshop_add_member", { _workshop: workshopId, _email: email, _role: role });
     if (error) setMsg(error.message.includes("no AutoJackie account") ? tr("No AutoJackie account with that email yet. Ask them to sign in once, then add them.") : tr("Couldn't add that person. Please try again."));
@@ -578,6 +589,7 @@ function TeamSection({ workshopId }: { workshopId: string }) {
     void load();
   };
   const remove = async (m: Member) => {
+    if (demo) { setTeam(xs => (xs ?? []).filter(x => x.user_id !== m.user_id)); return; }
     setMsg("");
     const { error } = await supabase.rpc("workshop_remove_member", { _workshop: workshopId, _user: m.user_id });
     if (error) setMsg(tr("Couldn't remove that person. Please try again."));
@@ -601,24 +613,27 @@ function TeamSection({ workshopId }: { workshopId: string }) {
   </div>;
 }
 
-function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean; onSaved: () => void }) {
-  const { s, setS, save, state } = useSettings(shop.id);
+function ProfileView({ shop, canEdit, demo = false, onSaved }: { shop: Shop; canEdit: boolean; demo?: boolean; onSaved: () => void }) {
+  const { s, setS, save, state } = useSettings(shop.id, canEdit, demo);
   const [city, setCity] = useState(shop.city);
   const [step, setStep] = useState(0);
   if (!s) return <p className="history-note" role="status">{tr("Loading…")}</p>;
-  const steps = canEdit ? [...PROFILE_STEPS, { title: "Team", sees: "Who can open this dashboard and what they can change." }] : PROFILE_STEPS;
+  const steps = canEdit || demo ? [...PROFILE_STEPS, { title: "Team", sees: "Who can open this dashboard and what they can change." }] : PROFILE_STEPS;
   const link = shop.slug && typeof window !== "undefined" ? `${window.location.origin}/w/${shop.slug}` : "";
   const submit = async () => {
+    if (!canEdit || demo) return;
     if (city !== shop.city) { await supabase.from("workshops").update({ city }).eq("id", shop.id); onSaved(); }
     await save({ phone: s.phone, address: s.address, opening_hours: s.opening_hours, contact_email: s.contact_email,
       brand_accent: /^#[0-9a-fA-F]{6}$/.test(s.brand_accent) ? s.brand_accent : "", brand_greeting: s.brand_greeting,
       website: /^https?:\/\//i.test(s.website) ? s.website : "" });
   };
+  const currentStep = steps[step];
+  if (!currentStep) return null;
   return <form className="ws-section" onSubmit={e => { e.preventDefault(); void submit(); }}>
     <Stepper steps={steps} step={step} setStep={setStep}/>
     <section className="ws-card">
-    <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>{tr("Drivers see:")}</b> {tr(steps[step]!.sees)}</p></Tip>{step + 1}. {tr(steps[step]!.title)}</h2></div>
-    <fieldset disabled={!canEdit} style={{ border: 0, padding: 0, margin: 0 }}>
+    <div className="ws-step-head"><h2 className="ws-label-row"><Tip><p><b>{tr("Drivers see:")}</b> {tr(currentStep.sees)}</p></Tip>{step + 1}. {tr(currentStep.title)}</h2></div>
+    <fieldset disabled={!canEdit && !demo} style={{ border: 0, padding: 0, margin: 0 }}>
       {step === 0 && <div className="ws-form-card ws-grid2">
         <div><div className="ws-label-row"><Label>{tr("Company name")}</Label><Hint controls={tr("your name in the booking list and on your Jackie page.")} shows={tr("to drivers. Managed by AutoJackie.")}/></div><div className="ws-readonly">{shop.name}</div></div>
         <div><div className="ws-label-row"><Label>{tr("VAT number")}</Label><Hint controls={tr("invoicing between you and AutoJackie.")} shows={tr("nowhere to drivers. Managed by AutoJackie.")}/></div><div className="ws-readonly">{shop.vat_number || tr("Not set")}</div></div>
@@ -635,8 +650,8 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
         <div><div className="ws-label-row"><Label htmlFor="b-greet">{tr("Greeting line")}</Label><Hint controls={tr("the welcome line above the chat.")} shows={tr("on your Jackie page, before drivers type.")}/></div><Input id="b-greet" maxLength={160} placeholder={tr("Welcome to Demo Verkstad. Tell Jackie what's up.")} value={s.brand_greeting} onChange={e => setS({ ...s, brand_greeting: e.target.value })}/></div>
       </div>}
     </fieldset>
-    {step === 2 && canEdit && <TeamSection workshopId={shop.id}/>}
-    <div className="ws-wizard-nav"><Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>{tr("Back")}</Button>{step < 2 && <WizardActions canEdit={canEdit} last={false} next={() => setStep(step + 1)}/>}</div>
+    {step === 2 && (canEdit || demo) && <TeamSection workshopId={shop.id} demo={demo}/>}
+    <div className="ws-wizard-nav"><Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>{tr("Back")}</Button>{(step < 2 || demo) && <WizardActions canEdit={canEdit} demo={demo} last={step === steps.length - 1} next={() => setStep(step + 1)}/>}</div>
     {state && <p className="history-note" role="status">{state}</p>}
     </section>
   </form>;
