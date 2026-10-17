@@ -195,7 +195,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
   }, [workshop?.accent]);
   return <div className="app-frame" style={workshop?.accent ? { ["--primary" as string]: workshop.accent } : undefined}>
     <header className="site-header">
-      <div className="tenant-brand"><Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span>Auto<span className="brand-orange">Jackie</span></span></Link>{headerWorkshop && <strong className="tenant-brand-name">{headerWorkshop.name}</strong>}</div>
+      <div className="tenant-brand"><Link to="/" className="brand" aria-label="AutoJackie home"><span className="brand-mark">J<span className="brand-mark-dot"/></span><span className="brand-word">Auto<span className="brand-orange">Jackie</span></span></Link>{headerWorkshop && <strong className="tenant-brand-name">{headerWorkshop.name}</strong>}</div>
       <nav aria-label="Main navigation">
         {(!workshop || user) && <Button variant="ghost" asChild className="workshop-link"><Link to="/workshop">{t.forWorkshops} <ArrowUpRight/></Link></Button>}
         <span className="nav-divider" aria-hidden="true"/>

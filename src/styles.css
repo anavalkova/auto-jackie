@@ -818,6 +818,8 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
 }
 @media (max-width: 760px) {
   .site-header .brand { flex-shrink: 0; }
+  .site-header .brand-word { display: none; }
+  .site-header .brand-mark { width: 33px; height: 36px; font-size: 26px; }
   .site-header nav > * { flex-shrink: 0; }
   .site-header nav .nav-control.nav-signin { width: 36px; min-width: 36px; flex: 0 0 36px; padding: 0; font-size: 0; gap: 0; }
   .site-header nav .workshop-link { font-size: 11px; padding: 0 2px; }
