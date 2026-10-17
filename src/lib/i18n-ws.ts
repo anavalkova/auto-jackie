@@ -103,7 +103,7 @@ export const WS: Record<string, [string, string]> = {
   "Prefers": ["Föredrar", "Bevorzugt"], "Previous": ["Föregående", "Zurück"], "Price": ["Pris", "Preis"], "Price (kr)": ["Pris (kr)", "Preis (kr)"],
   "Pricing engine": ["Prismotor", "Preis-Engine"], "Profile": ["Profil", "Profil"], "Settings": ["Inställningar", "Einstellungen"], "Quoted": ["Offererad", "Angeboten"], "Received": ["Mottagna", "Eingegangen"],
   "Your workshops": ["Dina verkstäder", "Ihre Werkstätten"], "Team": ["Team", "Team"], "Admin": ["Administratör", "Administrator"], "Front desk": ["Reception", "Empfang"],
-  "Add to team": ["Lägg till i teamet", "Zum Team hinzufügen"], "Email": ["E-post", "E-Mail"], "Add": ["Lägg till", "Hinzufügen"], "Their AutoJackie email": ["Personens AutoJackie-e-post", "AutoJackie-E-Mail der Person"], "Role": ["Roll", "Rolle"], "Added.": ["Tillagd.", "Hinzugefügt."],
+  "Add to team": ["Lägg till i teamet", "Zum Team hinzufügen"], "Add": ["Lägg till", "Hinzufügen"], "Their AutoJackie email": ["Personens AutoJackie-e-post", "AutoJackie-E-Mail der Person"], "Role": ["Roll", "Rolle"], "Added.": ["Tillagd.", "Hinzugefügt."],
   "No AutoJackie account with that email yet. Ask them to sign in once, then add them.": ["Det finns inget AutoJackie-konto med den e-posten än. Be personen logga in en gång först.", "Es gibt noch kein AutoJackie-Konto mit dieser E-Mail. Die Person muss sich einmal anmelden."],
   "Couldn't add that person. Please try again.": ["Kunde inte lägga till personen. Försök igen.", "Person konnte nicht hinzugefügt werden. Bitte erneut versuchen."],
   "Couldn't remove that person. Please try again.": ["Kunde inte ta bort personen. Försök igen.", "Person konnte nicht entfernt werden. Bitte erneut versuchen."],
