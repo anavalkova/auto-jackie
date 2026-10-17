@@ -622,7 +622,7 @@ function ProfileView({ shop, canEdit, demo = false, onSaved, sub }: { shop: Shop
   const [step, setStep] = useSubTab(sub);
   if (!s) return <p className="history-note" role="status">{tr("Loading…")}</p>;
   const steps = canEdit || demo ? [...PROFILE_STEPS, { title: "Team", sees: "Who can open this dashboard and what they can change." }] : PROFILE_STEPS;
-  const link = shop.slug && typeof window !== "undefined" ? `${window.location.origin}/w/${shop.slug}` : "";
+  const link = shop.slug && typeof window !== "undefined" ? `${window.location.hostname.includes("preview") || window.location.hostname === "localhost" ? "https://auto-jackie.lovable.app" : window.location.origin}/w/${shop.slug}` : "";
   const submit = async () => {
     if (!canEdit || demo) return;
     if (city !== shop.city) { await supabase.from("workshops").update({ city }).eq("id", shop.id); onSaved(); }
