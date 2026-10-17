@@ -808,7 +808,8 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
   .jackie-panel > .chat-history, .jackie-panel > .visits-card { margin: 0; }
   .jackie-panel > .vehicle-card { padding: 0; }
   .jackie-panel > .vehicle-card button { width: 100%; min-height: 42px; font-size: 13px; }
-  .assistant-summary, .assistant-bottom { display: none; }
+  .assistant-bottom { display: none; }
+  .assistant-summary { font-size: 12px; line-height: 1.45; margin-top: 2px; }
   .assistant-top { padding: 10px 12px; min-height: 0; }
   .chat-shell .try-row { display: flex; flex-wrap: wrap; gap: 4px 12px; padding-top: 6px; }
   .chat-shell .try-row > span, .chat-shell .try-row > button:not(.try-toggle) { display: none; }
