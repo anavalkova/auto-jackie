@@ -5,7 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { LANGS, setLang, useT } from "@/lib/i18n";
 import { tr } from "@/lib/tr";
 
-export function MobileHeaderMenu({ children, email, onSignIn, onSignOut }: { children: ReactNode; email?: string; onSignIn: () => void; onSignOut: () => void }) {
+export function MobileHeaderMenu({ children, email, onSignIn, onSignOut }: { children: ReactNode; email: string | undefined; onSignIn: () => void; onSignOut: () => void }) {
   const { lang } = useT();
   const label = { en: "Menu", sv: "Meny", de: "Menü" }[lang];
   return <DropdownMenu>
