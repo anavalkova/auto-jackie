@@ -776,3 +776,15 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
 
 
 
+
+/* Inline demo guide: explains each dashboard section without hiding it. */
+.demo-guide { display: grid; gap: 12px; margin-bottom: 16px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; background: color-mix(in oklch, var(--primary) 4%, var(--card)); }
+.demo-guide section { display: grid; gap: 6px; }
+.demo-guide section + section { padding-top: 12px; border-top: 1px dashed var(--border); }
+.demo-guide-title { display: flex; gap: 8px; align-items: center; margin: 0; font-size: 14px; }
+.demo-guide-title svg { width: 15px; height: 15px; flex: none; color: var(--primary); }
+.demo-guide-body { margin: 0; font-size: 13px; color: var(--muted-foreground); }
+.demo-guide .tour-can li { font-size: 13px; }
+@media (max-width: 760px) {
+  .demo-guide { padding: 12px 14px; gap: 10px; }
+}
