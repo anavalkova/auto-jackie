@@ -1,4 +1,5 @@
 # AutoJackie
+- [ ] Populate every demo workshop section with fictional judging examples and verify read-only exploration.
 - [x] Keep signed-in Demo visitors read-only with tour access; retain Ana as sole Demo/Dev owner and administrator. Verified demo locked saves, local edits reset, tour replay, both owner workspaces, and unchanged demo password.
 - [x] Replace the pop-up guided tour with an inline per-section demo guide so nothing is hidden behind a blur.
 - [x] Move the intro above the chat divider and compact mobile examples and composer; verified phone in EN/SV/DE and desktop.
