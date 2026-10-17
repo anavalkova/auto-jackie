@@ -37,6 +37,7 @@ export const WS: Record<string, [string, string]> = {
   "CUSTOMER": ["KUND", "KUNDE"], "Cancel connection": ["Avbryt anslutning", "Verbindung abbrechen"], "Car": ["Bil", "Auto"], "Change": ["Ändra", "Ändern"],
   "Cheaper, but answers may be less careful. Recommended (★) is the best balance.": ["Billigare, men svaren kan bli mindre noggranna. Rekommenderad (★) är bästa balansen.", "Günstiger, aber Antworten sind evtl. weniger sorgfältig. Empfohlen (★) ist die beste Balance."],
   "City": ["Ort", "Stadt"], "City (optional)": ["Ort (valfritt)", "Stadt (optional)"], "Close": ["Stäng", "Schließen"], "Closed": ["Avslutad", "Abgeschlossen"],
+  "What can I do here?": ["Vad kan jag göra här?", "Was kann ich hier tun?"],
   "Closed on Swedish public holidays": ["Stängt på svenska helgdagar", "An schwedischen Feiertagen geschlossen"],
   "Coming soon": ["Kommer snart", "Demnächst"], "Company name": ["Företagsnamn", "Firmenname"],
   "Confirm it's you": ["Bekräfta att det är du", "Bestätigen, dass Sie es sind"],

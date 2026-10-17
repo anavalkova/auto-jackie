@@ -1,5 +1,7 @@
-import { Check, Lightbulb } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, Lightbulb, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { tr } from "@/lib/tr";
 
 export type TourTab = "overview" | "booking" | "context" | "pricing" | "profile";
 type L3 = [string, string, string]; // EN, SV, DE
@@ -92,12 +94,26 @@ export function DemoGuide({ tab }: { tab: TourTab }) {
   const { lang } = useT();
   const i = IDX[lang as keyof typeof IDX] ?? 0;
   const steps = TOUR_STEPS.filter(s => s.tab === tab);
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onDown); document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onDown); document.removeEventListener("keydown", onKey); };
+  }, [open]);
   if (steps.length === 0) return null;
-  return <aside className="demo-guide" aria-label={steps[0]!.area[i]}>
-    {steps.map(s => <section key={s.area[0]}>
-      <p className="demo-guide-title"><Lightbulb aria-hidden/> <strong>{s.title[i]}</strong></p>
-      <p className="demo-guide-body">{s.body[i]}</p>
-      <ul className="tour-can">{s.can.map(c => <li key={c[0]}><Check aria-hidden/>{c[i]}</li>)}</ul>
-    </section>)}
-  </aside>;
+  const label = tr("What can I do here?");
+  return <div className="why-overlay demo-guide-toggle" ref={ref}>
+    <button type="button" className="why-chip" aria-expanded={open} onClick={() => setOpen(o => !o)}><Lightbulb aria-hidden/> {label}</button>
+    {open && <aside className="why-note why-pop demo-guide-pop" aria-label={label}>
+      <div className="why-pop-head"><strong className="why-title">{steps[0]!.area[i]}</strong><button type="button" className="why-close" aria-label={tr("Close")} onClick={() => setOpen(false)}><X/></button></div>
+      {steps.map(s => <section key={s.area[0]} className="demo-guide-step">
+        <p className="demo-guide-title"><strong>{s.title[i]}</strong></p>
+        <p className="demo-guide-body">{s.body[i]}</p>
+        <ul className="tour-can">{s.can.map(c => <li key={c[0]}><Check aria-hidden/>{c[i]}</li>)}</ul>
+      </section>)}
+    </aside>}
+  </div>;
 }
