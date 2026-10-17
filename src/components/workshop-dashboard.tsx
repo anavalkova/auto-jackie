@@ -28,8 +28,9 @@ type Status = Database["public"]["Enums"]["inquiry_status"];
 type Shop = { id: string; name: string; city: string; vat_number: string; slug: string | null; role: string };
 type Tab = "overview" | "booking" | "context" | "pricing" | "profile";
 const TABS: { id: Tab; label: string }[] = [
-  { id: "overview", label: "Overview" }, { id: "booking", label: "Booking" }, { id: "context", label: "Jackie's context" }, { id: "pricing", label: "Pricing engine" }, { id: "profile", label: "Profile" },
+  { id: "overview", label: "Overview" }, { id: "booking", label: "Booking" }, { id: "context", label: "Jackie's context" }, { id: "pricing", label: "Pricing engine" }, { id: "profile", label: "Settings" },
 ];
+const STAFF_TABS: Tab[] = ["overview", "booking"];
 
 const STATUSES: { id: Status; label: string }[] = [
   { id: "new", label: "New" }, { id: "contacted", label: "Contacted" }, { id: "quoted", label: "Quoted" }, { id: "booked", label: "Booked" }, { id: "closed", label: "Closed" },
