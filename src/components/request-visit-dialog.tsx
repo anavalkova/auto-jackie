@@ -12,9 +12,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { ensureOther, matchService, OTHER, type ServiceItem } from "@/lib/services";
 import { rulesFromRpc, upcomingDays } from "@/lib/booking";
 import { useT } from "@/lib/i18n";
+import { useServerFn } from "@tanstack/react-start";
+import { sendBookingConfirmation } from "@/lib/booking-email.functions";
 
 type Channel = "sms" | "whatsapp" | "email";
-const CHANNELS: { id: Channel; label: string }[] = [{ id: "sms", label: "SMS" }, { id: "whatsapp", label: "WhatsApp" }, { id: "email", label: "Email" }];
+const CHANNELS: { id: Channel; label: string; soon?: boolean }[] = [{ id: "email", label: "Email" }, { id: "sms", label: "SMS", soon: true }, { id: "whatsapp", label: "WhatsApp", soon: true }];
 
 export type VisitCard = { issue: string; service?: string | undefined; urgency?: string | undefined; priceLowSek?: number | undefined; priceHighSek?: number | undefined; note?: string | undefined };
 export function Tip({ text }: { text: string }) {
@@ -39,9 +41,10 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId, onBooked
   const [day, setDay] = useState("");
   const [picks, setPicks] = useState<string[]>([]);
   const [name, setName] = useState(""); const [phone, setPhone] = useState(""); const [email, setEmail] = useState("");
-  const [channel, setChannel] = useState<Channel>("sms"); const [message, setMessage] = useState("");
+  const [channel, setChannel] = useState<Channel>("email"); const [message, setMessage] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [signIn, setSignIn] = useState(false);
+  const confirm = useServerFn(sendBookingConfirmation);
   const root = useRef<HTMLDivElement>(null);
   useEffect(() => { root.current?.scrollIntoView({ block: "start", behavior: "smooth" }); }, [step, state]);
 
@@ -81,19 +84,21 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId, onBooked
       setState("sending");
       const { error } = await supabase.rpc("reschedule_my_visit", { _id: rescheduleId, _slot: picks[0]! });
       setState(error ? "error" : "sent");
+      if (!error) void confirm({ data: { id: rescheduleId, lang, rescheduled: true } }).catch(() => {});
       if (!error) onBooked?.();
       return;
     }
     const mapped = service;
     if (!user || !shopId || picks.length === 0 || !job) return;
     setState("sending");
-    const { error } = await supabase.from("inquiries").insert({
+    const { data: row, error } = await supabase.from("inquiries").insert({
       workshop_id: shopId, driver_id: user.id, issue: job.slice(0, 200), urgency: card.urgency ?? "soon",
       price_low_sek: card.priceLowSek ?? null, price_high_sek: card.priceHighSek ?? null, note: (card.note ?? "").slice(0, 1000),
       vehicle_label: vehicleLabel.slice(0, 120), message: message.trim(), contact_name: name.trim(), contact_phone: phone.trim(),
       preferred_slots: picks, service: mapped || OTHER, contact_channel: channel, contact_email: email.trim(),
-    });
+    }).select("id").single();
     setState(error ? "error" : "sent");
+    if (!error && row) void confirm({ data: { id: row.id, lang } }).catch(() => {});
     if (!error) onBooked?.();
   };
 
@@ -135,7 +140,7 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId, onBooked
         {step === 3 && <div className="visit-form booking-grid">
           <div><Label htmlFor="v-name">{b.name}</Label><Input id="v-name" required maxLength={80} value={name} onChange={e => setName(e.target.value)} autoComplete="name"/></div>
           <div><Label htmlFor="v-phone">{b.phone}</Label><Input id="v-phone" required type="tel" minLength={5} maxLength={30} placeholder="070 123 45 67" value={phone} onChange={e => setPhone(e.target.value)} autoComplete="tel"/></div>
-          <div><Label className="field-tip"><Tip text={b.hConfirm}/>{b.confirmBy}</Label><div className="channel-row" role="radiogroup">{CHANNELS.map(c => <button key={c.id} type="button" role="radio" aria-checked={channel === c.id} className={"slot" + (channel === c.id ? " is-on" : "")} onClick={() => setChannel(c.id)}>{c.label}</button>)}</div></div>
+          <div><Label className="field-tip"><Tip text={b.hConfirm}/>{b.confirmBy}</Label><div className="channel-row" role="radiogroup">{CHANNELS.map(c => <button key={c.id} type="button" role="radio" disabled={c.soon} aria-checked={channel === c.id} className={"slot" + (channel === c.id ? " is-on" : "")} onClick={() => setChannel(c.id)}>{c.label}{c.soon && <small className="soon-tag"> · {b.soon}</small>}</button>)}</div></div>
           {channel === "email" && <div><Label htmlFor="v-email">{b.email}</Label><Input id="v-email" type="email" required maxLength={120} value={email} onChange={e => setEmail(e.target.value)}/></div>}
           <div className="ws-span"><Label htmlFor="v-msg">{b.msg}</Label><Textarea id="v-msg" rows={2} maxLength={1000} value={message} onChange={e => setMessage(e.target.value)} placeholder={b.msgPh}/></div>
           {state === "error" && <p className="chat-error ws-span" role="alert">{b.error}</p>}

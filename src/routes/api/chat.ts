@@ -134,7 +134,7 @@ export const Route = createFileRoute("/api/chat")({
           model: provider.responses(chatAi.model),
           instructions: `${BASE_PROMPT}\n\nToday (Stockholm): ${new Date().toLocaleDateString("en-GB", { timeZone: "Europe/Stockholm", weekday: "long", day: "numeric", month: "long", year: "numeric" })}.${shop ? `\n\n${workshopContext(shop)}` : ""}\n\nInterface language: ${({ en: "English", sv: "Swedish", de: "German" })[parsed.data.lang ?? "en"]}.\n\nVehicle: ${vehicleContext(parsed.data.vehicle)}`,
           messages: await convertToModelMessages(messages),
-          tools: { searchWikidata, getWikidataItem, lookupFaultCode, searchTeslaManual, readTeslaManualPage, suggestWorkshopVisit, ...createBookingTools({ workshopId: parsed.data.workshopId, userId, token: request.headers.get("authorization")?.replace(/^Bearer /, "") ?? "", vehicleLabel: parsed.data.vehicle && !parsed.data.vehicle.confidential ? parsed.data.vehicle.description ?? "" : "" }) },
+          tools: { searchWikidata, getWikidataItem, lookupFaultCode, searchTeslaManual, readTeslaManualPage, suggestWorkshopVisit, ...createBookingTools({ workshopId: parsed.data.workshopId, userId, token: request.headers.get("authorization")?.replace(/^Bearer /, "") ?? "", vehicleLabel: parsed.data.vehicle && !parsed.data.vehicle.confidential ? parsed.data.vehicle.description ?? "" : "", lang: parsed.data.lang }) },
           stopWhen: stepCountIs(10),
           abortSignal: request.signal,
           providerOptions: {
