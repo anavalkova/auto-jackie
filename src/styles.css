@@ -516,6 +516,24 @@
   .ws-pricing-table .history-note { display: block; margin: 4px 0 0; }
   .ws-pricing-table ~ .ws-chips .native-select { width: 100%; min-width: 0; }
 }
+.ws-team-list { list-style: none; margin: 0 0 14px; padding: 0; border-top: 1px solid var(--border); }
+.ws-team-row { display: grid; grid-template-columns: minmax(0, 1fr) auto 36px; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.ws-team-email { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-team-role { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--secondary); color: var(--secondary-foreground); white-space: nowrap; }
+.ws-team-remove { width: 36px; height: 36px; }
+.ws-team-add { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; }
+.ws-team-add .native-select, .ws-team-add input, .ws-team-add button { height: 40px; min-width: 0; }
+@media (max-width: 640px) {
+  .ws-team-row { grid-template-columns: minmax(0, 1fr) 36px; row-gap: 4px; }
+  .ws-team-email { grid-column: 1; grid-row: 1; }
+  .ws-team-role { grid-column: 1; grid-row: 2; justify-self: start; }
+  .ws-team-remove { grid-column: 2; grid-row: 1 / span 2; }
+  .ws-team-add { grid-template-columns: minmax(0, 1fr) auto; }
+  .ws-team-add input { grid-column: 1 / -1; height: 44px; font-size: 16px; }
+  .ws-team-add .native-select { width: 100%; height: 44px; font-size: 16px; }
+  .ws-team-add button { height: 44px; padding: 0 18px; }
+}
+
 
 .ws-funnel { display: grid; gap: 8px; }
 .ws-funnel-row { display: grid; grid-template-columns: 110px 1fr 48px; gap: 10px; align-items: center; font-size: 14px; }

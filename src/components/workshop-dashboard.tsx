@@ -620,17 +620,20 @@ function TeamSection({ workshopId, demo = false }: { workshopId: string; demo?: 
   if (!team) return <p className="history-note" role="status">{tr("Loading…")}</p>;
   return <div className="ws-form-card">
     <h2 className="ws-label-row"><Hint controls={tr("who can open this workshop's dashboard. Admins see and change everything; front desk sees Overview and Bookings only.")} shows={tr("only to you, here in Settings.")}/>{tr("Who has access")}</h2>
-    <table className="ws-table"><thead><tr><th>{tr("Email")}</th><th>{tr("Role")}</th><th/></tr></thead><tbody>
-      {team.map(m => <tr key={m.user_id}><td>{m.email}</td><td><strong>{m.role === "owner" ? tr("Admin") : tr("Front desk")}</strong></td>
-        <td>{m.role !== "owner" && <Button type="button" size="sm" variant="ghost" aria-label={tr("Remove")} onClick={() => void remove(m)}>×</Button>}</td></tr>)}
-      <tr>
-        <td><Input type="email" maxLength={120} placeholder={tr("Their AutoJackie email")} value={email} onChange={e => setEmail(e.target.value)} aria-label={tr("Their AutoJackie email")}/></td>
-        <td><select className="native-select" value={role} onChange={e => setRole(e.target.value as "owner" | "staff")} aria-label={tr("Role")}>
-          <option value="staff">{tr("Front desk")}</option><option value="owner">{tr("Admin")}</option>
-        </select></td>
-        <td><Button type="button" size="sm" variant="outline" disabled={!email.includes("@")} onClick={() => void add()}>{tr("Add")}</Button></td>
-      </tr>
-    </tbody></table>
+    <ul className="ws-team-list">
+      {team.map(m => <li key={m.user_id} className="ws-team-row">
+        <span className="ws-team-email">{m.email}</span>
+        <span className="ws-team-role">{m.role === "owner" ? tr("Admin") : tr("Front desk")}</span>
+        {m.role !== "owner" ? <Button type="button" size="icon" variant="ghost" className="ws-team-remove" aria-label={`${tr("Remove")} ${m.email}`} onClick={() => void remove(m)}>×</Button> : <span className="ws-team-remove" aria-hidden/>}
+      </li>)}
+    </ul>
+    <div className="ws-team-add">
+      <Input type="email" maxLength={120} placeholder={tr("Their AutoJackie email")} value={email} onChange={e => setEmail(e.target.value)} aria-label={tr("Their AutoJackie email")}/>
+      <select className="native-select" value={role} onChange={e => setRole(e.target.value as "owner" | "staff")} aria-label={tr("Role")}>
+        <option value="staff">{tr("Front desk")}</option><option value="owner">{tr("Admin")}</option>
+      </select>
+      <Button type="button" variant="outline" disabled={!email.includes("@")} onClick={() => void add()}>{tr("Add")}</Button>
+    </div>
     {msg && <p className="history-note" role="status">{msg}</p>}
   </div>;
 }
