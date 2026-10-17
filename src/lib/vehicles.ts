@@ -31,6 +31,14 @@ export type Vehicle = {
   mileageKm?: number | undefined;
 };
 
+/** Treat older saved registry records as private too, regardless of their legacy flag. */
+export const isPrivateVehicle = (vehicle: Vehicle) => vehicle.source === "plate" || vehicle.source === "hsn" || vehicle.confidential;
+export const vehicleForJackie = (vehicle: Vehicle | null) => vehicle ? {
+  confidential: isPrivateVehicle(vehicle),
+  description: vehicle.description,
+  mileageKm: vehicle.mileageKm,
+} : null;
+
 // German KBA codes (sample set for the demo catalog).
 export const hsnTsn: Record<string, { make: string; model: string; engine: string; year: number }> = {
   "0603/BKG": { make: "Volkswagen", model: "Golf", engine: "1.5 TSI", year: 2020 },
