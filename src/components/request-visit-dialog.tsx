@@ -24,12 +24,12 @@ export function Tip({ text }: { text: string }) {
 type Shop = { id: string; name: string; city: string };
 
 /** Inline booking flow shown in place of the chat (no pop-up): 1 what, 2 when (day strip then times), 3 contact. */
-export function BookingPanel({ card, vehicleLabel, onClose, workshopId, onBooked }: { card: VisitCard; vehicleLabel: string; onClose: () => void; workshopId?: string | undefined; onBooked?: (() => void) | undefined }) {
+export function BookingPanel({ card, vehicleLabel, onClose, workshopId, onBooked, rescheduleId }: { card: VisitCard; vehicleLabel: string; onClose: () => void; workshopId?: string | undefined; onBooked?: (() => void) | undefined; rescheduleId?: string | undefined }) {
   const { t, lang } = useT(); const b = t.bk;
   const locale = lang === "en" ? "en-GB" : lang;
   const { user, ready } = useSessionUser();
   const direct = !card.issue;
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(rescheduleId ? 2 : 1);
   const [shops, setShops] = useState<Shop[]>([]);
   const [shopId, setShopId] = useState(workshopId ?? "");
   const [services, setServices] = useState<ServiceItem[]>([]);
@@ -76,6 +76,14 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId, onBooked
   const canNext = step === 1 ? !!shopId && job.length >= 3 : step === 2 ? picks.length > 0 : true;
 
   const send = async () => {
+    if (rescheduleId) {
+      if (!user || picks.length === 0) return;
+      setState("sending");
+      const { error } = await supabase.rpc("reschedule_my_visit", { _id: rescheduleId, _slot: picks[0]! });
+      setState(error ? "error" : "sent");
+      if (!error) onBooked?.();
+      return;
+    }
     const mapped = service;
     if (!user || !shopId || picks.length === 0 || !job) return;
     setState("sending");
@@ -93,14 +101,15 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId, onBooked
   return <div className="booking-panel" ref={root}>
     <div className="booking-head">
       <Button variant="ghost" size="sm" onClick={onClose}><ArrowLeft/> {b.back}</Button>
-      <h2>{state === "sent" ? b.sentTitle : b.title}</h2>
+      <h2>{rescheduleId ? (state === "sent" ? t.rescheduleSent : t.rescheduleTitle) : state === "sent" ? b.sentTitle : b.title}</h2>
     </div>
-    {state === "sent" ? <div className="booking-body"><p>{b.sentBody.replace("%c", CHANNELS.find(c => c.id === channel)?.label ?? "")}</p><Button onClick={onClose}>{b.done}</Button></div>
+    {state === "sent" && rescheduleId ? <div className="booking-body"><p>{t.rescheduleNote}</p><Button onClick={onClose}>{b.done}</Button></div>
+      : state === "sent" ? <div className="booking-body"><p>{b.sentBody.replace("%c", CHANNELS.find(c => c.id === channel)?.label ?? "")}</p><Button onClick={onClose}>{b.done}</Button></div>
       : !ready ? null
       : !user ? <div className="booking-body"><p>{b.signInNeeded}</p><p className="history-note">{b.chatTip}</p><Button onClick={() => setSignIn(true)}>{b.signIn}</Button></div>
       : shops.length === 0 ? <div className="booking-body"><p className="history-note">{b.noShops}</p></div>
-      : <form className="booking-body" onSubmit={e => { e.preventDefault(); if (step < 3) { if (canNext) setStep(step + 1); } else void send(); }}>
-        <ol className="booking-steps">{steps.map((s, i) => <li key={s} className={i + 1 === step ? "is-on" : i + 1 < step ? "is-done" : ""}><button type="button" disabled={i + 1 > step} onClick={() => setStep(i + 1)}><span>{i + 1 < step ? <Check/> : i + 1}</span>{s}</button></li>)}</ol>
+      : <form className="booking-body" onSubmit={e => { e.preventDefault(); if (rescheduleId) void send(); else if (step < 3) { if (canNext) setStep(step + 1); } else void send(); }}>
+        {rescheduleId ? <p className="eyebrow">{shops.find(x => x.id === shopId)?.name} · {card.issue}</p> : <ol className="booking-steps">{steps.map((s, i) => <li key={s} className={i + 1 === step ? "is-on" : i + 1 < step ? "is-done" : ""}><button type="button" disabled={i + 1 > step} onClick={() => setStep(i + 1)}><span>{i + 1 < step ? <Check/> : i + 1}</span>{s}</button></li>)}</ol>}
 
         {step === 1 && <div className="visit-form">
           <p className="eyebrow field-tip"><Tip text={b.hWorkshop}/>{b.workshop}: {shops.find(x => x.id === shopId)?.name}</p>
@@ -133,8 +142,9 @@ export function BookingPanel({ card, vehicleLabel, onClose, workshopId, onBooked
         </div>}
 
         <div className="booking-actions">
-          {step > 1 && <Button type="button" variant="outline" onClick={() => setStep(step - 1)}>{b.prev}</Button>}
-          <Button type="submit" disabled={!canNext || state === "sending"}>{step < 3 ? b.next : state === "sending" ? b.sending : b.send}</Button>
+          {rescheduleId && state === "error" && <p className="chat-error" role="alert">{t.rescheduleError}</p>}
+          {step > 1 && !rescheduleId && <Button type="button" variant="outline" onClick={() => setStep(step - 1)}>{b.prev}</Button>}
+          <Button type="submit" disabled={!canNext || state === "sending"}>{rescheduleId ? (state === "sending" ? b.sending : t.rescheduleSend) : step < 3 ? b.next : state === "sending" ? b.sending : b.send}</Button>
         </div>
       </form>}
     <SignInDialog open={signIn} onOpenChange={setSignIn}/>

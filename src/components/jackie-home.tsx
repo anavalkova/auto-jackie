@@ -184,6 +184,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
 
   const signOut = async () => { await supabase.auth.signOut(); setVehicle(null); navigate({ to: "/", replace: true }); };
   const [directBooking, setDirectBooking] = useState<VisitCard | null>(null);
+  const [rescheduling, setRescheduling] = useState<RescheduleTarget | null>(null);
 
   return <div className="app-frame" style={workshop?.accent ? { ["--primary" as string]: workshop.accent } : undefined}>
     <header className="site-header">
@@ -231,7 +232,7 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
           </div>
         </section>
 
-        <MyVisits userId={user?.id ?? null} refreshKey={visitsKey}/>
+        <MyVisits userId={user?.id ?? null} refreshKey={visitsKey} onReschedule={v => { setDirectBooking(null); setRescheduling(v); }}/>
       </aside>
 
       <section className="assistant-area" aria-label="Chat with Jackie">
@@ -239,8 +240,9 @@ export function JackieHome({ chatId, workshop }: { chatId?: string; workshop?: W
           { value: "36%", text: t.why1, source: { label: "Trafikanalys, 2022", url: "https://www.trafa.se/globalassets/statistik/vagtrafik/fordon/2023/fordon-i-lan-och-kommuner-2022.pdf" } },
           { value: "P0301?", text: t.why2 },
         ]}/></div></div>
-        {directBooking && <BookingPanel card={directBooking} vehicleLabel={vehicle && !isPrivateVehicle(vehicle) ? vehicle.label : ""} onClose={() => setDirectBooking(null)} workshopId={workshop?.id} onBooked={() => setVisitsKey(k => k + 1)}/>}
-        <div className="chat-slot" hidden={!!directBooking}>
+        {rescheduling && <BookingPanel key={rescheduling.id} card={{ issue: rescheduling.job }} vehicleLabel="" rescheduleId={rescheduling.id} workshopId={rescheduling.workshopId} onClose={() => setRescheduling(null)} onBooked={() => setVisitsKey(k => k + 1)}/>}
+        {!rescheduling && directBooking && <BookingPanel card={directBooking} vehicleLabel={vehicle && !isPrivateVehicle(vehicle) ? vehicle.label : ""} onClose={() => setDirectBooking(null)} workshopId={workshop?.id} onBooked={() => setVisitsKey(k => k + 1)}/>}
+        <div className="chat-slot" hidden={!!directBooking || !!rescheduling}>
         {missing ? <div className="chat-empty"><h1>{t.missingTitle}</h1><p>{user ? t.missingDeleted : t.missingSignIn}</p><div className="starter-grid">{!user && <Button onClick={() => setSignInOpen(true)}>{t.signIn}</Button>}<Button variant="outline" asChild><Link to="/">{t.startNew}</Link></Button></div></div>
           : initial === null ? <div className="chat-empty"><p>{t.opening}</p></div>
           : <JackieChat key={chatId ?? `new-${newChatKey}`} chatId={chatId} initialMessages={initial} vehicle={vehicle} pending={null} onPendingSent={() => {}} onTurnFinished={onTurnFinished} onReset={onReset} saving={!!user && !!chatId} workshopId={workshop?.id} onSignIn={() => setSignInOpen(true)} onBook={setDirectBooking} onEmptyChange={setChatEmpty}/>}
