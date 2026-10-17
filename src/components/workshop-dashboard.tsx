@@ -624,7 +624,7 @@ function ProfileView({ shop, canEdit, onSaved }: { shop: Shop; canEdit: boolean;
       </div>}
     </fieldset>
     {step === 2 && canEdit && <TeamSection workshopId={shop.id}/>}
-    <div className="ws-wizard-nav"><Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>{tr("Back")}</Button>{step < 2 || !canEdit ? <WizardActions canEdit={canEdit} last={step === steps.length - 1} next={() => setStep(step + 1)}/> : <Button type="button" onClick={() => setStep(step + 1)} disabled={step === steps.length - 1}>{tr("Next")}</Button>}</div>
+    <div className="ws-wizard-nav"><Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep(step - 1)}>{tr("Back")}</Button>{step < 2 && <WizardActions canEdit={canEdit} last={false} next={() => setStep(step + 1)}/>}</div>
     {state && <p className="history-note" role="status">{state}</p>}
     </section>
   </form>;
