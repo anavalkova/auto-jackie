@@ -18,7 +18,7 @@ function WhyBody({ stats, footer, pitch, points }: Props) {
     {stats.length > 0 && <ul className="why-stats">
       {stats.map(s => (
         <li key={s.value + s.text}>
-          <span className="why-value">{s.value}</span>
+          <span className="why-value">{tr(s.value)}</span>
           <span className="why-text">
             {tr(s.text)}
             {s.source && <> <a href={s.source.url} target="_blank" rel="noreferrer">({s.source.label})</a></>}

@@ -200,6 +200,7 @@ export const WS: Record<string, [string, string]> = {
   "{n} days ahead": ["{n} dagar framåt", "{n} Tage im Voraus"],
   "{n} is ready. When {e} signs in, they'll land in their dashboard.": ["{n} är klar. När {e} loggar in hamnar de i sin översikt.", "{n} ist bereit. Wenn sich {e} anmeldet, landet er im eigenen Dashboard."],
   "{n} will be able to use AutoJackie's tools as you: read your saved chats, car and visit requests, or your workshop's requests if you're workshop staff.": ["{n} kommer att kunna använda AutoJackies verktyg som du: läsa dina sparade chattar, bil och besöksförfrågningar, eller verkstadens förfrågningar om du jobbar där.", "{n} kann die Tools von AutoJackie in Ihrem Namen nutzen: Ihre gespeicherten Chats, Ihr Auto und Terminanfragen lesen, oder die Anfragen Ihrer Werkstatt, wenn Sie dort arbeiten."],
+  "1 in 4": ["1 av 4", "1 von 4"], "1 in 3": ["1 av 3", "1 von 3"], "2 models": ["2 modeller", "2 Modelle"],
   "New Year's Day": ["Nyårsdagen", "Neujahr"], "Epiphany": ["Trettondedag jul", "Heilige Drei Könige"], "Good Friday": ["Långfredagen", "Karfreitag"], "Easter Monday": ["Annandag påsk", "Ostermontag"],
   "May Day": ["Första maj", "Tag der Arbeit"], "Ascension Day": ["Kristi himmelsfärd", "Christi Himmelfahrt"], "National Day": ["Nationaldagen", "Nationalfeiertag"],
   "Midsummer Eve": ["Midsommarafton", "Mittsommerabend"], "Midsummer Day": ["Midsommardagen", "Mittsommertag"], "All Saints' Day": ["Alla helgons dag", "Allerheiligen"],
