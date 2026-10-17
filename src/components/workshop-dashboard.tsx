@@ -80,7 +80,7 @@ export function WorkshopDashboard() {
   const [demo, setDemo] = useState(false);
   const [tour, setTour] = useState<number | null>(null);
   const closeTour = useCallback(() => { setTour(null); try { localStorage.setItem("autojackie_tour_done", "1"); } catch { /* private mode */ } }, []);
-  const tourStep = useCallback((s: number) => { setTour(s); setTab(TOUR_STEPS[s].tab); }, []);
+  const tourStep = useCallback((s: number) => { setTour(s); const t = TOUR_STEPS[s]; if (t) setTab(t.tab); }, []);
   useEffect(() => { if (demo && !tourDone()) setTour(0); }, [demo]);
   const [shops, setShops] = useState<Shop[]>([]);
   const loadShop = useCallback(async () => {
