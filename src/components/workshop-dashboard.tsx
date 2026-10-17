@@ -12,7 +12,7 @@ import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 import { ensureOther, OTHER } from "@/lib/services";
 import { TIERS, TIER_INFO, DEFAULT_TIERS, type Tier } from "@/lib/ai-tiers";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, LockKeyhole, LogOut, Settings2, UserRound, CircleHelp, CalendarCheck, CalendarClock, Car, ChevronDown, Globe2, Inbox, MessageCircle, Moon, Sparkles, TrendingUp, Trash2, Wrench } from "lucide-react";
+import { ArrowUpRight, Check, LockKeyhole, LogOut, Settings2, UserRound, CircleHelp, CalendarCheck, CalendarClock, Car, ChevronDown, Globe2, Inbox, MessageCircle, Moon, Sparkles, TrendingUp, Trash2, Wrench } from "lucide-react";
 import { SectionHint } from "@/components/demo-tour";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { LANGS, setLang, useT } from "@/lib/i18n";
@@ -147,6 +147,7 @@ export function WorkshopDashboard() {
     if (error || !data) return;
     setItems(xs => xs.map(x => x.id === data.id ? data : x)); setSelected(data);
   };
+  const switchWorkshop = (id: string) => { const w = shops.find(x => x.id === id); if (w) { setShop(w); setTab("overview"); setSelected(null); setPage(0); } };
   const header = <header className="site-header">
     <Link to="/" className="brand" aria-label={tr("AutoJackie home")}><span className="brand-mark">J<span className="brand-mark-dot"/></span><span className="brand-word">Auto<span className="brand-orange">Jackie</span></span><span className="brand-sub">{tr("for workshops")}</span></Link>
     <nav className="desktop-header-nav" aria-label={tr("Workshop navigation")}>
@@ -166,6 +167,7 @@ export function WorkshopDashboard() {
       <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="nav-control language-control" aria-label={tr("Language")}><Globe2/> {LANGS.find(l => l.code === lang)?.short} <ChevronDown/></Button></DropdownMenuTrigger><DropdownMenuContent align="end">{LANGS.map(l => <DropdownMenuItem key={l.code} onSelect={() => setLang(l.code)} aria-current={l.code === lang ? "true" : undefined}>{l.short} · {l.label}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>
     </nav>
     <MobileHeaderMenu email={user?.email} onSignIn={() => setSignIn(true)} onSignOut={() => { void supabase.auth.signOut().then(() => window.location.assign("/workshop")); }}>
+      {!demo && shops.length > 1 && <><DropdownMenuLabel className="flex items-center gap-2"><Car className="size-4"/>{tr("Your workshops")}</DropdownMenuLabel>{shops.map(w => <DropdownMenuItem key={w.id} onSelect={() => switchWorkshop(w.id)} aria-current={w.id === shop?.id ? "true" : undefined}><span className="min-w-0 flex-1">{w.name}{w.city ? ` · ${w.city}` : ""}</span>{w.id === shop?.id && <Check/>}</DropdownMenuItem>)}</>}
       <DropdownMenuItem asChild>{!demo && shop?.slug ? <Link to="/w/$slug" params={{ slug: shop.slug }}><ArrowUpRight/>{tr("Driver view")}</Link> : <Link to="/"><ArrowUpRight/>{tr("Driver view")}</Link>}</DropdownMenuItem>
       {isAdmin && <DropdownMenuItem asChild><Link to="/admin"><Settings2/>{tr("Operations")}</Link></DropdownMenuItem>}
     </MobileHeaderMenu>
@@ -178,7 +180,7 @@ export function WorkshopDashboard() {
     {demo && <p className="demo-banner" role="note"><Sparkles aria-hidden/> {t.pitch.demoBanner}</p>}
     <div className="ws-title"><div><span className="eyebrow">{tr("WORKSHOP DASHBOARD")}</span><div className="ws-title-name"><h1>{shop.name}</h1><SectionHint key={tab} tab={tab} why={WHY[tab]} demo={demo}/></div></div>
       {!demo && shops.length > 1 && <div className="ws-field" style={{ margin: 0 }}><Label htmlFor="ws-switch">{tr("Your workshops")}</Label>
-        <select id="ws-switch" className="native-select" value={shop.id} onChange={e => { const w = shops.find(x => x.id === e.target.value); if (w) { setShop(w); setTab("overview"); setSelected(null); setPage(0); } }}>
+        <select id="ws-switch" className="native-select" value={shop.id} onChange={e => switchWorkshop(e.target.value)}>
           {shops.map(w => <option key={w.id} value={w.id}>{w.name}{w.city ? ` · ${w.city}` : ""}</option>)}
         </select></div>}
     </div>
