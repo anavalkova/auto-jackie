@@ -31,3 +31,4 @@
 - Agent integrations: MCP at /mcp (OAuth, read-only driver + workshop tools), consent page, WebMCP on workshop requests.
 
 - Pricing service fields share one editor, presented as a table on desktop and stacked labeled rows on phones, so mobile edits retain the same validation and save behavior.
+- Booking confirmation emails go through the managed app-email sender (src/lib/email-templates, booking-confirmation template) from server code only; one booking event = one idempotent send, and email failures never undo a saved booking.
