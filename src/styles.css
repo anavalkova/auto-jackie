@@ -763,12 +763,16 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
   .jackie-panel > .visits-card { margin-bottom: 8px; }
   .visit-item { background: var(--background); }
 }
-/* The chat keeps a little of the screen to itself, below the input, so it still reads as a chat. */
+/* The chat card keeps the rest of the screen: the input sits at its bottom,
+   the empty area above is where the conversation lives. Modest on phones. */
 @media (max-width: 760px) {
-  .workspace { min-height: calc(100svh - 120px); }
+  .workspace { min-height: calc(100svh - 190px); }
   .assistant-area { flex: 1; }
   .chat-slot { flex: 1; }
   .chat-shell { flex: 1; min-height: 0; }
+  .chat-log { flex: 1; }
+  .chat-shell > .try-row { margin-top: auto; }
 }
+
 
 
