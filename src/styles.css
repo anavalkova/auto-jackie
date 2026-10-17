@@ -831,3 +831,22 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
   .jackie-panel > .chat-history:has(.is-open) { display: block; }
   .chat-shell .try-row > button.try-toggle { all: unset; display: inline-block; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--muted-foreground); padding: 3px 10px; border: 1px dashed var(--border); border-radius: 999px; }
 }
+
+/* Phone driver panel: thin grey car bar on top, My visits | My chats side by side; open lists float as dropdowns without moving the boxes. */
+@media (max-width: 760px) {
+  .jackie-panel { position: relative; grid-template-columns: 1fr 1fr; align-items: center; z-index: 30; }
+  .jackie-panel > .vehicle-card { grid-column: 1 / -1; grid-row: 1; background: var(--secondary); border: 0; box-shadow: none; border-radius: 10px; }
+  .jackie-panel > .vehicle-card button, .jackie-panel > .vehicle-card .vehicle-empty { min-height: 34px; height: 34px; font-size: 12px; background: transparent; }
+  .jackie-panel > .vehicle-card svg { width: 15px; height: 15px; }
+  .jackie-panel > .visits-card { grid-column: 1; grid-row: 2; }
+  .jackie-panel > .chat-history, .jackie-panel > .chat-history:has(.is-open) { grid-column: 2; grid-row: 2; display: flex; align-items: center; }
+  .jackie-panel > .chat-history:only-of-type { grid-column: 1 / -1; }
+  .jackie-panel > .visits-card, .jackie-panel > .chat-history { position: static; padding: 0 6px; min-height: 42px; display: flex; align-items: center; }
+  .jackie-panel > .visits-card > .history-heading, .jackie-panel > .chat-history > .history-heading { width: 100%; margin: 0; }
+  .jackie-panel .history-mobile-toggle { font-size: 12px; padding: 0 4px; min-width: 0; overflow: hidden; }
+  .jackie-panel > .visits-card > .history-content.is-open,
+  .jackie-panel > .chat-history > .history-content.is-open { position: absolute; top: calc(100% - 4px); width: calc(100% - 40px); max-height: 60svh; overflow-y: auto; padding: 10px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 32px color-mix(in oklab, var(--foreground) 16%, transparent); z-index: 40; }
+  .jackie-panel > .visits-card > .history-content.is-open { left: 8px; border-top-left-radius: 4px; }
+  .jackie-panel > .chat-history > .history-content.is-open { right: 8px; border-top-right-radius: 4px; }
+  .jackie-panel > .chat-history .history-list { max-height: none; }
+}
