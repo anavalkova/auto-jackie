@@ -600,7 +600,7 @@ function TeamSection({ workshopId, demo = false }: { workshopId: string; demo?: 
   };
   if (!team) return <p className="history-note" role="status">{tr("Loading…")}</p>;
   return <div className="ws-form-card">
-    <div className="ws-label-row"><Hint controls={tr("who can open this workshop's dashboard. Admins see and change everything; front desk sees Overview and Bookings only.")} shows={tr("only to you, here in Settings.")}/><h2>{tr("Who has access")}</h2></div>
+    <h2 className="ws-label-row"><Hint controls={tr("who can open this workshop's dashboard. Admins see and change everything; front desk sees Overview and Bookings only.")} shows={tr("only to you, here in Settings.")}/>{tr("Who has access")}</h2>
     <table className="ws-table"><thead><tr><th>{tr("Email")}</th><th>{tr("Role")}</th><th/></tr></thead><tbody>
       {team.map(m => <tr key={m.user_id}><td>{m.email}</td><td><strong>{m.role === "owner" ? tr("Admin") : tr("Front desk")}</strong></td>
         <td>{m.role !== "owner" && <Button type="button" size="sm" variant="ghost" aria-label={tr("Remove")} onClick={() => void remove(m)}>×</Button>}</td></tr>)}
