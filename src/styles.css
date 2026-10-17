@@ -851,7 +851,8 @@ button.vehicle-empty:hover .vehicle-empty-go { opacity: .9; color: var(--primary
   .site-header .brand-sub { display: none; }
   .site-header .brand { min-width: 0; }
 }
-.try-toggle { display: none; }
+/* The phone chip must not show on desktop, where the "Try:" label and the examples are already inline. */
+.try-row .try-toggle { display: none; }
 @media (max-width: 760px) {
   .site-header { flex-wrap: nowrap; min-height: 56px; padding: 8px 0; gap: 8px; }
   .site-header nav { flex-wrap: nowrap; gap: 4px; }
